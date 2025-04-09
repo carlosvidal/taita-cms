@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Body styles */
+body {
+  @apply bg-gray-50 text-gray-800;
+}
+
+/* Transitions */
+a, button {
+  @apply transition-colors duration-200;
+}
+
+/* Link styles */
+a, .green {
+  @apply no-underline text-green-500 transition-colors duration-200 p-1;
+}
+
+a:hover {
+  @apply bg-green-100; /* Changed from bg-green-light to bg-green-100 */
+}
+
+/* Editor styles */
+.ProseMirror {
+  @apply min-h-[200px] p-2.5 border border-gray-300 rounded;
+}
+
+.ProseMirror:focus {
+  @apply outline-none border-blue-500;
+}
+
+.ProseMirror p {
+  @apply mb-4;
+}
+
+.ProseMirror ul {
+  @apply pl-5 list-disc;
+}
+
+.ProseMirror a {
+  @apply text-blue-500 underline;
+}
+
+/* Responsive layout */
+@media (min-width: 1024px) {
+  body {
+    @apply flex items-center;
+  }
+
+  #app {
+    @apply px-8;
+  }
+}
+
+/* Base styles */
+@layer base {
+  h1 {
+    @apply text-4xl font-bold tracking-tight;
+  }
+  h2 {
+    @apply text-3xl font-semibold;
+  }
+  h3 {
+    @apply text-2xl font-medium;
+  }
+}
+
+/* Dark mode transitions */
+.dark {
+  @apply transition-colors duration-200;
+}
+
+/* Card styles */
+.card {
+  @apply rounded-lg shadow-md p-6 bg-white dark:bg-gray-800;
+}
+
+/* Button styles */
+.btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
+}
