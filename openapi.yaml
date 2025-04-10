@@ -1,0 +1,208 @@
+openapi: 3.0.0
+info:
+  title: Astro Blog API
+  description: API for managing blog posts and user interactions
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+
+paths:
+  /posts:
+    get:
+      summary: Get all blog posts
+      responses:
+        '200':
+          description: List of blog posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+    post:
+      summary: Create a new blog post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+      responses:
+        '201':
+          description: Post created successfully
+
+  /media/upload:
+    post:
+      summary: Subir imágenes
+      tags: [Media]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Imágenes subidas y convertidas exitosamente
+        '400':
+          description: No se proporcionó ninguna imagen
+        '500':
+          description: Error al procesar la imagen
+
+  /posts/{id}:
+    get:
+      summary: Get a specific blog post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blog post details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+  /settings:
+    get:
+      summary: Obtener configuraciones del blog
+      responses:
+        '200':
+          description: Configuraciones del blog
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogSettings'
+        '500':
+          description: Error al obtener configuraciones
+    put:
+      summary: Actualizar configuraciones del blog
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogSettings'
+      responses:
+        '200':
+          description: Configuraciones actualizadas
+        '400':
+          description: Plantilla no válida
+        '500':
+          description: Error al actualizar configuraciones
+
+  /profile:
+    put:
+      summary: Actualizar perfil de usuario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+      responses:
+        '200':
+          description: Perfil actualizado
+        '401':
+          description: Contraseña actual incorrecta
+        '404':
+          description: Usuario no encontrado
+        '500':
+          description: Error al actualizar el perfil
+
+components:
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        author:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    BlogSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        language:
+          type: string
+          enum: [es, en]
+        template:
+          type: string
+          enum: [default, minimal, professional]
+        domain:
+          type: string
+        googleAnalyticsId:
+          type: string
+        socialNetworks:
+          type: object
+          properties:
+            facebook:
+              type: string
+            instagram:
+              type: string
+            x:
+              type: string
+            linkedin:
+              type: string
+            youtube:
+              type: string
+            github:
+              type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+        bio:
+          type: string
+        picture:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -17,8 +17,11 @@ const post = ref({
   slug: '',
   categoryId: '',
   image: '',
-  thumbnail: ''
+  thumbnail: '',
+  status: 'draft' // Keep this in the script section
 })
+
+// Remove the HTML template code from here
 const error = ref('')
 const categories = ref([])
 
@@ -157,6 +160,18 @@ onMounted(async () => {
                 class="flex-1 px-4 py-2 focus:outline-none"
               >
             </div>
+          </div>
+
+          <!-- Status Selector -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <select 
+              v-model="post.status"
+              class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200"
+            >
+              <option value="draft">Borrador</option>
+              <option value="published">Publicado</option>
+            </select>
           </div>
 
           <!-- Content Editor -->

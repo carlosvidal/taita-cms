@@ -14,18 +14,23 @@ const isLoading = ref(false)
 const error = ref('')
 
 const fetchCategories = async () => {
-  isLoading.value = true
-  error.value = ''
+  isLoading.value = true;
+  error.value = null;
   try {
-    const response = await api.get('/api/categories')
-    categories.value = response.data
+    const response = await api.get('/api/categories'); // Added /api prefix
+    categories.value = response.data;
   } catch (err) {
-    console.error('Error fetching categories:', err)
-    error.value = 'Error al cargar las categorías'
+    error.value = err.response?.data?.message || 
+                 'Failed to connect to server. Please check your connection and try again.';
+    console.error('API Error:', {
+      url: err.config?.url,
+      status: err.response?.status,
+      data: err.response?.data
+    });
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 const handleEdit = (category) => {
   currentCategory.value = { ...category }
@@ -40,27 +45,27 @@ const handleCreate = () => {
 const handleSave = async (categoryData) => {
   try {
     if (categoryData.id) {
-      await api.put(`/api/categories/${categoryData.id}`, categoryData)
+      await api.put(`/api/categories/${categoryData.id}`, categoryData);
     } else {
-      await api.post('/api/categories', categoryData)
+      await api.post('/api/categories', categoryData);
     }
-    await fetchCategories()
-    showModal.value = false
+    await fetchCategories();
+    showModal.value = false;
   } catch (err) {
-    console.error('Error saving category:', err)
-    error.value = 'Error al guardar la categoría'
+    error.value = err.response?.data?.message || 'Error saving category';
+    console.error('Save Error:', err.response?.data);
   }
-}
+};
 
 const handleDelete = async (id) => {
-  if (!confirm('¿Estás seguro de que quieres eliminar esta categoría?')) return
+  if (!confirm('¿Estás seguro de que quieres eliminar esta categoría?')) return;
   
   try {
-    await api.delete(`/api/categories/${id}`)
-    await fetchCategories()
+    await api.delete(`/api/categories/${id}`);
+    await fetchCategories();
   } catch (err) {
-    console.error('Error deleting category:', err)
-    error.value = 'Error al eliminar la categoría'
+    error.value = err.response?.data?.message || 'Error deleting category';
+    console.error('Delete Error:', err.response?.data);
   }
 }
 
