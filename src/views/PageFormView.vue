@@ -16,7 +16,9 @@ const page = ref({
   title: '',
   slug: '',
   content: '',
-  status: 'draft'
+  status: 'draft',
+  excerpt: '',
+  featuredImage: null
 })
 
 // Remove the HTML template code from here
@@ -28,13 +30,16 @@ const pageTitle = computed(() => {
   return isEditMode.value ? 'Editar Página' : 'Crear Página'
 })
 
-const fetchPage = async (id) => {
+const fetchPage = async (uuid) => {
   isLoading.value = true
   try {
-    const response = await api.get(`/api/pages/${id}`)
+    console.log(`Obteniendo página con UUID: ${uuid}`)
+    const response = await api.get(`/api/pages/uuid/${uuid}`)
     page.value = response.data
+    console.log('Página obtenida:', response.data)
   } catch (err) {
-    error.value = err.response?.data?.message || 'Error al cargar la página'
+    console.error('Error al obtener página:', err)
+    error.value = err.response?.data?.message || err.response?.data?.error || err.message || 'Error al cargar la página'
   } finally {
     isLoading.value = false
   }
@@ -42,27 +47,72 @@ const fetchPage = async (id) => {
 
 const handleSubmit = async () => {
   try {
-    isSaving.value = true
-    error.value = ''
+    isSaving.value = true;
+    error.value = '';
+    console.log('Iniciando guardado de página...');
 
     // Validate required fields
-    if (!page.value.title || !page.value.content) {
-      throw new Error('Todos los campos son obligatorios')
+    if (!page.value.title?.trim()) {
+      throw new Error('Title is required');
     }
+    if (!page.value.content?.trim()) {
+      throw new Error('Content is required');
+    }
+    if (page.value.excerpt?.length > 160) {
+      throw new Error('Excerpt must be 160 characters or less');
+    }
+
+    // Get authenticated user ID (replace with your actual auth logic)
+    const authUser = JSON.parse(localStorage.getItem('authUser'));
+    console.log('Auth user from localStorage:', authUser);
+    
+    // Si no hay usuario autenticado, usaremos un ID temporal para pruebas
+    let authorId;
+    if (!authUser?.id) {
+      console.log('No hay usuario autenticado, usando ID temporal');
+      authorId = 1; // ID temporal para pruebas
+    } else {
+      authorId = authUser.id;
+    }
+
+    // Prepare payload with simplified structure
+    const pageData = {
+      title: page.value.title.trim(),
+      content: page.value.content.trim(),
+      excerpt: page.value.excerpt?.trim() || '',
+      slug: page.value.slug?.trim() || null,
+      status: page.value.status || 'draft',
+      authorId: authorId // Usar el ID que determinamos anteriormente
+    };
+    
+    console.log('Payload completo:', pageData);
 
     if (isEditMode.value) {
-      await api.put(`/api/pages/${route.params.id}`, page.value)
+      console.log(`Enviando PUT a /api/cms-pages/${route.params.id}`);
+      const response = await api.put(`/api/cms-pages/${route.params.id}`, pageData);
+      console.log('Respuesta del servidor (PUT):', response.data);
     } else {
-      await api.post('/api/pages', page.value)
+      console.log('Enviando POST a /api/cms-pages');
+      const response = await api.post('/api/cms-pages', pageData);
+      console.log('Respuesta del servidor (POST):', response.data);
     }
 
-    // Handle success
-    router.push('/pages')
+    router.push('/pages');
   } catch (err) {
-    error.value = err.message || 'Error al guardar la página'
-    console.error('Page error:', err)
+    console.error('Error completo:', err);
+    error.value = err.response?.data?.message ||
+      err.response?.data?.error ||
+      err.message ||
+      'Error saving page';
+
+    console.error('Page Save Error:', {
+      status: err.response?.status,
+      data: err.response?.data,
+      validationErrors: err.response?.data?.errors,
+      message: err.message
+    });
   } finally {
-    isSaving.value = false
+    isSaving.value = false;
   }
 }
 
@@ -72,6 +122,31 @@ onMounted(async () => {
     await fetchPage(route.params.id)
   }
 })
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validate file type
+  if (!file.type.match('image/jpeg')) {
+    error.value = 'Solo se permiten imágenes JPG';
+    return;
+  }
+
+  // Validate image dimensions
+  const img = new Image();
+  img.onload = function () {
+    if (this.width < 800 || this.height < 600) {
+      error.value = `La imagen debe ser de al menos 800×600px (actual: ${this.width}×${this.height}px)`;
+      return;
+    }
+    page.value.featuredImage = file;
+  };
+  img.onerror = () => {
+    error.value = 'Error al cargar la imagen';
+  };
+  img.src = URL.createObjectURL(file);
+};
 </script>
 
 <template>
@@ -131,7 +206,31 @@ onMounted(async () => {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Contenido</label>
             <TipTapEditor v-model="page.content"
-              class="min-h-[300px] border border-gray-300 rounded focus:ring-2 focus:ring-gray-300 overflow-hidden transition-all duration-200" />
+              class="min-h-[200px] border border-gray-300 rounded focus:ring-2 focus:ring-gray-300 overflow-hidden transition-all duration-200" />
+          </div>
+
+          <!-- Excerpt Input -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Resumen (máx. 160 caracteres)</label>
+            <textarea v-model="page.excerpt" maxlength="160" placeholder="Breve descripción de la página"
+              class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200"
+              rows="3"></textarea>
+            <p class="text-xs text-gray-500 mt-1">{{ page.excerpt?.length || 0 }}/160 caracteres</p>
+          </div>
+
+          <!-- Featured Image Upload -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen destacada (JPG, min. 800×600px)</label>
+            <div class="mt-1 flex items-center">
+              <input type="file" id="featuredImage" accept="image/jpeg" @change="handleImageUpload" class="sr-only">
+              <label for="featuredImage"
+                class="cursor-pointer rounded-md bg-white py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                Seleccionar imagen
+              </label>
+              <span class="ml-4 text-sm text-gray-500" v-if="page.featuredImage">
+                {{ page.featuredImage.name }}
+              </span>
+            </div>
           </div>
 
           <!-- Form Actions -->

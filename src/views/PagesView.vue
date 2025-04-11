@@ -23,9 +23,9 @@ const fetchPages = async () => {
   }
 }
 
-const handleDelete = async (id) => {
+const handleDelete = async (uuid) => {
   try {
-    await api.delete(`/api/pages/${id}`)
+    await api.delete(`/api/pages/${uuid}`)
     await fetchPages()
   } catch (error) {
     console.error('Error deleting page:', error)
@@ -96,7 +96,7 @@ onMounted(fetchPages)
           <td>
             <div class="flex space-x-2">
               <button 
-                @click="() => router.push(`/pages/${page.id}/edit`)" 
+                @click="() => router.push(`/pages/${page.uuid}/edit`)" 
                 class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
                 title="Editar"
               >

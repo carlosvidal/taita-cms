@@ -8,6 +8,9 @@ import PostsView from '../views/PostsView.vue'
 import PostFormView from '../views/PostFormView.vue'
 import PagesView from '../views/PagesView.vue'
 import PageFormView from '../views/PageFormView.vue'
+import SettingsView from '../views/SettingsView.vue'
+import UsersView from '../views/UsersView.vue'
+import UserFormView from '../views/UserFormView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -78,9 +81,33 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/pages/:id/edit',
-      name: 'edit-page',
+      path: '/page/edit/:uuid',
+      name: 'page-edit',
       component: PageFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: SettingsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: UsersView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/users/new',
+      name: 'new-user',
+      component: UserFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/user/edit/:uuid',
+      name: 'edit-user',
+      component: UserFormView,
       meta: { requiresAuth: true }
     }
   ]

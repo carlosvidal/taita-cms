@@ -89,7 +89,19 @@ export default {
           throw new Error(data.error || 'Error de autenticación');
         }
         
+        // Guardar tanto el token como los datos del usuario
         localStorage.setItem('authToken', data.token);
+        
+        // Guardar datos del usuario para usar en otras partes de la aplicación
+        localStorage.setItem('authUser', JSON.stringify({
+          id: data.user.id,
+          uuid: data.user.uuid,
+          email: data.user.email,
+          name: data.user.name || 'Usuario',
+          role: data.user.role || 'AUTHOR'
+        }));
+        
+        console.log('Usuario autenticado:', JSON.parse(localStorage.getItem('authUser')));
         router.push('/dashboard');
         
       } catch (err) {

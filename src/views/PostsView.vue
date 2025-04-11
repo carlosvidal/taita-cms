@@ -23,9 +23,9 @@ const fetchPosts = async () => {
   }
 }
 
-const handleDelete = async (id) => {
+const handleDelete = async (uuid) => {
   try {
-    await api.delete(`/api/posts/${id}`)
+    await api.delete(`/api/posts/${uuid}`)
     await fetchPosts()
   } catch (error) {
     console.error('Error deleting post:', error)
@@ -98,15 +98,15 @@ onMounted(() => {
           <td>
             <div class="flex gap-2">
               <button 
-                @click="() => router.push(`/posts/${post.id}/edit`)" 
-                class="p-1.5 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-                title="Edit"
+                @click="() => router.push(`/posts/${post.uuid}/edit`)" 
+                class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
+                title="Editar"
               >
                 <Edit class="w-4 h-4" />
               </button>
               <button 
-                @click="() => handleDelete(post.id)" 
-                class="p-1.5 rounded hover:bg-red-50 text-red-600 transition-colors"
+                @click="() => handleDelete(post.uuid)" 
+                class="p-1 rounded hover:bg-red-50 text-red-600 transition-colors"
                 title="Delete"
               >
                 <Trash2 class="w-4 h-4" />

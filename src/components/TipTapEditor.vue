@@ -156,7 +156,7 @@ watch(() => props.modelValue, (newValue) => {
 }
 
 .editor-content {
-  min-height: 250px;
+  min-height: 200px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 

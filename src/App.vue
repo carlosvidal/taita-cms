@@ -1,7 +1,10 @@
 <script setup>
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, LogOut, X, AlignJustify } from 'lucide-vue-next'
+import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, LogOut, X, AlignJustify, Settings, UserCircle } from 'lucide-vue-next'
+
+// Estado para el usuario autenticado
+const currentUser = ref(null)
 
 const route = useRoute()
 const router = useRouter()
@@ -13,6 +16,11 @@ const isLoginPage = computed(() => {
   return route.path === '/login'
 })
 
+// Comprobar si el usuario es administrador
+const isAdmin = computed(() => {
+  return currentUser.value && currentUser.value.role === 'ADMIN'
+})
+
 // Determinar si debemos mostrar el sidebar
 const showSidebar = computed(() => {
   return !isLoginPage.value
@@ -22,7 +30,7 @@ const showSidebar = computed(() => {
 const handleLogout = () => {
   // Eliminar el token de autenticación
   localStorage.removeItem('authToken')
-  
+
   // Redirigir al usuario a la página de login usando window.location
   // para forzar una recarga completa de la página y evitar problemas con componentes
   window.location.href = '/login'
@@ -48,10 +56,24 @@ const checkMobileView = () => {
 // Escuchar cambios de ruta para cerrar el menú móvil
 router.afterEach(closeMobileMenu)
 
-// Configurar listeners para el tamaño de la ventana
+// Cargar datos del usuario desde localStorage
+const loadUserData = () => {
+  try {
+    const userData = localStorage.getItem('authUser')
+    if (userData) {
+      currentUser.value = JSON.parse(userData)
+      console.log('Usuario cargado:', currentUser.value)
+    }
+  } catch (error) {
+    console.error('Error al cargar datos de usuario:', error)
+  }
+}
+
+// Configurar listeners para el tamaño de la ventana y cargar datos del usuario
 onMounted(() => {
   checkMobileView()
   window.addEventListener('resize', checkMobileView)
+  loadUserData()
 })
 
 onUnmounted(() => {
@@ -74,21 +96,13 @@ onUnmounted(() => {
     </header>
 
     <!-- Overlay para cuando el drawer está abierto en móviles -->
-    <div 
-      v-if="showSidebar && isMobileView && isMobileMenuOpen" 
-      class="mobile-overlay"
-      @click="closeMobileMenu"
-    ></div>
+    <div v-if="showSidebar && isMobileView && isMobileMenuOpen" class="mobile-overlay" @click="closeMobileMenu"></div>
 
     <!-- Sidebar solo se muestra cuando no estamos en la página de login -->
-    <aside 
-      v-if="showSidebar" 
-      class="sidebar" 
-      :class="{
-        'mobile-sidebar': isMobileView,
-        'mobile-sidebar-open': isMobileMenuOpen
-      }"
-    >
+    <aside v-if="showSidebar" class="sidebar" :class="{
+      'mobile-sidebar': isMobileView,
+      'mobile-sidebar-open': isMobileMenuOpen
+    }">
       <nav class="main-nav">
         <h1 class="brand" v-if="!isMobileView">CMS</h1>
         <ul>
@@ -122,8 +136,28 @@ onUnmounted(() => {
               <span>Menu</span>
             </RouterLink>
           </li>
+          <!-- Enlace a Usuarios solo visible para administradores -->
+          <li v-if="isAdmin">
+            <RouterLink to="/users" class="nav-link" @click="closeMobileMenu">
+              <UserCircle class="icon" />
+              <span>Usuarios</span>
+            </RouterLink>
+          </li>
+          <!-- Enlace a Mi Perfil visible para todos los usuarios -->
+          <li v-else>
+            <RouterLink :to="`/user/edit/${currentUser?.uuid}`" class="nav-link" @click="closeMobileMenu">
+              <UserCircle class="icon" />
+              <span>Mi Perfil</span>
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/settings" class="nav-link" @click="closeMobileMenu">
+              <Settings class="icon" />
+              <span>Configuración</span>
+            </RouterLink>
+          </li>
         </ul>
-        
+
         <!-- Botón de logout en la parte inferior -->
         <div class="sidebar-footer">
           <button @click="handleLogout" class="logout-button">
@@ -135,7 +169,7 @@ onUnmounted(() => {
     </aside>
 
     <!-- Contenido principal con clase especial para la página de login -->
-    <main :class="[isLoginPage ? 'login-content' : 'content-area', {'has-mobile-header': isMobileView && showSidebar}]">
+    <main :class="[isLoginPage ? 'login-content' : 'content-area', { 'has-mobile-header': isMobileView && showSidebar }]">
       <RouterView />
     </main>
   </div>
@@ -346,7 +380,8 @@ html {
 .mobile-sidebar {
   position: fixed;
   top: 0;
-  left: -280px; /* Inicialmente fuera de la pantalla */
+  left: -280px;
+  /* Inicialmente fuera de la pantalla */
   width: 280px;
   height: 100vh;
   z-index: 30;
@@ -362,11 +397,13 @@ html {
 
 /* Ajuste para el contenido principal cuando hay header móvil */
 .has-mobile-header {
-  padding-top: 80px; /* 60px del header + 20px de espacio */
+  padding-top: 80px;
+  /* 60px del header + 20px de espacio */
 }
 
 /* Media queries para diferentes tamaños de pantalla */
 @media (min-width: 768px) {
+
   /* En pantallas medianas y grandes, el sidebar siempre está visible */
   .sidebar {
     width: var(--sidebar-width);
@@ -375,14 +412,14 @@ html {
     top: 0;
     border-right: 1px solid var(--border-color);
     border-bottom: none;
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 0;
     overflow-y: auto;
   }
-  
+
   .main-nav ul {
     display: block;
   }
-  
+
   .nav-link {
     padding: 0.75rem;
   }
