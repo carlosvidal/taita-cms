@@ -9,6 +9,32 @@
       </div>
       
       <form v-else @submit.prevent="saveSettings" class="space-y-6">
+        <!-- Título del Blog -->
+        <div class="space-y-2">
+          <label for="title" class="block text-sm font-medium text-gray-700">Título del Blog</label>
+          <input 
+            type="text" 
+            id="title" 
+            v-model="settings.title" 
+            placeholder="Mi Blog" 
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          <p class="text-xs text-gray-500 mt-1">El título principal de tu blog</p>
+        </div>
+        
+        <!-- Descripción del Blog -->
+        <div class="space-y-2">
+          <label for="description" class="block text-sm font-medium text-gray-700">Descripción del Blog</label>
+          <textarea 
+            id="description" 
+            v-model="settings.description" 
+            placeholder="Una breve descripción de tu blog" 
+            rows="3"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          ></textarea>
+          <p class="text-xs text-gray-500 mt-1">Una breve descripción que aparecerá en la página principal</p>
+        </div>
+        
         <!-- Idioma -->
         <div class="space-y-2">
           <label for="language" class="block text-sm font-medium text-gray-700">Idioma</label>
@@ -155,10 +181,13 @@ const originalSettings = ref({})
 
 // Configuraciones
 const settings = reactive({
+  title: 'Mi Blog',
+  description: 'Un blog personal',
   language: 'es',
   template: 'default',
   domain: '',
-  googleAnalyticsId: ''
+  googleAnalyticsId: '',
+  socialNetworks: {}
 })
 
 // Redes sociales (se guardarán como JSON en el campo socialNetworks)
@@ -176,6 +205,8 @@ const fetchSettings = async () => {
     const data = response.data || {}
     
     // Actualizar configuraciones
+    settings.title = data.title || 'Mi Blog'
+    settings.description = data.description || 'Un blog personal'
     settings.language = data.language || 'es'
     settings.template = data.template || 'default'
     settings.domain = data.domain || ''

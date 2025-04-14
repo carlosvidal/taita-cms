@@ -142,4 +142,8 @@ const closeModal = () => {
   showCreateModal.value = false
   editingItem.value = null
 }
+
+onMounted(() => {
+  fetchMenuItems()
+})
 </script>

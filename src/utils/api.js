@@ -35,5 +35,6 @@ export default {
   get: (url) => apiClient.get(url),
   post: (url, data) => apiClient.post(url, data),
   put: (url, data) => apiClient.put(url, data),
+  patch: (url, data) => apiClient.patch(url, data),
   delete: (url) => apiClient.delete(url)
 }

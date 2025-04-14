@@ -11,11 +11,31 @@ const router = useRouter()
 const posts = ref([])
 const isLoading = ref(false)
 
+// Función para formatear fechas
+const formatDate = (dateString) => {
+  if (!dateString) return 'Fecha no disponible'
+  
+  const date = new Date(dateString)
+  
+  // Verificar si la fecha es válida
+  if (isNaN(date.getTime())) return 'Fecha inválida'
+  
+  // Formatear la fecha en formato local
+  return new Intl.DateTimeFormat('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
 const fetchPosts = async () => {
   isLoading.value = true
   try {
     const response = await api.get('/api/posts')
     posts.value = response.data
+    console.log('Posts cargados:', posts.value)
   } catch (error) {
     console.error('Error fetching posts:', error)
   } finally {
@@ -24,8 +44,10 @@ const fetchPosts = async () => {
 }
 
 const handleDelete = async (uuid) => {
+  if (!confirm('¿Estás seguro de que deseas eliminar este post?')) return
+  
   try {
-    await api.delete(`/api/posts/${uuid}`)
+    await api.delete(`/api/posts/uuid/${uuid}`)
     await fetchPosts()
   } catch (error) {
     console.error('Error deleting post:', error)
@@ -75,15 +97,18 @@ onMounted(() => {
       <p class="text-gray-500 text-sm">Create your first post to get started</p>
     </div>
     
-    <BaseTable v-else>
+    <BaseTable v-else class="text-sm">
       <template #header>
-        <th>Title</th>
-        <th>Slug</th>
-        <th>Actions</th>
+        <th>Título</th>
+        <th>Autor</th>
+        <th>Categoría</th>
+        <th>Estado</th>
+        <th>Última edición</th>
+        <th>Acciones</th>
       </template>
       
       <template #body>
-        <tr v-for="post in posts" :key="post.id">
+        <tr v-for="post in posts" :key="post.id" class="hover:bg-gray-50">
           <td>
             <div class="flex items-center">
               <div class="flex-shrink-0 h-8 w-8 bg-gray-100 rounded flex items-center justify-center text-gray-500">
@@ -91,10 +116,37 @@ onMounted(() => {
               </div>
               <div class="ml-3">
                 <div class="text-sm font-medium text-gray-900">{{ post.title }}</div>
+                <div class="text-xs text-gray-500">{{ post.slug }}</div>
               </div>
             </div>
           </td>
-          <td>{{ post.slug }}</td>
+          <td>
+            <div class="text-sm text-gray-900">{{ post.author?.name || 'Sin autor' }}</div>
+            <div class="text-xs text-gray-500">{{ post.author?.email }}</div>
+          </td>
+          <td>
+            <!-- Categoría sin estilo pill -->
+            <div class="text-sm text-gray-900">
+              {{ post.category?.name || 'Sin categoría' }}
+            </div>
+          </td>
+          <td>
+            <!-- Estado con estilo pill y comparación case-insensitive -->
+            <span 
+              :class="{
+                'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium': true,
+                'bg-green-100 text-green-800': post.status?.toUpperCase() === 'PUBLISHED',
+                'bg-yellow-100 text-yellow-800': post.status?.toUpperCase() === 'DRAFT'
+              }"
+            >
+              {{ post.status?.toUpperCase() === 'PUBLISHED' ? 'Publicado' : 'Borrador' }}
+            </span>
+          </td>
+          <td>
+            <div class="text-sm text-gray-500">
+              {{ formatDate(post.updatedAt) }}
+            </div>
+          </td>
           <td>
             <div class="flex gap-2">
               <button 
@@ -107,7 +159,7 @@ onMounted(() => {
               <button 
                 @click="() => handleDelete(post.uuid)" 
                 class="p-1 rounded hover:bg-red-50 text-red-600 transition-colors"
-                title="Delete"
+                title="Eliminar"
               >
                 <Trash2 class="w-4 h-4" />
               </button>

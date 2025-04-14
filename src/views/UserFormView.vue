@@ -380,14 +380,42 @@ const uploadProfilePicture = async (uuid) => {
   formData.append('picture', selectedFile.value)
   
   try {
-    const response = await api.post(`/api/users/uuid/${uuid}/picture`, formData, {
+    console.log('Subiendo imagen de perfil a:', `/api/users/uuid/${uuid}/picture`);
+    console.log('Contenido del FormData:', [...formData.entries()]);
+    console.log('Tipo de archivo:', selectedFile.value.type);
+    console.log('Tamaño de archivo:', selectedFile.value.size);
+    
+    // Obtener el token de autenticación
+    const token = localStorage.getItem('authToken');
+    
+    // Usar fetch nativo en lugar de axios (como en MediaView)
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const url = `${apiBaseUrl}/api/users/uuid/${uuid}/picture`;
+    
+    console.log('URL completa:', url);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Authorization': `Bearer ${token}`
       }
-    })
-    return response.data
+    });
+    
+    const responseData = await response.json();
+    console.log('Respuesta de carga de imagen:', response.status, responseData);
+    
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${JSON.stringify(responseData)}`);
+    }
+    
+    console.log('Imagen de perfil subida exitosamente:', responseData);
+    return responseData;
   } catch (error) {
-    console.error('Error al subir imagen de perfil:', error)
+    console.error('Error al subir imagen de perfil:', error);
+    console.error('Detalles del error:', {
+      message: error.message
+    });
     throw error
   }
 }

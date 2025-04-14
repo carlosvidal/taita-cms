@@ -8,9 +8,13 @@ import PostsView from '../views/PostsView.vue'
 import PostFormView from '../views/PostFormView.vue'
 import PagesView from '../views/PagesView.vue'
 import PageFormView from '../views/PageFormView.vue'
+import MediaView from '../views/MediaView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import UsersView from '../views/UsersView.vue'
 import UserFormView from '../views/UserFormView.vue'
+import SeriesView from '../views/SeriesView.vue'
+import SeriesFormView from '../views/SeriesFormView.vue'
+import ProfilePictureTestView from '../views/ProfilePictureTestView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -81,9 +85,52 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/page/edit/:uuid',
+      path: '/pages/:uuid/edit',
+      name: 'edit-page',
+      component: PageFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/pages/edit/:uuid',
       name: 'page-edit',
       component: PageFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/media',
+      name: 'media',
+      component: MediaView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/series',
+      name: 'series',
+      component: SeriesView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/series/new',
+      name: 'new-series',
+      component: SeriesFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/series/:uuid',
+      name: 'edit-series',
+      component: SeriesFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/series/:id/edit',
+      name: 'series-edit',
+      component: SeriesFormView,
+      props: true,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/profile-picture-test',
+      name: 'profile-picture-test',
+      component: ProfilePictureTestView,
       meta: { requiresAuth: true }
     },
     {

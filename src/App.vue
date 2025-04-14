@@ -1,7 +1,7 @@
 <script setup>
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, LogOut, X, AlignJustify, Settings, UserCircle } from 'lucide-vue-next'
+import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, LogOut, X, AlignJustify, Settings, UserCircle, Library } from 'lucide-vue-next'
 
 // Estado para el usuario autenticado
 const currentUser = ref(null)
@@ -131,11 +131,29 @@ onUnmounted(() => {
             </RouterLink>
           </li>
           <li>
+            <RouterLink to="/series" class="nav-link" @click="closeMobileMenu">
+              <Library class="icon" />
+              <span>Series</span>
+            </RouterLink>
+          </li>
+          <li>
             <RouterLink to="/menu" class="nav-link" @click="closeMobileMenu">
               <MenuIcon class="icon" />
               <span>Menu</span>
             </RouterLink>
           </li>
+          <li>
+            <RouterLink to="/media" class="nav-link" @click="closeMobileMenu">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              <span>Medios</span>
+            </RouterLink>
+          </li>
+
           <!-- Enlace a Usuarios solo visible para administradores -->
           <li v-if="isAdmin">
             <RouterLink to="/users" class="nav-link" @click="closeMobileMenu">
@@ -169,7 +187,8 @@ onUnmounted(() => {
     </aside>
 
     <!-- Contenido principal con clase especial para la página de login -->
-    <main :class="[isLoginPage ? 'login-content' : 'content-area', { 'has-mobile-header': isMobileView && showSidebar }]">
+    <main
+      :class="[isLoginPage ? 'login-content' : 'content-area', { 'has-mobile-header': isMobileView && showSidebar }]">
       <RouterView />
     </main>
   </div>

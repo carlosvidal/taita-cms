@@ -11,11 +11,31 @@ const router = useRouter()
 const pages = ref([])
 const isLoading = ref(false)
 
+// Función para formatear fechas
+const formatDate = (dateString) => {
+  if (!dateString) return 'Fecha no disponible'
+  
+  const date = new Date(dateString)
+  
+  // Verificar si la fecha es válida
+  if (isNaN(date.getTime())) return 'Fecha inválida'
+  
+  // Formatear la fecha en formato local
+  return new Intl.DateTimeFormat('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
 const fetchPages = async () => {
   isLoading.value = true
   try {
     const response = await api.get('/api/pages')
     pages.value = response.data
+    console.log('Páginas cargadas:', pages.value)
   } catch (error) {
     console.error('Error fetching pages:', error)
   } finally {
@@ -24,8 +44,10 @@ const fetchPages = async () => {
 }
 
 const handleDelete = async (uuid) => {
+  if (!confirm('¿Estás seguro de que deseas eliminar esta página?')) return
+  
   try {
-    await api.delete(`/api/pages/${uuid}`)
+    await api.delete(`/api/pages/uuid/${uuid}`)
     await fetchPages()
   } catch (error) {
     console.error('Error deleting page:', error)
@@ -73,15 +95,17 @@ onMounted(fetchPages)
       <p class="text-gray-500 text-sm">Create your first page to get started</p>
     </div>
     
-    <BaseTable v-else>
+    <BaseTable v-else class="text-sm">
       <template #header>
-        <th>Title</th>
-        <th>Slug</th>
-        <th>Actions</th>
+        <th>Título</th>
+        <th>Autor</th>
+        <th>Estado</th>
+        <th>Última edición</th>
+        <th>Acciones</th>
       </template>
       
       <template #body>
-        <tr v-for="page in pages" :key="page.id">
+        <tr v-for="page in pages" :key="page.id" class="hover:bg-gray-50">
           <td>
             <div class="flex items-center">
               <div class="flex-shrink-0 h-8 w-8 bg-gray-100 rounded flex items-center justify-center text-gray-500">
@@ -89,12 +113,32 @@ onMounted(fetchPages)
               </div>
               <div class="ml-3">
                 <div class="text-sm font-medium text-gray-900">{{ page.title }}</div>
+                <div class="text-xs text-gray-500">{{ page.slug }}</div>
               </div>
             </div>
           </td>
-          <td>{{ page.slug }}</td>
           <td>
-            <div class="flex space-x-2">
+            <div class="text-sm text-gray-900">{{ page.author?.name || 'Sin autor' }}</div>
+            <div class="text-xs text-gray-500">{{ page.author?.email }}</div>
+          </td>
+          <td>
+            <span 
+              :class="{
+                'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium': true,
+                'bg-green-100 text-green-800': page.status === 'PUBLISHED',
+                'bg-yellow-100 text-yellow-800': page.status === 'DRAFT'
+              }"
+            >
+              {{ page.status === 'PUBLISHED' ? 'Publicado' : 'Borrador' }}
+            </span>
+          </td>
+          <td>
+            <div class="text-sm text-gray-500">
+              {{ formatDate(page.updatedAt) }}
+            </div>
+          </td>
+          <td>
+            <div class="flex gap-2">
               <button 
                 @click="() => router.push(`/pages/${page.uuid}/edit`)" 
                 class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
@@ -103,7 +147,7 @@ onMounted(fetchPages)
                 <Edit class="w-4 h-4" />
               </button>
               <button 
-                @click="() => handleDelete(page.id)" 
+                @click="() => handleDelete(page.uuid)" 
                 class="p-1 rounded hover:bg-red-50 text-red-600 transition-colors"
                 title="Eliminar"
               >
