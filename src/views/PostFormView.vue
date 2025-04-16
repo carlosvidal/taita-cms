@@ -376,18 +376,19 @@ const checkSlugAvailability = async (slug) => {
   <div class="max-w-4xl mx-auto py-4 px-2 sm:py-8 sm:px-6 lg:px-8">
     <!-- Loading state -->
     <div v-if="isLoading" class="text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-800 mx-auto"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-panel mx-auto"></div>
       <p class="mt-4 text-gray-600">Cargando...</p>
     </div>
 
     <template v-else>
       <!-- Error message -->
+
       <div v-if="error" class="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
         <p class="text-red-600 font-medium">{{ error }}</p>
       </div>
 
-      <div :class="['bg-white overflow-hidden sm:border sm:border-gray-200 sm:rounded sm:shadow-md']">
-        <div class="p-3 sm:p-6 border-b border-gray-200 flex justify-between items-center">
+      <div :class="['bg-panel overflow-hidden sm:border sm:border-panel sm:rounded sm:shadow-md']">
+        <div class="p-3 sm:p-6 border-b border-panel flex justify-between items-center">
           <h1 class="text-2xl font-bold text-gray-900">{{ postTitle }}</h1>
         </div>
 
@@ -426,7 +427,7 @@ const checkSlugAvailability = async (slug) => {
                 v-if="series.length > 0" 
                 type="button" 
                 @click="router.push('/series/new')"
-                class="px-3 py-2 bg-gray-100 rounded border border-gray-300 hover:bg-gray-200 text-gray-700"
+                class="px-3 py-2 bg-panel rounded border border-gray-300 hover:bg-gray-200 text-gray-700"
                 title="Crear nueva serie"
               >
                 <Library class="w-4 h-4" />
@@ -482,7 +483,7 @@ const checkSlugAvailability = async (slug) => {
             
             <!-- Mostrar imagen existente si hay una -->
             <div v-if="post.existingImage && !post.removeImage" class="mt-2 mb-3">
-              <div class="relative w-64 h-40 overflow-hidden rounded border border-gray-200">
+              <div class="relative w-64 h-40 overflow-hidden rounded border border-panel">
                 <img :src="getFullImageUrl(post.existingImage)" alt="Imagen destacada" class="object-cover w-full h-full">
                 <button @click="removeImage" type="button"
                   class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
@@ -498,7 +499,7 @@ const checkSlugAvailability = async (slug) => {
             <div v-if="!post.existingImage || post.removeImage" class="mt-1 flex items-center">
               <input type="file" id="featuredImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" class="sr-only">
               <label for="featuredImage"
-                class="cursor-pointer rounded-md bg-white py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                class="cursor-pointer rounded-md bg-panel py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-panel focus:outline-none focus:ring-2 focus:ring-gray-300">
                 Seleccionar imagen
               </label>
               <span class="ml-4 text-sm text-gray-500" v-if="post.featuredImage">
@@ -522,7 +523,7 @@ const checkSlugAvailability = async (slug) => {
               <div class="relative inline-block w-14 mr-2 align-middle select-none">
                 <input type="checkbox" :checked="post.status === 'published'"
                   @change="post.status = $event.target.checked ? 'published' : 'draft'"
-                  class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 appearance-none cursor-pointer" />
+                  class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-panel border-2 appearance-none cursor-pointer" />
                 <label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300"></label>
               </div>
               <span :class="{

@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-white rounded border border-gray-200 shadow-sm w-full">
-    <table class="min-w-full divide-y divide-gray-200">
+  <div class="bg-panel rounded border border-panel shadow-sm w-full">
+    <table class="min-w-full divide-y border-panel">
       <thead class="bg-gray-50">
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Label</th>
@@ -8,7 +8,7 @@
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
+      <tbody class="bg-panel divide-y border-panel">
         <tr 
           v-for="item in items" 
           :key="item.id"

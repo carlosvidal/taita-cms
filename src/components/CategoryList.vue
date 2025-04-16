@@ -17,9 +17,9 @@ const sortedCategories = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white border border-gray-200 rounded overflow-hidden">
+  <div class="bg-panel border border-panel rounded overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table class="min-w-full divide-y border-panel">
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
@@ -28,7 +28,7 @@ const sortedCategories = computed(() => {
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-panel divide-y border-panel">
           <tr v-for="category in sortedCategories" :key="category.id" class="hover:bg-gray-50 transition-colors duration-150">
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">

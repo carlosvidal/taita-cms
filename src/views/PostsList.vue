@@ -20,16 +20,14 @@
             </span>
           </td>
           <td>
-            <button 
+            <BaseButton 
               @click="togglePostStatus(post)"
-              class="btn btn-sm"
-              :class="{
-                'btn-outline-success': post.status === 'draft',
-                'btn-outline-secondary': post.status === 'published'
-              }"
+              variant="primary"
+              size="sm"
+              :disabled="isSaving"
             >
               {{ post.status === 'published' ? 'Despublicar' : 'Publicar' }}
-            </button>
+            </BaseButton>
           </td>
         </tr>
       </tbody>
@@ -38,7 +36,15 @@
 </template>
 
 <script>
+import BaseButton from '@/components/BaseButton.vue'
+
 export default {
+  components: { BaseButton },
+  data() {
+    return {
+      isSaving: false
+    }
+  },
   methods: {
     async togglePostStatus(post) {
       try {

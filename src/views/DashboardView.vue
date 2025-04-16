@@ -7,8 +7,8 @@
       <!-- Stats Overview -->
       <section>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-medium text-gray-900">Resumen</h2>
-          <button @click="fetchStats" class="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors" title="Refrescar estadísticas">
+          <h2 class="text-lg font-medium text-panel-heading">Resumen</h2>
+          <button @click="fetchStats" class="p-1 rounded hover:bg-panel text-panel-muted transition-colors" title="Refrescar estadísticas">
             <RefreshCw class="w-4 h-4" />
           </button>
         </div>
@@ -23,34 +23,34 @@
       </section>
       
       <!-- Recent Activity -->
-      <section class="border border-gray-200 rounded-lg bg-white">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-medium text-gray-900">Actividad reciente</h2>
+      <section class="border border-panel rounded-lg bg-panel">
+        <div class="px-6 py-4 border-b border-panel">
+          <h2 class="text-lg font-medium text-panel-heading">Actividad reciente</h2>
         </div>
         
-        <div v-if="isLoading" class="p-8 text-center text-gray-500">
+        <div v-if="isLoading" class="p-8 text-center text-panel-muted">
           <div class="animate-pulse flex justify-center">
-            <div class="h-4 w-24 bg-gray-200 rounded"></div>
+            <div class="h-4 w-24 bg-panel rounded"></div>
           </div>
           <p class="mt-2 text-sm">Cargando actividad...</p>
         </div>
         
         <div v-else-if="!recentActivity.length" class="p-12 text-center">
-          <div class="text-gray-400 mb-3">
+          <div class="text-panel-muted mb-3">
             <History class="w-10 h-10" />
           </div>
-          <h3 class="text-lg font-medium text-gray-700 mb-1">Sin actividad reciente</h3>
-          <p class="text-gray-500 text-sm">Comienza a crear contenido para ver tu actividad aquí</p>
+          <h3 class="text-lg font-medium text-panel-text mb-1">Sin actividad reciente</h3>
+          <p class="text-panel-muted text-sm">Comienza a crear contenido para ver tu actividad aquí</p>
         </div>
         
-        <div v-else class="divide-y divide-gray-100">
-          <div v-for="(activity, index) in recentActivity" :key="index" class="px-6 py-4 flex items-start hover:bg-gray-50 transition-colors">
-            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 mr-3">
+        <div v-else class="divide-y border-panel">
+          <div v-for="(activity, index) in recentActivity" :key="index" class="px-6 py-4 flex items-start hover:bg-panel transition-colors">
+            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-panel flex items-center justify-center text-gray-600 mr-3">
               <component :is="getIconComponent(activity.icon)" class="w-4 h-4" />
             </div>
             <div>
-              <p class="text-sm text-gray-900">{{ activity.message }}</p>
-              <p class="text-xs text-gray-500 mt-1">{{ activity.time }}</p>
+              <p class="text-sm text-panel-heading">{{ activity.message }}</p>
+              <p class="text-xs text-panel-muted mt-1">{{ activity.time }}</p>
             </div>
           </div>
         </div>
@@ -58,16 +58,16 @@
       
       <!-- Quick Actions -->
       <section>
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Acciones rápidas</h2>
+        <h2 class="text-lg font-medium text-panel-heading mb-4">Acciones rápidas</h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div v-for="action in quickActions" :key="action.name" 
-               class="p-4 border border-gray-200 rounded-lg bg-white hover:shadow-sm transition-all cursor-pointer"
+               class="p-4 border border-panel rounded-lg bg-panel hover:shadow-sm transition-all cursor-pointer"
                @click="action.action">
             <div class="flex items-center">
               <div :class="`w-8 h-8 rounded flex items-center justify-center mr-3 ${action.bgColor}`">
                 <component :is="getIconComponent(action.icon)" class="w-4 h-4 text-white" />
               </div>
-              <span class="text-sm font-medium text-gray-700">{{ action.name }}</span>
+              <span class="text-sm font-medium text-panel-text">{{ action.name }}</span>
             </div>
           </div>
         </div>
@@ -115,25 +115,25 @@ const quickActions = [
   {
     name: 'Crear post',
     icon: 'file-text',
-    bgColor: 'bg-gray-800',
+    bgColor: 'bg-panel',
     action: () => router.push('/posts/new')
   },
   {
     name: 'Crear página',
     icon: 'file',
-    bgColor: 'bg-gray-800',
+    bgColor: 'bg-panel',
     action: () => router.push('/pages/new')
   },
   {
     name: 'Gestionar categorías',
     icon: 'tag',
-    bgColor: 'bg-gray-800',
+    bgColor: 'bg-panel',
     action: () => router.push('/categories')
   },
   {
     name: 'Configuración',
     icon: 'settings',
-    bgColor: 'bg-gray-800',
+    bgColor: 'bg-panel',
     action: () => router.push('/settings')
   }
 ]

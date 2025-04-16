@@ -255,7 +255,7 @@ html {
   align-items: center;
   width: 100%;
   height: 100vh;
-  padding: 2rem;
+  padding: 0;
 }
 
 /* Estilos para el sidebar */
@@ -348,7 +348,7 @@ html {
 
 @media (min-width: 768px) {
   .content-area {
-    padding: 2rem;
+    padding: 0;
   }
 }
 

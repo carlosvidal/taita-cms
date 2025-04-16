@@ -35,8 +35,8 @@ const handleCreate = () => {
 </script>
 
 <template>
-  <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+  <div class="bg-panel border border-panel rounded-lg overflow-hidden">
+    <div class="px-6 py-4 border-b border-panel flex justify-between items-center">
       <h2 class="text-lg font-medium text-gray-900">{{ title }}</h2>
       <BaseButton 
         variant="secondary" 
@@ -72,8 +72,8 @@ const handleCreate = () => {
     </div>
     
     <div v-else class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y border-panel">
+        <thead class="bg-panel">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
@@ -81,8 +81,8 @@ const handleCreate = () => {
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="post in posts" :key="post.id" class="hover:bg-gray-50 transition-colors duration-150">
+        <tbody class="bg-panel divide-y border-panel">
+          <tr v-for="post in posts" :key="post.id" class="hover:bg-panel transition-colors duration-150">
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
                 <div class="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-md flex items-center justify-center text-gray-500">

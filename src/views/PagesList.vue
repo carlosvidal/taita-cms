@@ -17,14 +17,15 @@
             </span>
           </td>
           <td>
-            <button 
+            <BaseButton 
               @click="togglePageStatus(page)"
-              class="status-toggle"
-              :class="page.status"
+              variant="primary"
+              size="sm"
+              :disabled="isSaving"
               :title="page.status === 'published' ? 'Despublicar' : 'Publicar'"
             >
               <span class="toggle-icon"></span>
-            </button>
+            </BaseButton>
           </td>
         </tr>
       </tbody>
@@ -33,10 +34,18 @@
 </template>
 
 <script>
+import BaseButton from '@/components/BaseButton.vue'
+
 export default {
   data() {
     return {
       pages: []
+    }
+  },
+  components: { BaseButton },
+  data() {
+    return {
+      isSaving: false
     }
   },
   methods: {

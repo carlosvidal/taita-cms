@@ -1,65 +1,89 @@
 <template>
-  <ViewLayout title="Moderación de Comentarios">
-    <div class="comments-toolbar">
-      <label>
-        Estado:
-        <select v-model="filterStatus">
+  <ViewLayout>
+    <template #title>Comentarios</template>
+    <template #subtitle>Modera los comentarios de tus posts</template>
+
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+      <div class="flex items-center gap-2">
+        <label class="text-panel-text font-medium">Estado:</label>
+        <select v-model="filterStatus" class="border-panel rounded px-2 py-1 bg-panel text-panel-text">
           <option value="">Todos</option>
           <option value="PENDING">Pendiente</option>
           <option value="APPROVED">Aprobado</option>
           <option value="REJECTED">Rechazado</option>
           <option value="SPAM">Spam</option>
         </select>
-      </label>
-      <button @click="fetchComments" class="btn btn-primary">Actualizar</button>
+      </div>
+      <BaseButton @click="fetchComments" variant="primary" size="sm">Actualizar</BaseButton>
     </div>
-    <table class="comments-table">
-      <thead>
-        <tr>
-          <th>Autor</th>
-          <th>Email</th>
-          <th>Comentario</th>
-          <th>Post</th>
-          <th>Fecha</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="comment in filteredComments" :key="comment.uuid">
-          <td>{{ comment.authorName }}</td>
-          <td>{{ comment.authorEmail }}</td>
-          <td>{{ comment.content }}</td>
-          <td>{{ comment.post?.title || '-' }}</td>
-          <td>{{ formatDate(comment.createdAt) }}</td>
-          <td>
-            <span :class="'status-' + comment.status.toLowerCase()">{{ statusLabel(comment.status) }}</span>
-          </td>
-          <td>
-            <button v-if="comment.status === 'PENDING' || comment.status === 'REJECTED'"
-              @click="approveComment(comment)" class="icon-action" title="Aprobar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
-            <button v-if="comment.status === 'PENDING' || comment.status === 'APPROVED'"
-              @click="rejectComment(comment)" class="icon-action" title="Rechazar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <button v-if="comment.status !== 'SPAM'" @click="spamComment(comment)" class="icon-action" title="Marcar como spam">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 22 21 22 12 2 3 22"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="20" x2="12" y2="20"/></svg>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div v-if="loading" class="comments-loading">Cargando comentarios...</div>
-    <div v-if="error" class="comments-error">{{ error }}</div>
-    <div v-if="!loading && filteredComments.length === 0" class="comments-empty">No hay comentarios.</div>
+
+    <div class="overflow-x-auto bg-panel border border-panel rounded-lg shadow-sm">
+      <table class="min-w-full divide-y border-panel">
+        <thead class="bg-panel">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Autor</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Email</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Comentario</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Post</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Fecha</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Estado</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="bg-panel divide-y border-panel">
+          <tr v-for="comment in filteredComments" :key="comment.uuid" class="hover:bg-panel transition-colors duration-150">
+            <td class="px-6 py-4 whitespace-nowrap">{{ comment.authorName }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">{{ comment.authorEmail }}</td>
+            <td class="px-6 py-4">{{ comment.content }}</td>
+            <!-- Si comment.post es un objeto, mostrar el título; si es un ID/UUID o no viene, mostrar placeholder -->
+            <td class="px-6 py-4">
+              <span v-if="typeof comment.post === 'object' && comment.post && comment.post.title">{{ comment.post.title }}</span>
+              <span v-else-if="comment.post">({{ comment.post }})</span>
+              <span v-else>-</span>
+            </td>
+            <td class="px-6 py-4">{{ formatDate(comment.createdAt) }}</td>
+            <td class="px-6 py-4">
+              <span :class="'status-' + comment.status.toLowerCase()">{{ statusLabel(comment.status) }}</span>
+            </td>
+            <td class="px-6 py-4 flex gap-2">
+              <button v-if="comment.status === 'PENDING' || comment.status === 'REJECTED'"
+                @click="approveComment(comment)"
+                class="icon-action"
+                title="Aprobar"
+              >
+                <Check class="w-5 h-5" />
+              </button>
+              <button v-if="comment.status === 'PENDING' || comment.status === 'APPROVED'"
+                @click="rejectComment(comment)"
+                class="icon-action"
+                title="Rechazar"
+              >
+                <X class="w-5 h-5" />
+              </button>
+              <button v-if="comment.status !== 'SPAM'"
+                @click="spamComment(comment)"
+                class="icon-action"
+                title="Marcar como spam"
+              >
+                <ShieldOff class="w-5 h-5" />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-if="loading" class="text-panel-muted text-center py-6">Cargando comentarios...</div>
+    <div v-if="error" class="text-red-600 text-center py-6">{{ error }}</div>
+    <div v-if="!loading && filteredComments.length === 0" class="text-panel-muted text-center py-6">No hay comentarios.</div>
   </ViewLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import ViewLayout from './ViewLayout.vue';
+import BaseButton from '@/components/BaseButton.vue';
+import { Check, X, ShieldOff } from 'lucide-vue-next';
 
 const comments = ref([]);
 const loading = ref(false);

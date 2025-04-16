@@ -1,12 +1,12 @@
 <template>
-  <div class="overflow-x-auto bg-white sm:rounded-lg sm:border sm:border-gray-200">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
+  <div class="overflow-x-auto bg-panel sm:rounded-lg sm:border sm:border-panel">
+    <table class="min-w-full divide-y border-panel">
+      <thead class="bg-panel">
         <tr>
           <slot name="header" />
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
+      <tbody class="bg-panel divide-y border-panel">
         <slot name="body" />
         <tr v-if="empty && $slots.empty">
           <td :colspan="colSpan" class="px-6 py-10 text-center text-gray-500">
@@ -41,6 +41,9 @@ defineProps({
 }
 
 :deep(tbody tr) {
-  @apply hover:bg-gray-50 transition-colors duration-150;
+  @apply transition-colors duration-150;
+}
+:deep(tbody tr):hover {
+  background: var(--color-panel) !important;
 }
 </style>

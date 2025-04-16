@@ -352,20 +352,20 @@ const checkSlugAvailability = async (slug) => {
   <div class="max-w-4xl mx-auto py-4 px-2 sm:py-8 sm:px-6 lg:px-8">
     <!-- Loading state -->
     <div v-if="isLoading" class="text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-800 mx-auto"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-panel mx-auto"></div>
       <p class="mt-4 text-gray-600">Cargando...</p>
     </div>
 
     <template v-else>
       <!-- Error message -->
-      <div v-if="error" class="mb-6 p-4 bg-red-50 rounded border border-red-200">
+      <div v-if="error" class="mb-6 p-4 bg-panel rounded border border-panel">
         <p class="text-red-600 font-medium">{{ error }}</p>
       </div>
 
-      <div :class="['bg-white overflow-hidden sm:border sm:border-gray-200 sm:rounded sm:shadow-md']">
-        <div class="p-3 sm:p-6 border-b border-gray-200 flex justify-between items-center">
+      <div :class="['bg-panel overflow-hidden sm:border sm:border-panel sm:rounded sm:shadow-md']">
+        <div class="p-3 sm:p-6 border-b border-panel flex justify-between items-center">
           <h1 class="text-2xl font-bold text-gray-900">{{ pageTitle }}</h1>
-          <BaseButton variant="ghost" size="sm" @click="router.push('/pages')">
+          <BaseButton variant="ghost" size="sm" @click="router.push('/pages')" :disabled="isSaving">
             <span class="flex items-center whitespace-nowrap">
               <ArrowLeft class="w-4 h-4 mr-2" />
               Volver a páginas
@@ -378,7 +378,7 @@ const checkSlugAvailability = async (slug) => {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
             <input v-model="page.title" required placeholder="Escribe el título de la página"
-              class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200">
+              class="w-full px-4 py-2 rounded border border-panel focus:ring-2 focus:ring-panel focus:border-panel transition-all duration-200">
           </div>
 
           <!-- Slug Input usando el componente SlugField -->
@@ -398,14 +398,14 @@ const checkSlugAvailability = async (slug) => {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Contenido</label>
             <TipTapEditor v-model="page.content"
-              class="min-h-[200px] border border-gray-300 rounded focus:ring-2 focus:ring-gray-300 overflow-hidden transition-all duration-200" />
+              class="min-h-[200px] border border-panel rounded focus:ring-2 focus:ring-panel overflow-hidden transition-all duration-200" />
           </div>
 
           <!-- Excerpt Input -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Resumen (máx. 160 caracteres)</label>
             <textarea v-model="page.excerpt" maxlength="160" placeholder="Breve descripción de la página"
-              class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200"
+              class="w-full px-4 py-2 rounded border border-panel focus:ring-2 focus:ring-panel focus:border-panel transition-all duration-200"
               rows="3"></textarea>
             <p class="text-xs text-gray-500 mt-1">{{ page.excerpt?.length || 0 }}/160 caracteres</p>
           </div>
@@ -416,9 +416,9 @@ const checkSlugAvailability = async (slug) => {
             
             <!-- Mostrar imagen existente si hay una -->
             <div v-if="page.existingImage && !page.removeImage" class="mt-2 mb-3">
-              <div class="relative w-64 h-40 overflow-hidden rounded border border-gray-200">
+              <div class="relative w-64 h-40 overflow-hidden rounded border border-panel">
                 <img :src="getFullImageUrl(page.existingImage)" :alt="`Imagen: ${page.existingImage}`" class="object-cover w-full h-full">
-                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 truncate">
+                <div class="absolute bottom-0 left-0 right-0 bg-panel bg-opacity-50 text-white text-xs p-1 truncate">
                   {{ page.existingImage }}
                 </div>
                 <button @click="removeImage" type="button"
@@ -438,7 +438,7 @@ const checkSlugAvailability = async (slug) => {
             <div v-if="!page.existingImage || page.removeImage" class="mt-1 flex items-center">
               <input type="file" id="featuredImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" class="sr-only">
               <label for="featuredImage"
-                class="cursor-pointer rounded-md bg-white py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                class="cursor-pointer rounded-md bg-panel py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-panel hover:bg-panel focus:outline-none focus:ring-2 focus:ring-panel">
                 Seleccionar imagen
               </label>
               <span class="ml-4 text-sm text-gray-500" v-if="page.featuredImage">
@@ -456,14 +456,14 @@ const checkSlugAvailability = async (slug) => {
           </div>
 
           <!-- Form Actions -->
-          <div class="flex flex-wrap items-center justify-between pt-6 border-t border-gray-100">
+          <div class="flex flex-wrap items-center justify-between pt-6 border-t border-panel">
             <!-- Status Toggle -->
             <div class="flex items-center mb-4 sm:mb-0">
               <div class="relative inline-block w-14 mr-2 align-middle select-none">
                 <input type="checkbox" :checked="page.status === 'published'"
                   @change="page.status = $event.target.checked ? 'published' : 'draft'"
-                  class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 appearance-none cursor-pointer" />
-                <label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300"></label>
+                  class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-panel border-2 appearance-none cursor-pointer" />
+                <label class="toggle-label block overflow-hidden h-6 rounded-full bg-panel"></label>
               </div>
               <span :class="{
                 'text-sm font-medium': true,

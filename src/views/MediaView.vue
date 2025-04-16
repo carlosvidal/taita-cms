@@ -219,7 +219,7 @@ onMounted(() => {
 
     <div v-if="isLoading" class="py-8 text-center text-gray-500">
       <div class="animate-pulse flex justify-center">
-        <div class="h-4 w-24 bg-gray-200 rounded"></div>
+        <div class="h-4 w-24 bg-panel rounded"></div>
       </div>
       <p class="mt-2 text-sm">Cargando imágenes...</p>
     </div>
@@ -235,18 +235,18 @@ onMounted(() => {
     </div>
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <div v-for="item in mediaItems" :key="item.id" class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-        <div class="relative h-48 overflow-hidden bg-gray-100">
+      <div v-for="item in mediaItems" :key="item.id" class="bg-panel rounded-lg border border-panel overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <div class="relative h-48 overflow-hidden bg-panel">
           <img v-if="item.urls?.original" :src="getFullImageUrl(item.urls.original)" :alt="item.originalName" class="w-full h-full object-cover">
-          <div v-else class="flex items-center justify-center h-full bg-gray-200">
+          <div v-else class="flex items-center justify-center h-full bg-panel">
             <span class="text-gray-500">Sin imagen</span>
           </div>
           <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 hover:opacity-100">
             <div class="flex space-x-2">
-              <button v-if="item.urls?.original" @click="copyToClipboard(getFullImageUrl(item.urls.original))" class="p-2 bg-white rounded-full text-gray-700 hover:text-blue-600 transition-colors">
+              <button v-if="item.urls?.original" @click="copyToClipboard(getFullImageUrl(item.urls.original))" class="p-2 bg-panel rounded-full text-gray-700 hover:text-blue-600 transition-colors">
                 <ExternalLink class="w-5 h-5" />
               </button>
-              <button @click="deleteImage(item.id)" class="p-2 bg-white rounded-full text-gray-700 hover:text-red-600 transition-colors">
+              <button @click="deleteImage(item.id)" class="p-2 bg-panel rounded-full text-gray-700 hover:text-red-600 transition-colors">
                 <Trash2 class="w-5 h-5" />
               </button>
             </div>
@@ -260,7 +260,7 @@ onMounted(() => {
             {{ formatDate(item.createdAt) }}
           </p>
           <div class="flex justify-between items-center mt-3">
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+            <span class="text-xs bg-panel text-gray-600 px-2 py-1 rounded">
               {{ item.entityType || 'general' }}
             </span>
             <button v-if="item.urls?.original" @click="copyToClipboard(getFullImageUrl(item.urls.original))" class="text-xs text-blue-600 hover:text-blue-800">
@@ -279,7 +279,7 @@ onMounted(() => {
 
     <!-- Upload Modal -->
     <div v-if="showUploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+      <div class="bg-panel rounded-lg shadow-xl max-w-md w-full p-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Subir nueva imagen</h3>
         
         <div v-if="uploadError" class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
@@ -296,7 +296,7 @@ onMounted(() => {
                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
               <div class="flex text-sm text-gray-600">
-                <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                <label for="file-upload" class="relative cursor-pointer bg-panel rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
                   <span>Subir un archivo</span>
                   <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/jpeg,image/png,image/webp" @change="handleFileSelect">
                 </label>
@@ -315,7 +315,7 @@ onMounted(() => {
         <div class="flex justify-end space-x-3">
           <button 
             @click="closeUploadModal" 
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-panel border border-gray-300 rounded-md shadow-sm hover:bg-panel"
             :disabled="isUploading"
           >
             Cancelar
