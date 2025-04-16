@@ -119,9 +119,12 @@ onUnmounted(() => {
             </RouterLink>
           </li>
           <li>
-            <RouterLink to="/pages" class="nav-link" @click="closeMobileMenu">
-              <File class="icon" />
-              <span>Pages</span>
+            <RouterLink to="/comments" class="nav-link" @click="closeMobileMenu">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              <span>Comentarios</span>
             </RouterLink>
           </li>
           <li>
@@ -134,6 +137,12 @@ onUnmounted(() => {
             <RouterLink to="/series" class="nav-link" @click="closeMobileMenu">
               <Library class="icon" />
               <span>Series</span>
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/pages" class="nav-link" @click="closeMobileMenu">
+              <File class="icon" />
+              <span>Pages</span>
             </RouterLink>
           </li>
           <li>
@@ -153,6 +162,7 @@ onUnmounted(() => {
               <span>Medios</span>
             </RouterLink>
           </li>
+
 
           <!-- Enlace a Usuarios solo visible para administradores -->
           <li v-if="isAdmin">

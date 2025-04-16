@@ -15,6 +15,7 @@ import UserFormView from '../views/UserFormView.vue'
 import SeriesView from '../views/SeriesView.vue'
 import SeriesFormView from '../views/SeriesFormView.vue'
 import ProfilePictureTestView from '../views/ProfilePictureTestView.vue'
+import CommentsView from '../views/CommentsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -100,6 +101,12 @@ const router = createRouter({
       path: '/media',
       name: 'media',
       component: MediaView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/comments',
+      name: 'comments',
+      component: CommentsView,
       meta: { requiresAuth: true }
     },
     {
