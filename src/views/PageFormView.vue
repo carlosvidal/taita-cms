@@ -43,10 +43,10 @@ const getFullImageUrl = (path) => {
     console.log('getFullImageUrl: path es null o undefined')
     return ''
   }
-  
+
   // Asegurarse de que la ruta no comience con una barra
   const cleanPath = path.startsWith('/') ? path.substring(1) : path
-  
+
   // Construir la URL completa
   const fullUrl = `${apiBaseUrl.value}/${cleanPath}`
   console.log('getFullImageUrl:', { path, cleanPath, fullUrl })
@@ -58,9 +58,9 @@ const fetchPage = async (uuid) => {
   try {
     console.log(`Obteniendo página con UUID: ${uuid}`)
     const response = await api.get(`/api/pages/uuid/${uuid}`)
-    
+
     console.log('Respuesta completa de la API:', response.data)
-    
+
     // Asegurarse de que todos los campos estén presentes
     page.value = {
       ...page.value, // Mantener valores por defecto para campos que no vengan en la respuesta
@@ -72,7 +72,7 @@ const fetchPage = async (uuid) => {
       imageId: response.data.imageId || null,
       removeImage: false
     }
-    
+
     // Depurar información de imagen
     console.log('Información de imagen:', {
       existingImage: page.value.existingImage,
@@ -80,7 +80,7 @@ const fetchPage = async (uuid) => {
       imageFromResponse: response.data.image,
       fullImageUrl: page.value.existingImage ? getFullImageUrl(page.value.existingImage) : ''
     })
-    
+
     console.log('Página cargada:', page.value)
   } catch (err) {
     console.error('Error al obtener página:', err)
@@ -110,7 +110,7 @@ const handleSubmit = async () => {
     // Get authenticated user ID (replace with your actual auth logic)
     const authUser = JSON.parse(localStorage.getItem('authUser'));
     console.log('Auth user from localStorage:', authUser);
-    
+
     // Si no hay usuario autenticado, usaremos un ID temporal para pruebas
     let authorId = 1; // Valor por defecto
     if (!authUser?.id) {
@@ -118,7 +118,7 @@ const handleSubmit = async () => {
     } else {
       authorId = authUser.id;
     }
-    
+
     // Preparar datos para enviar
     const pageData = {
       title: page.value.title,
@@ -127,7 +127,7 @@ const handleSubmit = async () => {
       status: page.value.status,
       authorId: authorId
     };
-    
+
     // Generar un slug único si no se proporciona uno
     if (page.value.slug && page.value.slug.trim() !== '') {
       pageData.slug = page.value.slug.trim();
@@ -140,11 +140,11 @@ const handleSubmit = async () => {
         .replace(/[^\w\s-]/g, '') // Eliminar caracteres especiales
         .replace(/[\s_-]+/g, '-') // Reemplazar espacios y guiones bajos por guiones
         .replace(/^-+|-+$/g, ''); // Eliminar guiones del principio y final
-      
+
       pageData.slug = `${baseSlug}-${timestamp}`;
       console.log(`Generando slug único: ${pageData.slug}`);
     }
-    
+
     // Si estamos editando y hay una imagen existente, incluirla en los datos
     if (isEditMode.value && page.value.existingImage && !page.value.removeImage) {
       pageData.image = page.value.existingImage;
@@ -172,7 +172,7 @@ const handleSubmit = async () => {
     if (page.value.featuredImage && page.value.featuredImage instanceof File) {
       try {
         console.log('Subiendo imagen destacada...');
-        
+
         // Crear un FormData simple y directo
         const formData = new FormData();
         formData.append('image', page.value.featuredImage);
@@ -198,48 +198,48 @@ const handleSubmit = async () => {
           }
           return entry;
         }));
-        
+
         // Usar fetch nativo para mayor control sobre la solicitud
         const response = await fetch(`${apiBaseUrl.value}/api/media/upload`, {
           method: 'POST',
           body: formData
         });
-        
+
         console.log('Respuesta bruta:', response);
         const responseData = await response.json();
         console.log('Respuesta de carga de imagen:', response.status, responseData);
-        
+
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${JSON.stringify(responseData)}`);
         }
 
         if (responseData) {
           console.log('Imagen subida exitosamente:', responseData);
-          
+
           // Construir los datos para actualizar la página
           const imageUpdateData = {
             image: responseData.original || responseData.urls?.original,
             imageId: responseData.id
           };
-          
+
           console.log('Actualizando página con datos de imagen:', imageUpdateData);
-          
+
           try {
             // Actualizar la página con la URL de la imagen
             const imageUpdateResponse = await api.put(`/api/pages/uuid/${savedPage.uuid}`, imageUpdateData);
             console.log('Respuesta de actualización de página:', imageUpdateResponse);
-            
+
             // Actualizar también el objeto page local para que se muestre la imagen inmediatamente
             page.value.existingImage = imageUpdateData.image;
             page.value.imageId = imageUpdateData.imageId;
             page.value.removeImage = false;
-            
+
             // Mostrar la URL completa de la imagen para depuración
             console.log('URL completa de la imagen:', getFullImageUrl(imageUpdateData.image));
-            
+
             // Forzar la recarga de la página para asegurarnos de que se muestre la imagen
             await fetchPage(savedPage.uuid);
-            
+
             console.log('Página actualizada con imagen:', imageUpdateResponse.data);
           } catch (updateError) {
             console.error('Error al actualizar la página con la imagen:', updateError);
@@ -327,10 +327,10 @@ const removeImage = () => {
  */
 const checkSlugAvailability = async (slug) => {
   if (!slug || (isEditMode.value && page.value.slug === slug)) return;
-  
+
   try {
     const response = await api.get(`/api/pages/check-slug?slug=${encodeURIComponent(slug)}`);
-    
+
     if (response.data.exists) {
       // El slug ya está en uso, mostrar mensaje de error
       error.value = `El slug "${slug}" ya está en uso. Por favor, elige otro.`;
@@ -382,15 +382,9 @@ const checkSlugAvailability = async (slug) => {
           </div>
 
           <!-- Slug Input usando el componente SlugField -->
-          <SlugField
-            v-model="page.slug"
-            :source-text="page.title"
-            prefix="/"
-            label="Slug"
-            placeholder="mi-pagina"
+          <SlugField v-model="page.slug" :source-text="page.title" prefix="/" label="Slug" placeholder="mi-pagina"
             hint="URL amigable para la página. Se genera automáticamente a partir del título."
-            @check-availability="checkSlugAvailability"
-          />
+            @check-availability="checkSlugAvailability" />
 
           <!-- Espacio reservado para otros campos futuros -->
 
@@ -412,19 +406,22 @@ const checkSlugAvailability = async (slug) => {
 
           <!-- Featured Image Upload -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen destacada (JPG/PNG/WebP, min. 800×600px)</label>
-            
+            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen destacada (JPG/PNG/WebP, min.
+              800×600px)</label>
+
             <!-- Mostrar imagen existente si hay una -->
             <div v-if="page.existingImage && !page.removeImage" class="mt-2 mb-3">
               <div class="relative w-64 h-40 overflow-hidden rounded border border-panel">
-                <img :src="getFullImageUrl(page.existingImage)" :alt="`Imagen: ${page.existingImage}`" class="object-cover w-full h-full">
+                <img :src="getFullImageUrl(page.existingImage)" :alt="`Imagen: ${page.existingImage}`"
+                  class="object-cover w-full h-full">
                 <div class="absolute bottom-0 left-0 right-0 bg-panel bg-opacity-50 text-white text-xs p-1 truncate">
                   {{ page.existingImage }}
                 </div>
                 <button @click="removeImage" type="button"
                   class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
                   title="Eliminar imagen">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -433,10 +430,11 @@ const checkSlugAvailability = async (slug) => {
                 ID de imagen: {{ page.imageId }}
               </div>
             </div>
-            
+
             <!-- Selector de nueva imagen -->
             <div v-if="!page.existingImage || page.removeImage" class="mt-1 flex items-center">
-              <input type="file" id="featuredImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" class="sr-only">
+              <input type="file" id="featuredImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload"
+                class="sr-only">
               <label for="featuredImage"
                 class="cursor-pointer rounded-md bg-panel py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-panel hover:bg-panel focus:outline-none focus:ring-2 focus:ring-panel">
                 Seleccionar imagen
@@ -445,7 +443,7 @@ const checkSlugAvailability = async (slug) => {
                 {{ page.featuredImage.name }}
               </span>
             </div>
-            
+
             <!-- Mensaje si la imagen ha sido marcada para eliminación -->
             <div v-if="page.removeImage && !page.featuredImage" class="mt-2 text-sm text-yellow-600">
               La imagen será eliminada al guardar
@@ -505,6 +503,7 @@ const checkSlugAvailability = async (slug) => {
   position: absolute;
   left: 0;
   top: 0;
+  background-color: grey;
   border: 2px solid #CBD5E0;
   transition: all 0.3s ease-in-out;
   z-index: 1;

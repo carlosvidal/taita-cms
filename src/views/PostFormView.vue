@@ -87,7 +87,7 @@ const handleSubmit = async () => {
     router.push('/login');
     return;
   }
-  
+
   try {
     isSaving.value = true;
     error.value = '';
@@ -107,7 +107,7 @@ const handleSubmit = async () => {
     // Get authenticated user ID (replace with your actual auth logic)
     const authUser = JSON.parse(localStorage.getItem('authUser'));
     console.log('Auth user from localStorage:', authUser);
-    
+
     // Si no hay usuario autenticado, usaremos un ID temporal para pruebas
     let authorId;
     if (!authUser?.id) {
@@ -127,13 +127,13 @@ const handleSubmit = async () => {
       status: (post.value.status === 'published' ? 'PUBLISHED' : 'DRAFT'),
       authorId: authorId // Usar el ID que determinamos anteriormente
     };
-    
+
     // Add category if selected
     if (post.value.categoryId) {
       postData.categoryId = post.value.categoryId;
       console.log('Agregando categoría al post:', post.value.categoryId);
     }
-    
+
     // Add series if selected
     if (post.value.seriesId) {
       postData.seriesId = post.value.seriesId;
@@ -142,7 +142,7 @@ const handleSubmit = async () => {
       }
       console.log('Agregando serie al post:', { seriesId: post.value.seriesId, sequenceNumber: post.value.sequenceNumber });
     }
-    
+
     // Primero guardar el post sin imagen
     let savedPost;
     if (isEditMode.value) {
@@ -161,7 +161,7 @@ const handleSubmit = async () => {
     if (post.value.featuredImage && post.value.featuredImage instanceof File) {
       try {
         console.log('Subiendo imagen destacada...');
-        
+
         // Crear un FormData simple y directo
         const formData = new FormData();
         formData.append('image', post.value.featuredImage);
@@ -182,24 +182,24 @@ const handleSubmit = async () => {
           method: 'POST',
           body: formData
         });
-        
+
         const responseData = await response.json();
         console.log('Respuesta de carga de imagen:', response.status, responseData);
-        
+
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${JSON.stringify(responseData)}`);
         }
 
         if (responseData) {
           console.log('Imagen subida exitosamente:', responseData);
-          
+
           // Actualizar el post con la URL de la imagen usando fetch en lugar de axios
           console.log('Actualizando post con imagen:', {
             uuid: savedPost.uuid,
             image: responseData.original || responseData.path,
             imageId: responseData.id
           });
-          
+
           try {
             // Crear un objeto con los campos de imagen para la actualización
             // Ahora el modelo Post tiene campo imageId, igual que Page
@@ -207,9 +207,9 @@ const handleSubmit = async () => {
               image: responseData.original || responseData.path,
               imageId: responseData.id
             };
-            
+
             console.log('Datos para actualizar post con imagen:', imageUpdateData);
-            
+
             // Usar fetch nativo en lugar de axios para evitar problemas de formato
             const updateResponse = await fetch(`${apiBaseUrl.value}/api/posts/uuid/${savedPost.uuid}`, {
               method: 'PUT',
@@ -218,15 +218,15 @@ const handleSubmit = async () => {
               },
               body: JSON.stringify(imageUpdateData)
             });
-            
+
             const updateResponseData = await updateResponse.json();
-            
+
             if (!updateResponse.ok) {
               throw new Error(`Error ${updateResponse.status}: ${JSON.stringify(updateResponseData)}`);
             }
-            
+
             console.log('Post actualizado con imagen:', updateResponseData);
-            
+
             // Actualizar el post local con la información de la imagen
             savedPost.image = responseData.original || responseData.path;
             savedPost.imageId = responseData.id;
@@ -295,7 +295,7 @@ onMounted(async () => {
     console.error('Error al cargar categorías:', error)
     categories.value = []
   }
-  
+
   // Load series
   try {
     const response = await api.get('/api/series')
@@ -351,10 +351,10 @@ const removeImage = () => {
  */
 const checkSlugAvailability = async (slug) => {
   if (!slug || (isEditMode.value && post.value.slug === slug)) return;
-  
+
   try {
     const response = await api.get(`/api/posts/check-slug?slug=${encodeURIComponent(slug)}`);
-    
+
     if (response.data.exists) {
       // El slug ya está en uso, mostrar mensaje de error
       error.value = `El slug "${slug}" ya está en uso. Por favor, elige otro.`;
@@ -411,7 +411,7 @@ const checkSlugAvailability = async (slug) => {
               </option>
             </select>
           </div>
-          
+
           <!-- Series Select -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Serie (opcional)</label>
@@ -423,41 +423,27 @@ const checkSlugAvailability = async (slug) => {
                   {{ item.title }}
                 </option>
               </select>
-              <button 
-                v-if="series.length > 0" 
-                type="button" 
-                @click="router.push('/series/new')"
+              <button v-if="series.length > 0" type="button" @click="router.push('/series/new')"
                 class="px-3 py-2 bg-panel rounded border border-gray-300 hover:bg-gray-200 text-gray-700"
-                title="Crear nueva serie"
-              >
+                title="Crear nueva serie">
                 <Library class="w-4 h-4" />
               </button>
             </div>
-            
+
             <!-- Sequence Number Input (solo visible si se selecciona una serie) -->
             <div v-if="post.seriesId" class="mt-2">
               <label class="block text-sm font-medium text-gray-700 mb-1">Número de secuencia en la serie</label>
-              <input 
-                v-model="post.sequenceNumber" 
-                type="number" 
-                min="1"
+              <input v-model="post.sequenceNumber" type="number" min="1"
                 placeholder="Posición en la serie (ej: 1, 2, 3...)"
-                class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200"
-              >
+                class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200">
               <p class="mt-1 text-xs text-gray-500">Define el orden de este post dentro de la serie.</p>
             </div>
           </div>
 
           <!-- Slug Input usando el componente SlugField -->
-          <SlugField
-            v-model="post.slug"
-            :source-text="post.title"
-            prefix="/blog/"
-            label="Slug"
-            placeholder="mi-post-url"
-            hint="URL amigable para el post. Se genera automáticamente a partir del título."
-            @check-availability="checkSlugAvailability"
-          />
+          <SlugField v-model="post.slug" :source-text="post.title" prefix="/blog/" label="Slug"
+            placeholder="mi-post-url" hint="URL amigable para el post. Se genera automáticamente a partir del título."
+            @check-availability="checkSlugAvailability" />
 
           <!-- Espacio reservado para otros campos futuros -->
 
@@ -479,25 +465,29 @@ const checkSlugAvailability = async (slug) => {
 
           <!-- Featured Image Upload -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen destacada (JPG/PNG/WebP, min. 800×600px)</label>
-            
+            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen destacada (JPG/PNG/WebP, min.
+              800×600px)</label>
+
             <!-- Mostrar imagen existente si hay una -->
             <div v-if="post.existingImage && !post.removeImage" class="mt-2 mb-3">
               <div class="relative w-64 h-40 overflow-hidden rounded border border-panel">
-                <img :src="getFullImageUrl(post.existingImage)" alt="Imagen destacada" class="object-cover w-full h-full">
+                <img :src="getFullImageUrl(post.existingImage)" alt="Imagen destacada"
+                  class="object-cover w-full h-full">
                 <button @click="removeImage" type="button"
                   class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
                   title="Eliminar imagen">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
             </div>
-            
+
             <!-- Selector de nueva imagen -->
             <div v-if="!post.existingImage || post.removeImage" class="mt-1 flex items-center">
-              <input type="file" id="featuredImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" class="sr-only">
+              <input type="file" id="featuredImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload"
+                class="sr-only">
               <label for="featuredImage"
                 class="cursor-pointer rounded-md bg-panel py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-panel focus:outline-none focus:ring-2 focus:ring-gray-300">
                 Seleccionar imagen
@@ -506,7 +496,7 @@ const checkSlugAvailability = async (slug) => {
                 {{ post.featuredImage.name }}
               </span>
             </div>
-            
+
             <!-- Mensaje si la imagen ha sido marcada para eliminación -->
             <div v-if="post.removeImage && !post.featuredImage" class="mt-2 text-sm text-yellow-600">
               La imagen será eliminada al guardar
@@ -567,6 +557,7 @@ const checkSlugAvailability = async (slug) => {
   position: absolute;
   left: 0;
   top: 0;
+  background-color: grey;
   border: 2px solid #CBD5E0;
   transition: all 0.3s ease-in-out;
   z-index: 1;

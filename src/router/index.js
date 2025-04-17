@@ -17,6 +17,8 @@ import SeriesFormView from '../views/SeriesFormView.vue'
 import ProfilePictureTestView from '../views/ProfilePictureTestView.vue'
 import CommentsView from '../views/CommentsView.vue'
 
+const BlogsView = () => import('../components/BlogsView.vue');
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -113,6 +115,12 @@ const router = createRouter({
       path: '/series',
       name: 'series',
       component: SeriesView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/blogs',
+      name: 'blogs',
+      component: BlogsView,
       meta: { requiresAuth: true }
     },
     {

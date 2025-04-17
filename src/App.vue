@@ -164,6 +164,13 @@ onUnmounted(() => {
           </li>
 
 
+          <!-- Enlace a Blogs solo visible para Superadmin -->
+          <li v-if="isAdmin">
+            <RouterLink to="/blogs" class="nav-link" @click="closeMobileMenu">
+              <LayoutDashboard class="icon" />
+              <span>Blogs</span>
+            </RouterLink>
+          </li>
           <!-- Enlace a Usuarios solo visible para administradores -->
           <li v-if="isAdmin">
             <RouterLink to="/users" class="nav-link" @click="closeMobileMenu">

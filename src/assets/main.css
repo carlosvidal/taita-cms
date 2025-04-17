@@ -78,7 +78,10 @@ a:hover {
 
 /* Card styles */
 .card {
-  @apply rounded-lg shadow-md p-6 bg-white dark: bg-gray-800;
+  /* Las variantes como dark: deben ir en el HTML, no en @apply */
+  /* Las variantes como dark: deben ir en el HTML, no en @apply */
+  @apply rounded-lg shadow-md p-6 bg-white;
+
 }
 
 /* Button styles */
@@ -87,5 +90,8 @@ a:hover {
 }
 
 .btn-primary {
-  @apply bg-blue-600 text-white hover: bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
+  /* Las variantes como dark: deben ir en el HTML, no en @apply */
+  /* Las variantes como dark: deben ir en el HTML, no en @apply */
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+
 }
