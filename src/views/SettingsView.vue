@@ -72,8 +72,13 @@
             v-model="settings.domain" 
             placeholder="ejemplo.com" 
             class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            :disabled="!isProPlan"
           />
           <p class="text-xs text-gray-500 mt-1">El dominio principal de tu blog</p>
+          <div v-if="!isProPlan" class="mt-1">
+            <button type="button" class="text-blue-600 underline text-xs font-medium hover:text-blue-800">Mejorar plan</button>
+            <span class="text-xs text-gray-400 ml-2">(Solo disponible en PRO)</span>
+          </div>
         </div>
         
         <!-- Google Analytics ID -->
@@ -85,8 +90,13 @@
             v-model="settings.googleAnalyticsId" 
             placeholder="UA-XXXXXXXXX-X o G-XXXXXXXXXX" 
             class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            :disabled="!isProPlan"
           />
           <p class="text-xs text-gray-500 mt-1">Tu ID de Google Analytics para rastrear visitas</p>
+          <div v-if="!isProPlan" class="mt-1">
+            <button type="button" class="text-blue-600 underline text-xs font-medium hover:text-blue-800">Mejorar plan</button>
+            <span class="text-xs text-gray-400 ml-2">(Solo disponible en PRO)</span>
+          </div>
         </div>
         
         <!-- Redes Sociales -->
@@ -178,6 +188,18 @@ const isLoading = ref(true)
 const isSaving = ref(false)
 const showSuccess = ref(false)
 const originalSettings = ref({})
+
+// Obtener plan del blog activo desde localStorage
+import { computed } from 'vue'
+const activeBlog = computed(() => {
+  try {
+    return JSON.parse(localStorage.getItem('activeBlog')) || {};
+  } catch {
+    return {};
+  }
+});
+const plan = computed(() => activeBlog.value.plan || 'FREE');
+const isProPlan = computed(() => plan.value === 'PRO');
 
 // Configuraciones
 const settings = reactive({

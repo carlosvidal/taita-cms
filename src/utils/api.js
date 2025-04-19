@@ -13,6 +13,10 @@ apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('authToken')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
+    console.log('[api.js] Enviando token:', token)
+    console.log('[api.js] Header Authorization:', config.headers.Authorization)
+  } else {
+    console.warn('[api.js] No se encontró token en localStorage')
   }
   return config
 })
@@ -22,6 +26,7 @@ apiClient.interceptors.response.use(
   response => response,
   error => {
     if (error.response && error.response.status === 401) {
+      console.error('[api.js] Error 401 - No autorizado. Headers enviados:', error.config.headers)
       // Si recibimos un error 401 (no autorizado), redirigimos al login
       localStorage.removeItem('authToken')
       // Usamos window.location en lugar de router para forzar un refresh completo

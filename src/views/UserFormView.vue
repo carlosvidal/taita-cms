@@ -86,6 +86,12 @@
             <p v-if="isEditMode" class="text-xs text-gray-500">
               El email no se puede modificar
             </p>
+            <div v-if="isEditMode" class="mt-2">
+              <label class="block text-sm font-medium text-gray-700">Rol</label>
+              <div class="text-gray-900">
+                {{ user.role === 'ADMIN' ? 'Administrador' : 'Autor' }}
+              </div>
+            </div>
           </div>
         </div>
         

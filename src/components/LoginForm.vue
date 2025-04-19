@@ -5,43 +5,25 @@
         <h1 class="login-title">CMS</h1>
         <p class="login-subtitle">Inicia sesión para acceder al panel de administración</p>
       </div>
-      
+
       <form @submit.prevent="handleLogin" class="login-form">
         <div v-if="error" class="error-message">
           {{ error }}
         </div>
-        
+
         <div class="form-group">
           <label for="email" class="form-label">Email</label>
-          <input 
-            id="email"
-            v-model="email" 
-            type="email" 
-            placeholder="tu@email.com"
-            class="form-input"
-            required
-            :disabled="isLoading"
-          >
+          <input id="email" v-model="email" type="email" placeholder="tu@email.com" class="form-input" required
+            :disabled="isLoading">
         </div>
-        
+
         <div class="form-group">
           <label for="password" class="form-label">Contraseña</label>
-          <input 
-            id="password"
-            v-model="password" 
-            type="password" 
-            placeholder="••••••••"
-            class="form-input"
-            required
-            :disabled="isLoading"
-          >
+          <input id="password" v-model="password" type="password" placeholder="••••••••" class="form-input" required
+            :disabled="isLoading">
         </div>
-        
-        <button 
-          type="submit" 
-          class="login-button"
-          :disabled="isLoading"
-        >
+
+        <button type="submit" class="login-button" :disabled="isLoading">
           <span v-if="isLoading" class="loading-spinner"></span>
           <span v-else>Iniciar sesión</span>
         </button>
@@ -53,6 +35,10 @@
           <code>Contraseña: securepassword</code>
         </div>
       </form>
+      <div class="signup-link mt-4 text-center">
+        <span>¿No tienes cuenta?</span>
+        <router-link to="/signup" class="text-blue-600 hover:underline ml-1">Regístrate</router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -68,13 +54,13 @@ export default {
     const password = ref('')
     const error = ref('')
     const isLoading = ref(false)
-    
+
     const handleLogin = async () => {
       error.value = ''
       isLoading.value = true
-      
+
       try {
-        const response = await fetch('http://localhost:3000/api/login', {
+        const response = await fetch('http://localhost:3000/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -82,16 +68,16 @@ export default {
             password: password.value
           })
         });
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
           throw new Error(data.error || 'Error de autenticación');
         }
-        
+
         // Guardar tanto el token como los datos del usuario
         localStorage.setItem('authToken', data.token);
-        
+
         // Guardar datos del usuario para usar en otras partes de la aplicación
         localStorage.setItem('authUser', JSON.stringify({
           id: data.user.id,
@@ -100,10 +86,10 @@ export default {
           name: data.user.name || 'Usuario',
           role: data.user.role || 'AUTHOR'
         }));
-        
+
         console.log('Usuario autenticado:', JSON.parse(localStorage.getItem('authUser')));
         router.push('/dashboard');
-        
+
       } catch (err) {
         console.error('Login error:', err);
         error.value = err.message || 'Error al iniciar sesión. Inténtalo de nuevo.';
@@ -111,7 +97,7 @@ export default {
         isLoading.value = false;
       }
     }
-    
+
     return {
       email,
       password,
@@ -252,6 +238,8 @@ export default {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

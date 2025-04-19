@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import SignupView from '../views/SignupView.vue'
 import MenuView from '../views/MenuView.vue'
 import CategoriesView from '../views/CategoriesView.vue'
 import PostsView from '../views/PostsView.vue'
@@ -17,20 +18,31 @@ import SeriesFormView from '../views/SeriesFormView.vue'
 import ProfilePictureTestView from '../views/ProfilePictureTestView.vue'
 import CommentsView from '../views/CommentsView.vue'
 
-const BlogsView = () => import('../components/BlogsView.vue');
+const BlogsView = () => import('../views/BlogsView.vue');
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/blogs',
+      name: 'blogs',
+      component: BlogsView,
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/',
       name: 'home',
-      redirect: '/dashboard' // Redirect root to dashboard
+      component: () => import('../views/LandingView.vue')
     },
     {
       path: '/login',
       name: 'login',
       component: LoginView
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: SignupView
     },
     {
       path: '/dashboard',
@@ -174,5 +186,50 @@ const router = createRouter({
     }
   ]
 })
+
+// --- GUARDAS DE NAVEGACION PERSONALIZADAS ---
+router.beforeEach(async (to, from, next) => {
+  const user = JSON.parse(localStorage.getItem('authUser'));
+  let selectedBlog = localStorage.getItem('activeBlog');
+  const publicPages = ['login', 'signup', 'blogs'];
+
+  if (publicPages.includes(to.name)) {
+    return next();
+  }
+
+  if (to.meta.requiresAuth && !user) {
+    return next({ name: 'login' });
+  }
+
+  // Si es SUPER_ADMIN y no tiene blog seleccionado, siempre va a /blogs
+  if (user && user.role === 'SUPER_ADMIN' && !selectedBlog) {
+    return next({ name: 'blogs' });
+  }
+
+  // Si es usuario ADMIN y no tiene blog seleccionado
+  if (user && user.role === 'ADMIN' && !selectedBlog) {
+    try {
+      // Buscar los blogs del usuario
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`/api/blogs?adminId=${user.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const blogs = await res.json();
+      if (Array.isArray(blogs) && blogs.length === 1) {
+        localStorage.setItem('activeBlog', blogs[0].uuid);
+        return next({ name: 'dashboard' });
+      } else {
+        // Multi-blog: fuerza selección
+        return next({ name: 'blogs' });
+      }
+    } catch (e) {
+      return next({ name: 'blogs' });
+    }
+  }
+
+  next();
+});
 
 export default router

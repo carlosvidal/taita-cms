@@ -12,6 +12,8 @@ const isMobileMenuOpen = ref(false)
 const isMobileView = ref(false)
 
 // Determinar si estamos en la página de login
+const isBlogsPage = computed(() => route.path === '/blogs');
+const isSignupPage = computed(() => route.path === '/signup');
 const isLoginPage = computed(() => {
   return route.path === '/login'
 })
@@ -23,13 +25,16 @@ const isAdmin = computed(() => {
 
 // Determinar si debemos mostrar el sidebar
 const showSidebar = computed(() => {
-  return !isLoginPage.value
+  // No mostrar sidebar en login, signup ni en selección de blogs
+  return !isLoginPage.value && !isSignupPage.value && !isBlogsPage.value
 })
 
 // Función para cerrar sesión
 const handleLogout = () => {
-  // Eliminar el token de autenticación
+  // Eliminar el usuario, token y el contexto de blog activo
+  localStorage.removeItem('authUser')
   localStorage.removeItem('authToken')
+  localStorage.removeItem('activeBlog')
 
   // Redirigir al usuario a la página de login usando window.location
   // para forzar una recarga completa de la página y evitar problemas con componentes
@@ -82,8 +87,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- Layout para páginas que no son de login -->
-  <div class="app-container" :class="{ 'login-layout': isLoginPage }">
+  <!-- Layout especial SOLO para selección de blogs (sin sidebar ni header) -->
+  <div v-if="isBlogsPage" class="blogs-page-standalone">
+    <RouterView />
+  </div>
+  <!-- Layout normal para el resto de rutas -->
+  <div v-else class="app-container" :class="{ 'login-layout': isLoginPage || isSignupPage }">
     <!-- Header móvil con botón de menú - solo visible en móviles cuando no es página de login -->
     <header v-if="showSidebar && isMobileView" class="mobile-header">
       <div class="mobile-header-content">
@@ -91,7 +100,7 @@ onUnmounted(() => {
           <AlignJustify v-if="!isMobileMenuOpen" class="icon" />
           <X v-else class="icon" />
         </button>
-        <h1 class="mobile-brand">CMS</h1>
+        <span class="brand">CMS</span>
       </div>
     </header>
 
@@ -164,13 +173,7 @@ onUnmounted(() => {
           </li>
 
 
-          <!-- Enlace a Blogs solo visible para Superadmin -->
-          <li v-if="isAdmin">
-            <RouterLink to="/blogs" class="nav-link" @click="closeMobileMenu">
-              <LayoutDashboard class="icon" />
-              <span>Blogs</span>
-            </RouterLink>
-          </li>
+          
           <!-- Enlace a Usuarios solo visible para administradores -->
           <li v-if="isAdmin">
             <RouterLink to="/users" class="nav-link" @click="closeMobileMenu">
