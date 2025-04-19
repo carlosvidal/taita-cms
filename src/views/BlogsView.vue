@@ -66,10 +66,10 @@ const handleSave = async (blogData) => {
 }
 
 const selectBlog = (blog) => {
-  // Guarda el blog seleccionado en localStorage
-  localStorage.setItem('activeBlog', JSON.stringify(blog));
-  // Redirige al dashboard del CMS (puedes cambiar la ruta destino si lo deseas)
-  window.location.href = '/dashboard';
+  // Guarda solo el UUID del blog en localStorage (clave 'activeBlog')
+  localStorage.setItem('activeBlog', blog.uuid);
+  // Redirige al dashboard del CMS (ruta válida)
+  window.location.href = '/cms/dashboard';
 }
 
 const user = computed(() => {

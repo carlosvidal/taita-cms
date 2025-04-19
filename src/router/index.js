@@ -17,175 +17,66 @@ import SeriesView from '../views/SeriesView.vue'
 import SeriesFormView from '../views/SeriesFormView.vue'
 import ProfilePictureTestView from '../views/ProfilePictureTestView.vue'
 import CommentsView from '../views/CommentsView.vue'
-
-const BlogsView = () => import('../views/BlogsView.vue');
+import PublicLayout from '../layouts/PublicLayout.vue'
+import SuperAdminLayout from '../layouts/SuperAdminLayout.vue'
+import CmsLayout from '../layouts/CmsLayout.vue'
+import BlogsView from '../views/BlogsView.vue'
+import LandingView from '../views/LandingView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/blogs',
-      name: 'blogs',
-      component: BlogsView,
-      meta: { requiresAuth: true }
-    },
+    // Layout público para landing, login, signup
     {
       path: '/',
-      name: 'home',
-      component: () => import('../views/LandingView.vue')
+      component: PublicLayout,
+      children: [
+        { path: '', name: 'home', component: LandingView },
+        { path: 'login', name: 'login', component: LoginView },
+        { path: 'signup', name: 'signup', component: SignupView },
+        { path: 'blogs', name: 'blogs', component: BlogsView }
+      ]
     },
+    // Layout para SUPER_ADMIN
     {
-      path: '/login',
-      name: 'login',
-      component: LoginView
+      path: '/super-admin',
+      component: SuperAdminLayout,
+      meta: { requiresAuth: true, role: 'SUPER_ADMIN' },
+      children: [
+        { path: 'blogs', name: 'super-admin-blogs', component: BlogsView }
+      ]
     },
+    // Layout CMS para usuarios normales
     {
-      path: '/signup',
-      name: 'signup',
-      component: SignupView
-    },
-    {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: DashboardView,
-      meta: { requiresAuth: true } // This will be used for route protection
-    },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
-    },
-    {
-      path: '/menu',
-      name: 'menu',
-      component: MenuView
-    },
-    {
-      path: '/categories',
-      name: 'categories',
-      component: CategoriesView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/posts',
-      name: 'posts',
-      component: PostsView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/posts/new',
-      name: 'new-post',
-      component: PostFormView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/posts/:id/edit',
-      name: 'edit-post',
-      component: PostFormView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/pages',
-      name: 'pages',
-      component: PagesView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/pages/new',
-      name: 'new-page',
-      component: PageFormView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/pages/:uuid/edit',
-      name: 'edit-page',
-      component: PageFormView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/pages/edit/:uuid',
-      name: 'page-edit',
-      component: PageFormView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/media',
-      name: 'media',
-      component: MediaView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/comments',
-      name: 'comments',
-      component: CommentsView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/series',
-      name: 'series',
-      component: SeriesView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/blogs',
-      name: 'blogs',
-      component: BlogsView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/series/new',
-      name: 'new-series',
-      component: SeriesFormView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/series/:uuid',
-      name: 'edit-series',
-      component: SeriesFormView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/series/:id/edit',
-      name: 'series-edit',
-      component: SeriesFormView,
-      props: true,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/profile-picture-test',
-      name: 'profile-picture-test',
-      component: ProfilePictureTestView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/settings',
-      name: 'settings',
-      component: SettingsView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/users',
-      name: 'users',
-      component: UsersView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/users/new',
-      name: 'new-user',
-      component: UserFormView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/user/edit/:uuid',
-      name: 'edit-user',
-      component: UserFormView,
-      meta: { requiresAuth: true }
+      path: '/cms',
+      component: CmsLayout,
+      meta: { requiresAuth: true },
+      children: [
+        { path: 'dashboard', name: 'dashboard', component: DashboardView },
+        { path: 'menu', name: 'menu', component: MenuView },
+        { path: 'categories', name: 'categories', component: CategoriesView },
+        { path: 'posts', name: 'posts', component: PostsView },
+        { path: 'posts/new', name: 'new-post', component: PostFormView },
+        { path: 'posts/:id/edit', name: 'edit-post', component: PostFormView },
+        { path: 'pages', name: 'pages', component: PagesView },
+        { path: 'pages/new', name: 'new-page', component: PageFormView },
+        { path: 'pages/:uuid/edit', name: 'edit-page', component: PageFormView },
+        { path: 'pages/edit/:uuid', name: 'page-edit', component: PageFormView },
+        { path: 'media', name: 'media', component: MediaView },
+        { path: 'comments', name: 'comments', component: CommentsView },
+        { path: 'series', name: 'series', component: SeriesView },
+        { path: 'series/new', name: 'new-series', component: SeriesFormView },
+        { path: 'series/:uuid', name: 'edit-series', component: SeriesFormView },
+        { path: 'series/:id/edit', name: 'series-edit', component: SeriesFormView, props: true },
+        { path: 'profile-picture-test', name: 'profile-picture-test', component: ProfilePictureTestView },
+        { path: 'settings', name: 'settings', component: SettingsView },
+        { path: 'users', name: 'users', component: UsersView },
+        { path: 'users/new', name: 'new-user', component: UserFormView },
+        { path: 'user/edit/:uuid', name: 'edit-user', component: UserFormView }
+      ]
     }
   ]
-})
+});
 
 // --- GUARDAS DE NAVEGACION PERSONALIZADAS ---
 router.beforeEach(async (to, from, next) => {
@@ -201,9 +92,17 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: 'login' });
   }
 
-  // Si es SUPER_ADMIN y no tiene blog seleccionado, siempre va a /blogs
+  if (to.meta.role && user.role !== to.meta.role) {
+    return next({ name: 'dashboard' });
+  }
+
+  // Si es SUPER_ADMIN y no tiene blog seleccionado, solo redirige si no está ya en super-admin-blogs
   if (user && user.role === 'SUPER_ADMIN' && !selectedBlog) {
-    return next({ name: 'blogs' });
+    if (to.name !== 'super-admin-blogs') {
+      return next({ name: 'super-admin-blogs' });
+    }
+    // Si ya está en super-admin-blogs, permite continuar
+    return next();
   }
 
   // Si es usuario ADMIN y no tiene blog seleccionado

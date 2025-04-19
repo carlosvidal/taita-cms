@@ -88,7 +88,12 @@ export default {
         }));
 
         console.log('Usuario autenticado:', JSON.parse(localStorage.getItem('authUser')));
-        router.push('/dashboard');
+        const user = JSON.parse(localStorage.getItem('authUser'));
+        if (user.role === 'SUPER_ADMIN') {
+          router.push({ name: 'super-admin-blogs' });
+        } else {
+          router.push({ name: 'dashboard' });
+        }
 
       } catch (err) {
         console.error('Login error:', err);
