@@ -28,6 +28,11 @@
           <span v-else>Iniciar sesión</span>
         </button>
 
+        <div class="forgot-link mt-2 text-center">
+          <router-link to="/forgot-password" class="text-blue-600 hover:underline">¿Olvidaste tu
+            contraseña?</router-link>
+        </div>
+
         <!-- Credenciales de prueba -->
         <div class="test-credentials">
           <p>Credenciales de prueba:</p>
@@ -75,10 +80,8 @@ export default {
           throw new Error(data.error || 'Error de autenticación');
         }
 
-        // Guardar tanto el token como los datos del usuario
+        // Guardar el token JWT y los datos del usuario por separado
         localStorage.setItem('authToken', data.token);
-
-        // Guardar datos del usuario para usar en otras partes de la aplicación
         localStorage.setItem('authUser', JSON.stringify({
           id: data.user.id,
           uuid: data.user.uuid,

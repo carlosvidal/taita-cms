@@ -1,7 +1,11 @@
 <template>
-  <div class="login-container">
-    <LoginForm />
-  </div>
+  <PublicLayout>
+    <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-100">
+      <div class="bg-white px-8 py-10 rounded-2xl shadow-xl max-w-md w-full">
+        <LoginForm />
+      </div>
+    </div>
+  </PublicLayout>
 </template>
 
 <script setup>
@@ -14,26 +18,18 @@ const handleLogin = async () => {
       password: form.password
     });
 
-    // In your login success handler:
+    // Guarda el token JWT y los datos del usuario por separado
+    localStorage.setItem('authToken', response.data.token);
     localStorage.setItem('authUser', JSON.stringify({
       id: response.data.user.id,
+      uuid: response.data.user.uuid,
+      email: response.data.user.email,
       name: response.data.user.name,
-      token: response.data.token
+      role: response.data.user.role
     }));
-
     router.push('/dashboard');
   } catch (error) {
     // ... error handling ...
   }
 };
 </script>
-
-<style scoped>
-.login-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style>

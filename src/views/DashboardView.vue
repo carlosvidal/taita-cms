@@ -116,13 +116,13 @@ const quickActions = [
     name: 'Crear post',
     icon: 'file-text',
     bgColor: 'bg-panel',
-    action: () => router.push('/posts/new')
+    action: () => router.push('/cms/posts/new')
   },
   {
     name: 'Crear página',
     icon: 'file',
     bgColor: 'bg-panel',
-    action: () => router.push('/pages/new')
+    action: () => router.push('/cms/pages/new')
   },
   {
     name: 'Gestionar categorías',

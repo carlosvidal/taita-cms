@@ -22,6 +22,8 @@ import SuperAdminLayout from '../layouts/SuperAdminLayout.vue'
 import CmsLayout from '../layouts/CmsLayout.vue'
 import BlogsView from '../views/BlogsView.vue'
 import LandingView from '../views/LandingView.vue'
+import ForgotPassword from '../views/ForgotPassword.vue'
+import ResetPassword from '../views/ResetPassword.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,17 +36,17 @@ const router = createRouter({
         { path: '', name: 'home', component: LandingView },
         { path: 'login', name: 'login', component: LoginView },
         { path: 'signup', name: 'signup', component: SignupView },
-        { path: 'blogs', name: 'blogs', component: BlogsView }
-      ]
+        { path: 'blogs', name: 'blogs', component: BlogsView },
+        { path: 'forgot-password', name: 'forgot-password', component: ForgotPassword },
+        { path: 'reset-password', name: 'reset-password', component: ResetPassword },
+      ],
     },
     // Layout para SUPER_ADMIN
     {
       path: '/super-admin',
       component: SuperAdminLayout,
       meta: { requiresAuth: true, role: 'SUPER_ADMIN' },
-      children: [
-        { path: 'blogs', name: 'super-admin-blogs', component: BlogsView }
-      ]
+      children: [{ path: 'blogs', name: 'super-admin-blogs', component: BlogsView }],
     },
     // Layout CMS para usuarios normales
     {
@@ -56,10 +58,10 @@ const router = createRouter({
         { path: 'menu', name: 'menu', component: MenuView },
         { path: 'categories', name: 'categories', component: CategoriesView },
         { path: 'posts', name: 'posts', component: PostsView },
-        { path: 'posts/new', name: 'new-post', component: PostFormView },
+        { path: 'posts/new', name: 'new-post', component: PostFormView, props: true },
         { path: 'posts/:id/edit', name: 'edit-post', component: PostFormView },
         { path: 'pages', name: 'pages', component: PagesView },
-        { path: 'pages/new', name: 'new-page', component: PageFormView },
+        { path: 'pages/new', name: 'new-page', component: PageFormView, props: true },
         { path: 'pages/:uuid/edit', name: 'edit-page', component: PageFormView },
         { path: 'pages/edit/:uuid', name: 'page-edit', component: PageFormView },
         { path: 'media', name: 'media', component: MediaView },
@@ -68,67 +70,71 @@ const router = createRouter({
         { path: 'series/new', name: 'new-series', component: SeriesFormView },
         { path: 'series/:uuid', name: 'edit-series', component: SeriesFormView },
         { path: 'series/:id/edit', name: 'series-edit', component: SeriesFormView, props: true },
-        { path: 'profile-picture-test', name: 'profile-picture-test', component: ProfilePictureTestView },
+        {
+          path: 'profile-picture-test',
+          name: 'profile-picture-test',
+          component: ProfilePictureTestView,
+        },
         { path: 'settings', name: 'settings', component: SettingsView },
         { path: 'users', name: 'users', component: UsersView },
         { path: 'users/new', name: 'new-user', component: UserFormView },
-        { path: 'user/edit/:uuid', name: 'edit-user', component: UserFormView }
-      ]
-    }
-  ]
-});
+        { path: 'user/edit/:uuid', name: 'edit-user', component: UserFormView, props: true },
+      ],
+    },
+  ],
+})
 
 // --- GUARDAS DE NAVEGACION PERSONALIZADAS ---
 router.beforeEach(async (to, from, next) => {
-  const user = JSON.parse(localStorage.getItem('authUser'));
-  let selectedBlog = localStorage.getItem('activeBlog');
-  const publicPages = ['login', 'signup', 'blogs'];
+  const user = JSON.parse(localStorage.getItem('authUser'))
+  let selectedBlog = localStorage.getItem('activeBlog')
+  const publicPages = ['login', 'signup', 'blogs']
 
   if (publicPages.includes(to.name)) {
-    return next();
+    return next()
   }
 
   if (to.meta.requiresAuth && !user) {
-    return next({ name: 'login' });
+    return next({ name: 'login' })
   }
 
   if (to.meta.role && user.role !== to.meta.role) {
-    return next({ name: 'dashboard' });
+    return next({ name: 'dashboard' })
   }
 
   // Si es SUPER_ADMIN y no tiene blog seleccionado, solo redirige si no está ya en super-admin-blogs
   if (user && user.role === 'SUPER_ADMIN' && !selectedBlog) {
     if (to.name !== 'super-admin-blogs') {
-      return next({ name: 'super-admin-blogs' });
+      return next({ name: 'super-admin-blogs' })
     }
     // Si ya está en super-admin-blogs, permite continuar
-    return next();
+    return next()
   }
 
   // Si es usuario ADMIN y no tiene blog seleccionado
   if (user && user.role === 'ADMIN' && !selectedBlog) {
     try {
       // Buscar los blogs del usuario
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('authToken')
       const res = await fetch(`/api/blogs?adminId=${user.id}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const blogs = await res.json();
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const blogs = await res.json()
       if (Array.isArray(blogs) && blogs.length === 1) {
-        localStorage.setItem('activeBlog', blogs[0].uuid);
-        return next({ name: 'dashboard' });
+        localStorage.setItem('activeBlog', blogs[0].uuid)
+        return next({ name: 'dashboard' })
       } else {
         // Multi-blog: fuerza selección
-        return next({ name: 'blogs' });
+        return next({ name: 'blogs' })
       }
     } catch (e) {
-      return next({ name: 'blogs' });
+      return next({ name: 'blogs' })
     }
   }
 
-  next();
-});
+  next()
+})
 
 export default router

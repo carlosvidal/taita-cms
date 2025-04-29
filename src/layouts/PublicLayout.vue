@@ -7,5 +7,7 @@
 </script>
 
 <style scoped>
-:host { display: block; }
+:host {
+  display: block;
+}
 </style>

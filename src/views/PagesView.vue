@@ -71,7 +71,7 @@ onMounted(fetchPages)
       
       <BaseButton 
         variant="primary" 
-        @click="router.push('/pages/new')"
+        @click="router.push('/cms/pages/new')"
       >
         <template #icon>
           <Plus class="w-4 h-4" />

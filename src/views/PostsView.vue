@@ -73,7 +73,7 @@ onMounted(() => {
       
       <BaseButton 
         variant="primary" 
-        @click="router.push('/posts/new')"
+        @click="router.push('/cms/posts/new')"
       >
         <span class="flex items-center whitespace-nowrap">
           <Plus class="w-4 h-4 mr-2" />

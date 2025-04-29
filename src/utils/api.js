@@ -13,10 +13,10 @@ apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('authToken')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
-    console.log('[api.js] Enviando token:', token)
-    console.log('[api.js] Header Authorization:', config.headers.Authorization)
+    //console.log('[api.js] Enviando token:', token)
+    //console.log('[api.js] Header Authorization:', config.headers.Authorization)
   } else {
-    console.warn('[api.js] No se encontró token en localStorage')
+    //console.warn('[api.js] No se encontró token en localStorage')
   }
   return config
 })
