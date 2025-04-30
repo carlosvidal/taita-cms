@@ -1,0 +1,6 @@
+Agrega esto en tu public/index.html antes de </body>:
+
+<script src="https://unpkg.com/@cap-js/widget/dist/widget.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@cap-js/widget/dist/widget.min.css">
+
+Esto hace que el widget Cap esté disponible como window.CapWidget para tu formulario.

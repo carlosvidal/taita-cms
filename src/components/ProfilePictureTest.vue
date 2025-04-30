@@ -20,7 +20,7 @@
     <button 
       @click="uploadImage" 
       :disabled="!selectedFile"
-      class="btn btn-primary mt-3"
+      class="btn btn-primary mt-3 bg-blue-600 text-white hover:bg-blue-700"
     >
       Subir imagen
     </button>

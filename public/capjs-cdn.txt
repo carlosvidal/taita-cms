@@ -1,0 +1,5 @@
+Agrega esto en tu public/index.html antes de tu script principal:
+
+<script src="https://unpkg.com/capjs/dist/cap.min.js"></script>
+
+Esto hará que capjs esté disponible como window.capjs en toda tu app.

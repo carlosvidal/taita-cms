@@ -8,7 +8,7 @@
       </select>
     </div>
     
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary bg-blue-600 text-white hover:bg-blue-700">
       {{ post.id ? 'Actualizar' : 'Crear' }}
     </button>
   </form>

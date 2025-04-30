@@ -53,6 +53,7 @@ a:hover {
 
   #app {
     /* padding eliminado para evitar espacio lateral */
+    width: 100%;
   }
 }
 
@@ -87,11 +88,4 @@ a:hover {
 /* Button styles */
 .btn {
   @apply px-4 py-2 rounded-md font-medium transition-colors;
-}
-
-.btn-primary {
-  /* Las variantes como dark: deben ir en el HTML, no en @apply */
-  /* Las variantes como dark: deben ir en el HTML, no en @apply */
-  @apply bg-blue-600 text-white hover:bg-blue-700;
-
 }

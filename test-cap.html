@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CapWidget Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@cap.js/widget"></script>
+  </head>
+  <body>
+    <cap-widget id="cap" data-cap-api-endpoint="<your cap api endpoint>"></cap-widget>
+    <script>
+      const widget = document.querySelector('#cap')
+
+      widget.addEventListener('solve', function (e) {
+        const token = e.detail.token
+
+        // Handle the token as needed
+      })
+    </script>
+  </body>
+</html>
