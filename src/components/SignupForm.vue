@@ -5,7 +5,7 @@
       <label class="block mb-2 font-semibold">Email</label>
       <input v-model="email" type="email" class="input mb-4" required />
       <div class="mb-4">
-        <component is="cap-widget" id="cap" ref="capWidget" data-cap-api-endpoint="http://localhost:3000/api/"
+        <component is="cap-widget" id="cap" ref="capWidget" :data-cap-api-endpoint="getApiEndpoint()"
           @solve="onCapSolve" />
       </div>
       <button class="btn w-full" :disabled="loading || !capValidated">Solicitar código</button>
@@ -63,6 +63,22 @@ const error = ref('')
 const success = ref(false)
 const router = useRouter()
 
+// Función para obtener la URL base de la API
+const getApiEndpoint = () => {
+  // Determinar la URL de la API basada en el entorno
+  let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  
+  // Si estamos en producción (dominio taita.blog), usar siempre la URL de producción
+  if (window.location.hostname.includes('taita.blog')) {
+    apiUrl = 'https://api.taita.blog';
+    console.log('SignupForm: Usando API de producción:', apiUrl);
+  } else {
+    console.log('SignupForm: Usando API configurada:', apiUrl);
+  }
+  
+  return `${apiUrl}/api/`;
+}
+
 const onRequestOtp = async () => {
   captchaError.value = ''
   if (!validate(captchaAnswer.value)) {
@@ -73,7 +89,8 @@ const onRequestOtp = async () => {
   loading.value = true
   error.value = ''
   try {
-    await axios.post('/api/auth/request-otp', { email: email.value })
+    const apiUrl = getApiEndpoint().replace('/api/', '');
+    await axios.post(`${apiUrl}/api/auth/request-otp`, { email: email.value })
     step.value = 2
   } catch (e) {
     error.value = e.response?.data?.error || 'Error solicitando código.'
@@ -86,7 +103,8 @@ const verifyOtp = async () => {
   loading.value = true
   error.value = ''
   try {
-    await axios.post('/api/auth/verify-otp', { email: email.value, code: otp.value })
+    const apiUrl = getApiEndpoint().replace('/api/', '');
+    await axios.post(`${apiUrl}/api/auth/verify-otp`, { email: email.value, code: otp.value })
     step.value = 3
   } catch (e) {
     error.value = e.response?.data?.error || 'Código incorrecto.'
@@ -99,7 +117,8 @@ const signup = async () => {
   loading.value = true
   error.value = ''
   try {
-    await axios.post('/api/auth/signup', {
+    const apiUrl = getApiEndpoint().replace('/api/', '');
+    await axios.post(`${apiUrl}/api/auth/signup`, {
       email: email.value,
       password: password.value,
       name: name.value,
