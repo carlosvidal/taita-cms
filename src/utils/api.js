@@ -1,8 +1,19 @@
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
+// Determinar la URL de la API basada en el entorno
+let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+// Si estamos en producción (dominio taita.blog), usar siempre la URL de producción
+if (window.location.hostname.includes('taita.blog')) {
+  apiUrl = 'https://api.taita.blog';
+  console.log('Usando API de producción:', apiUrl);
+} else {
+  console.log('Usando API configurada:', apiUrl);
+}
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: apiUrl,
   headers: {
     'Content-Type': 'application/json'
   }
