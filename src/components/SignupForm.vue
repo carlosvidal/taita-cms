@@ -90,6 +90,7 @@ const onRequestOtp = async () => {
   error.value = ''
   try {
     const apiUrl = getApiEndpoint().replace('/api/', '');
+    // La ruta ya incluye /api/ correctamente
     await axios.post(`${apiUrl}/api/auth/request-otp`, { email: email.value })
     step.value = 2
   } catch (e) {
@@ -104,6 +105,7 @@ const verifyOtp = async () => {
   error.value = ''
   try {
     const apiUrl = getApiEndpoint().replace('/api/', '');
+    // La ruta ya incluye /api/ correctamente
     await axios.post(`${apiUrl}/api/auth/verify-otp`, { email: email.value, code: otp.value })
     step.value = 3
   } catch (e) {
@@ -118,6 +120,7 @@ const signup = async () => {
   error.value = ''
   try {
     const apiUrl = getApiEndpoint().replace('/api/', '');
+    // La ruta ya incluye /api/ correctamente
     await axios.post(`${apiUrl}/api/auth/signup`, {
       email: email.value,
       password: password.value,

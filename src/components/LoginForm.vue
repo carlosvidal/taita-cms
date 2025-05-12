@@ -76,7 +76,7 @@ export default {
           console.log('LoginForm: Usando API configurada:', apiUrl);
         }
         
-        const response = await fetch(`${apiUrl}/auth/login`, {
+        const response = await fetch(`${apiUrl}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
