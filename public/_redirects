@@ -1,1 +1,5 @@
+# Redirecciones específicas para rutas anidadas
+/cms/* /index.html 200
+/super-admin/* /index.html 200
+# Redirección general para todas las demás rutas
 /* /index.html 200
