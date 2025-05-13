@@ -8,6 +8,7 @@ import BaseButton from '@/components/BaseButton.vue'
 import BlogModal from '@/components/BlogModal.vue'
 import api from '@/utils/api'
 import { Plus, LayoutDashboard, Eye, LogIn, Settings } from 'lucide-vue-next'
+import router from '@/router'
 
 const blogs = ref([])
 const showModal = ref(false)
@@ -68,8 +69,8 @@ const handleSave = async (blogData) => {
 const selectBlog = (blog) => {
   // Guarda solo el UUID del blog en localStorage (clave 'activeBlog')
   localStorage.setItem('activeBlog', blog.uuid);
-  // Redirige al dashboard del CMS (ruta válida)
-  window.location.href = '/cms/dashboard';
+  // Redirige al dashboard del CMS usando Vue Router
+  router.push({ name: 'dashboard' });
 }
 
 const user = computed(() => {

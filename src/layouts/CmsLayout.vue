@@ -89,6 +89,7 @@
 <script setup>
 import { RouterLink } from 'vue-router';
 import { ref, onMounted } from 'vue';
+import router from '@/router';
 import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database } from 'lucide-vue-next';
 
 const userRole = ref('');
@@ -108,7 +109,7 @@ function handleLogout() {
   localStorage.removeItem('authUser');
   localStorage.removeItem('authToken');
   localStorage.removeItem('activeBlog');
-  window.location.href = '/login';
+  router.push({ name: 'login' });
 }
 </script>
 
