@@ -73,6 +73,10 @@
           </li>
         </ul>
         <div class="sidebar-footer">
+          <a v-if="activeBlogUrl" :href="activeBlogUrl" target="_blank" class="view-blog-button">
+            <Eye class="icon" />
+            <span>Ver Blog</span>
+          </a>
           <button @click="handleLogout" class="logout-button">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             <span>Cerrar sesión</span>
@@ -88,17 +92,52 @@
 
 <script setup>
 import { RouterLink } from 'vue-router';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import router from '@/router';
-import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database } from 'lucide-vue-next';
+import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database, Eye } from 'lucide-vue-next';
+import api from '@/utils/api';
 
 const userRole = ref('');
 const userUuid = ref('');
-onMounted(() => {
+const activeBlog = ref(null);
+
+// URL del blog activo
+const activeBlogUrl = computed(() => {
+  if (!activeBlog.value) return null;
+  
+  // Si el blog tiene un dominio personalizado, usarlo
+  if (activeBlog.value.domain) {
+    return `https://${activeBlog.value.domain}`;
+  }
+  
+  // Si no tiene dominio personalizado, usar el subdominio en taita.blog
+  if (activeBlog.value.subdomain) {
+    return `https://${activeBlog.value.subdomain}.taita.blog`;
+  }
+  
+  // Si no tiene ni dominio ni subdominio, usar la URL principal
+  return 'https://www.taita.blog';
+});
+
+onMounted(async () => {
   try {
     const user = JSON.parse(localStorage.getItem('authUser'));
     userRole.value = user?.role || '';
     userUuid.value = user?.uuid || '';
+    
+    // Obtener el UUID del blog activo
+    const activeBlogUuid = localStorage.getItem('activeBlog');
+    
+    if (activeBlogUuid) {
+      try {
+        // Obtener la información del blog activo
+        const response = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+        activeBlog.value = response.data;
+        console.log('Blog activo:', activeBlog.value);
+      } catch (error) {
+        console.error('Error al obtener información del blog:', error);
+      }
+    }
   } catch {
     userRole.value = '';
     userUuid.value = '';
@@ -122,6 +161,32 @@ function handleLogout() {
   flex: 1;
   background: #f8fafc;
   padding: 2rem 0;
+}
+
+.view-blog-button,
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.2s;
+  text-decoration: none;
+  margin-bottom: 5px;
+}
+
+.view-blog-button:hover,
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.view-blog-button {
+  color: #4ade80; /* Color verde para destacar */
 }
 
 /* Estilo para el botón de super administrador */
