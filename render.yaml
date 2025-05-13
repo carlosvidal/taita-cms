@@ -10,7 +10,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: VITE_API_URL
-        value: https://api.taita.blog
+        value: https://taita-api.onrender.com
       - key: VITE_SITE_NAME
         value: Taita Blog
       - key: VITE_SITE_URL
