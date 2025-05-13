@@ -40,8 +40,9 @@ apiClient.interceptors.response.use(
       console.error('[api.js] Error 401 - No autorizado. Headers enviados:', error.config.headers)
       // Si recibimos un error 401 (no autorizado), redirigimos al login
       localStorage.removeItem('authToken')
-      // Usamos window.location en lugar de router para forzar un refresh completo
-      window.location.href = '/login'
+      // Importar y usar router directamente no funciona bien en interceptores
+      // En su lugar, usamos hash mode para la navegación
+      window.location.href = '/#/login'
     }
     return Promise.reject(error)
   }

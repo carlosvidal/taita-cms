@@ -117,6 +117,12 @@ const handleSubmit = async () => {
       authorId = authUser.id;
     }
 
+    // Obtener el blogId del localStorage (necesario para la API)
+    const activeBlog = localStorage.getItem('activeBlog');
+    if (!activeBlog) {
+      throw new Error('No hay un blog seleccionado. Por favor, seleccione un blog primero.');
+    }
+    
     // Prepare payload with simplified structure
     const postData = {
       title: post.value.title.trim(),
@@ -125,8 +131,11 @@ const handleSubmit = async () => {
       slug: post.value.slug?.trim() || null,
       // Convertir el status a mayúsculas para que coincida con el enum PublishStatus
       status: (post.value.status === 'published' ? 'PUBLISHED' : 'DRAFT'),
-      authorId: authorId // Usar el ID que determinamos anteriormente
+      authorId: authorId, // Usar el ID que determinamos anteriormente
+      blogId: activeBlog // Incluir el blogId (UUID del blog activo)
     };
+    
+    console.log('Datos del post a enviar:', postData);
 
     // Add category if selected
     if (post.value.categoryId) {
