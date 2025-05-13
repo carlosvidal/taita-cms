@@ -6,6 +6,7 @@
         <input v-model="form.name" placeholder="Nombre del blog" required />
         <input v-model="form.subdomain" placeholder="Subdominio" required />
         <input v-model="form.domain" placeholder="Dominio personalizado (opcional)" />
+        <p class="domain-note">* Los dominios personalizados están disponibles temporalmente para todos los planes</p>
         <select v-model="form.plan">
           <option value="FREE">Free</option>
           <option value="PRO">Pro</option>
@@ -85,5 +86,13 @@ function handleSubmit() {
 .error {
   color: #c00;
   margin-top: 0.5rem;
+}
+
+.domain-note {
+  font-size: 0.8rem;
+  color: #4f46e5;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  font-style: italic;
 }
 </style>

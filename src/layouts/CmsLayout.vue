@@ -64,6 +64,13 @@
               <span>Configuración</span>
             </RouterLink>
           </li>
+          <!-- Botón para super administradores para acceder a la lista de blogs -->
+          <li v-if="userRole === 'SUPER_ADMIN'">
+            <RouterLink to="/super-admin/blogs" class="nav-link super-admin-link">
+              <Database class="icon" />
+              <span>Gestionar Blogs</span>
+            </RouterLink>
+          </li>
         </ul>
         <div class="sidebar-footer">
           <button @click="handleLogout" class="logout-button">
@@ -82,7 +89,7 @@
 <script setup>
 import { RouterLink } from 'vue-router';
 import { ref, onMounted } from 'vue';
-import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image } from 'lucide-vue-next';
+import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database } from 'lucide-vue-next';
 
 const userRole = ref('');
 const userUuid = ref('');
@@ -114,5 +121,17 @@ function handleLogout() {
   flex: 1;
   background: #f8fafc;
   padding: 2rem 0;
+}
+
+/* Estilo para el botón de super administrador */
+.super-admin-link {
+  background-color: #4f46e5;
+  color: white;
+  border-radius: 0.375rem;
+  margin-top: 1rem;
+}
+
+.super-admin-link:hover {
+  background-color: #4338ca;
 }
 </style>

@@ -102,12 +102,19 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: 'dashboard' })
   }
 
-  // Si es SUPER_ADMIN y no tiene blog seleccionado, solo redirige si no está ya en super-admin-blogs
-  if (user && user.role === 'SUPER_ADMIN' && !selectedBlog) {
-    if (to.name !== 'super-admin-blogs') {
+  // Si es SUPER_ADMIN, asegurarse de que pueda acceder a la lista de blogs
+  if (user && user.role === 'SUPER_ADMIN') {
+    // Si está intentando ir a super-admin-blogs, permitir siempre
+    if (to.name === 'super-admin-blogs') {
+      return next()
+    }
+    
+    // Si está intentando ir a otra ruta y no tiene blog seleccionado, redirigir a super-admin-blogs
+    if (!selectedBlog) {
       return next({ name: 'super-admin-blogs' })
     }
-    // Si ya está en super-admin-blogs, permite continuar
+    
+    // Si tiene blog seleccionado, permitir continuar
     return next()
   }
 
