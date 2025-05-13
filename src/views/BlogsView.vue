@@ -89,14 +89,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="blogs-select-container" style="
-    max-width: 700px;
-    margin: 3rem auto 0 auto;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    padding: 2.5rem 2rem 2rem 2rem;
-  ">
+  <div class="blogs-select-container" >
     <div class="blogs-header flex items-center justify-between mb-6" style="
       margin-bottom: 2rem;
     ">
