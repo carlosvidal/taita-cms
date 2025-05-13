@@ -65,16 +65,15 @@ export default {
       isLoading.value = true
 
       try {
-        // Determinar la URL de la API basada en el entorno
-        let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        // Siempre usar la URL de la API en Render.com para producción
+        const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
         
-        // Si estamos en producción (dominio taita.blog), usar siempre la URL de producción
-        if (window.location.hostname.includes('taita.blog')) {
-          apiUrl = 'https://api.taita.blog';
-          console.log('LoginForm: Usando API de producción:', apiUrl);
-        } else {
-          console.log('LoginForm: Usando API configurada:', apiUrl);
-        }
+        // Determinar la URL de la API basada en el entorno
+        let apiUrl = isProduction 
+          ? 'https://taita-api.onrender.com' 
+          : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
+        
+        console.log(`LoginForm: Ambiente: ${isProduction ? 'Producción' : 'Desarrollo'}, Usando API: ${apiUrl}`);
         
         const response = await fetch(`${apiUrl}/api/auth/login`, {
           method: 'POST',
