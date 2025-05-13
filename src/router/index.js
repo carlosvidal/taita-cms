@@ -102,19 +102,25 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: 'dashboard' })
   }
 
-  // Si es SUPER_ADMIN, asegurarse de que pueda acceder a la lista de blogs
+  // Si es SUPER_ADMIN, asegurarse de que pueda acceder a todas las rutas necesarias
   if (user && user.role === 'SUPER_ADMIN') {
     // Si está intentando ir a super-admin-blogs, permitir siempre
     if (to.name === 'super-admin-blogs') {
       return next()
     }
     
+    // Si está intentando ir al dashboard, permitir siempre
+    if (to.name === 'dashboard') {
+      return next()
+    }
+    
     // Si está intentando ir a otra ruta y no tiene blog seleccionado, redirigir a super-admin-blogs
-    if (!selectedBlog) {
+    if (!selectedBlog && to.path.startsWith('/cms')) {
+      // Solo redirigir si está intentando acceder a rutas del CMS que requieren un blog seleccionado
       return next({ name: 'super-admin-blogs' })
     }
     
-    // Si tiene blog seleccionado, permitir continuar
+    // Si tiene blog seleccionado o no está intentando acceder a una ruta que requiere blog, permitir continuar
     return next()
   }
 
