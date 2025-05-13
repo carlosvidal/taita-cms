@@ -117,13 +117,25 @@ const handleSubmit = async () => {
       authorId = authUser.id;
     }
 
-    // Obtener el blogId del localStorage (necesario para la API)
-    const activeBlog = localStorage.getItem('activeBlog');
-    if (!activeBlog) {
+    // Verificar que hay un blog seleccionado
+    const activeBlogUuid = localStorage.getItem('activeBlog');
+    if (!activeBlogUuid) {
       throw new Error('No hay un blog seleccionado. Por favor, seleccione un blog primero.');
     }
     
-    // Prepare payload with simplified structure
+    console.log('Obteniendo información del blog activo...');
+    
+    // Primero necesitamos obtener el ID numérico del blog a partir del UUID
+    // El backend requiere blogId como Int, pero en localStorage tenemos el UUID
+    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+    const blogData = blogResponse.data;
+    console.log('Información del blog obtenida:', blogData);
+    
+    if (!blogData || !blogData.id) {
+      throw new Error('No se pudo obtener el ID numérico del blog');
+    }
+    
+    // Prepare payload with simplified structure según lo que espera el backend
     const postData = {
       title: post.value.title.trim(),
       content: post.value.content.trim(),
@@ -132,7 +144,7 @@ const handleSubmit = async () => {
       // Convertir el status a mayúsculas para que coincida con el enum PublishStatus
       status: (post.value.status === 'published' ? 'PUBLISHED' : 'DRAFT'),
       authorId: authorId, // Usar el ID que determinamos anteriormente
-      blogId: activeBlog // Incluir el blogId (UUID del blog activo)
+      blogId: blogData.id // Usar el ID numérico del blog, no el UUID
     };
     
     console.log('Datos del post a enviar:', postData);
@@ -160,10 +172,15 @@ const handleSubmit = async () => {
       console.log('Respuesta del servidor (PUT):', response.data);
       savedPost = response.data;
     } else {
-      console.log('Enviando POST a /api/posts');
-      const response = await api.post('/api/posts', postData);
-      console.log('Respuesta del servidor (POST):', response.data);
-      savedPost = response.data;
+      try {
+        console.log('Enviando POST a /api/posts');
+        const response = await api.post('/api/posts', postData);
+        console.log('Respuesta del servidor (POST):', response.data);
+        savedPost = response.data;
+      } catch (error) {
+        console.log('Error detallado:', error.response?.data);
+        throw error;
+      }
     }
 
     // Si hay una imagen, subirla después de guardar el post
