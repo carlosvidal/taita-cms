@@ -156,6 +156,19 @@ onMounted(() => {
             <button @click.stop="viewBlog(blog)" class="action-btn" title="Ver blog">
               <Eye class="w-5 h-5" />
             </button>
+            <button @click.stop="selectBlog(blog)" class="action-btn" title="Entrar al CMS">
+              <LogIn class="w-5 h-5" />
+            </button>
+            <button v-if="isSuperAdmin" @click.stop="openSettings(blog)" class="action-btn" title="Configuraciones">
+              <Settings class="w-5 h-5" />
+            </button>
+          </td>
+        </tr>
+      </template>
+      <template #empty>
+        No hay blogs registrados.
+      </template>
+    </BaseTable>
     <BlogModal v-if="showModal" :blog="currentBlog" @save="handleSave" @close="showModal = false" />
   </div>
 </template>
