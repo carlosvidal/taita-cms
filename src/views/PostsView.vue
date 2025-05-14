@@ -150,7 +150,7 @@ onMounted(() => {
           <td>
             <div class="flex gap-2">
               <button 
-                @click="() => router.push(`/posts/${post.uuid}/edit`)" 
+                @click="() => router.push(`/cms/posts/${post.uuid}/edit`)" 
                 class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
                 title="Editar"
               >
