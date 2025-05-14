@@ -95,6 +95,13 @@ const user = computed(() => {
 });
 const isSuperAdmin = computed(() => user.value.role === 'SUPER_ADMIN');
 
+// Función para limpiar el blog activo de localStorage
+const resetActiveBlog = () => {
+  localStorage.removeItem('activeBlog');
+  alert('Se ha reiniciado la selección de blog. Ahora puedes seleccionar un blog válido.');
+  fetchBlogs(); // Recargar la lista de blogs
+};
+
 onMounted(() => {
   if (user.value && user.value.id) {
     fetchBlogs();
@@ -107,12 +114,21 @@ onMounted(() => {
     <div class="blogs-header flex items-center justify-between mb-6" style="
       margin-bottom: 2rem;
     ">
-      <h1 class="blogs-title" style="
-        font-size: 1.45rem;
-        font-weight: 700;
-        color: #222;
-        margin: 0;
-      ">Selecciona un blog</h1>
+      <div class="flex items-center">
+        <h1 class="blogs-title" style="
+          font-size: 1.45rem;
+          font-weight: 700;
+          color: #222;
+          margin: 0;
+        ">Selecciona un blog</h1>
+        <button 
+          @click="resetActiveBlog" 
+          class="ml-4 px-3 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-800 rounded-md transition-colors"
+          title="Usar si tienes problemas al seleccionar blogs"
+        >
+          Reiniciar selección
+        </button>
+      </div>
       <BaseButton v-if="isAdmin" @click="handleCreate" color="primary" class="new-blog-btn" style="
         margin-left: auto;
         margin-bottom: 0;
@@ -140,19 +156,6 @@ onMounted(() => {
             <button @click.stop="viewBlog(blog)" class="action-btn" title="Ver blog">
               <Eye class="w-5 h-5" />
             </button>
-            <button @click.stop="selectBlog(blog)" class="action-btn" title="Entrar al CMS">
-              <LogIn class="w-5 h-5" />
-            </button>
-            <button v-if="isSuperAdmin" @click.stop="openSettings(blog)" class="action-btn" title="Configuraciones">
-              <Settings class="w-5 h-5" />
-            </button>
-          </td>
-        </tr>
-      </template>
-      <template #empty>
-        No hay blogs registrados.
-      </template>
-    </BaseTable>
     <BlogModal v-if="showModal" :blog="currentBlog" @save="handleSave" @close="showModal = false" />
   </div>
 </template>
