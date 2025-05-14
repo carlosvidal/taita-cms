@@ -16,7 +16,7 @@ const currentBlog = ref(null)
 
 function viewBlog(blog) {
   // Abrir blog en nueva pestaña
-  const url = blog.domain ? `https://${blog.domain}` : `https://${blog.subdomain}.tudominio.com`;
+  const url = blog.domain ? `https://${blog.subdomain}.${blog.domain}` : `https://${blog.subdomain}.taita.blog`;
   window.open(url, '_blank');
 }
 
@@ -66,29 +66,22 @@ const handleSave = async (blogData) => {
   }
 }
 
+// Función simplificada para seleccionar un blog
 const selectBlog = async (blog) => {
   console.log('Intentando seleccionar blog:', blog);
   
   try {
-    // Verificar que el blog existe antes de guardarlo
-    const apiUrl = `${api.baseURL}/api/blogs/uuid/${blog.uuid}`;
-    console.log('Consultando API en:', apiUrl);
+    // Guardar el UUID directamente sin verificar
+    console.log('Guardando UUID en localStorage:', blog.uuid);
+    localStorage.setItem('activeBlog', blog.uuid);
     
-    const response = await api.get(`/api/blogs/uuid/${blog.uuid}`);
-    console.log('Respuesta de la API:', response.data);
-    
-    if (response.data && response.data.id) {
-      // Guarda solo el UUID del blog en localStorage (clave 'activeBlog')
-      console.log('Guardando UUID en localStorage:', blog.uuid);
-      localStorage.setItem('activeBlog', blog.uuid);
-      
-      // Redirige al dashboard del CMS usando Vue Router
-      console.log('Redirigiendo al dashboard...');
-      router.push({ name: 'dashboard' });
-    } else {
-      console.warn('La API respondió pero no se encontró el blog');
-      throw new Error('Blog no encontrado en la respuesta de la API');
-    }
+    // Redirige al dashboard del CMS usando Vue Router
+    console.log('Redirigiendo al dashboard...');
+    router.push({ name: 'dashboard' });
+  } catch (error) {
+    console.error('Error al seleccionar blog:', error);
+    alert(`Error al seleccionar el blog: ${error.message}. Por favor, inténtalo de nuevo.`);
+  }
   } catch (error) {
     console.error('Error al seleccionar blog:', error);
     console.log('Detalles del error:', {
@@ -178,7 +171,7 @@ onMounted(() => {
       <template #body>
         <tr v-for="blog in blogs" :key="blog.id" class="blog-row">
           <td class="font-semibold">{{ blog.name }}</td>
-          <td>{{ blog.subdomain ? blog.subdomain + '.tudominio.com' : '-' }}</td>
+          <td>{{ blog.subdomain ? blog.subdomain + '.' + (blog.domain || 'taita.blog') : '-' }}</td>
           <td>{{ blog.domain || '-' }}</td>
           <td>{{ blog.plan || '-' }}</td>
           <td class="flex gap-2 justify-end">
