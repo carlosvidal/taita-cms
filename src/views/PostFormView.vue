@@ -33,7 +33,13 @@ const categories = ref([])
 const series = ref([])
 
 const isEditMode = computed(() => {
+  // Comprobar si hay un parámetro id en la ruta (podría ser un id o un uuid)
   return !!route.params.id
+})
+
+// Obtener el UUID del post a editar
+const postUuid = computed(() => {
+  return route.params.id
 })
 
 const postTitle = computed(() => {
@@ -50,11 +56,13 @@ const getFullImageUrl = (path) => {
   return `${apiBaseUrl.value}/${path}`
 }
 
-const fetchPost = async (uuid) => {
+const fetchPost = async () => {
+  if (!isEditMode.value || !postUuid.value) return;
+  
   isLoading.value = true
   try {
-    console.log(`Obteniendo post con UUID: ${uuid}`)
-    const response = await api.get(`/api/posts/uuid/${uuid}`)
+    console.log(`Obteniendo post con UUID: ${postUuid.value}`)
+    const response = await api.get(`/api/posts/uuid/${postUuid.value}`)
 
     // Asegurarse de que todos los campos estén presentes
     post.value = {
@@ -201,8 +209,8 @@ const handleSubmit = async () => {
     // Primero guardar el post sin imagen
     let savedPost;
     if (isEditMode.value) {
-      console.log(`Enviando PUT a /api/posts/uuid/${route.params.id}`);
-      const response = await api.put(`/api/posts/uuid/${route.params.id}`, postData);
+      console.log(`Enviando PUT a /api/posts/uuid/${postUuid.value}`);
+      const response = await api.put(`/api/posts/uuid/${postUuid.value}`, postData);
       console.log('Respuesta del servidor (PUT):', response.data);
       savedPost = response.data;
     } else {
@@ -368,7 +376,7 @@ onMounted(async () => {
 
   // If in edit mode, fetch the post
   if (isEditMode.value) {
-    await fetchPost(route.params.id)
+    await fetchPost()
   }
 })
 
