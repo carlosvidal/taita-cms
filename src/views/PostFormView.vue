@@ -120,19 +120,37 @@ const handleSubmit = async () => {
     // Verificar que hay un blog seleccionado
     const activeBlogUuid = localStorage.getItem('activeBlog');
     if (!activeBlogUuid) {
-      throw new Error('No hay un blog seleccionado. Por favor, seleccione un blog primero.');
+      alert('No hay un blog seleccionado. Serás redirigido a la página de selección de blogs.');
+      router.push('/blogs');
+      return; // Detener la ejecución
     }
     
     console.log('Obteniendo información del blog activo...');
     
     // Primero necesitamos obtener el ID numérico del blog a partir del UUID
-    // El backend requiere blogId como Int, pero en localStorage tenemos el UUID
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-    const blogData = blogResponse.data;
-    console.log('Información del blog obtenida:', blogData);
-    
-    if (!blogData || !blogData.id) {
-      throw new Error('No se pudo obtener el ID numérico del blog');
+    let blogData;
+    try {
+      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+      blogData = blogResponse.data;
+      console.log('Información del blog obtenida:', blogData);
+      
+      if (!blogData || !blogData.id) {
+        alert('No se pudo obtener la información del blog. Serás redirigido a la página de selección de blogs.');
+        router.push('/blogs');
+        return; // Detener la ejecución
+      }
+    } catch (error) {
+      // Si el blog no existe (error 404), limpiar localStorage y redirigir
+      if (error.response && error.response.status === 404) {
+        console.error('El blog seleccionado no existe:', activeBlogUuid);
+        localStorage.removeItem('activeBlog'); // Eliminar el UUID inválido
+        alert('El blog seleccionado no existe. Serás redirigido a la página de selección de blogs.');
+        router.push('/blogs');
+        return; // Detener la ejecución
+      }
+      console.error('Error al obtener información del blog:', error);
+      alert('Error al obtener información del blog. Por favor, inténtalo de nuevo.');
+      return; // Detener la ejecución
     }
     
     // Prepare payload with simplified structure según lo que espera el backend
