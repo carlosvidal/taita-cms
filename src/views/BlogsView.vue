@@ -66,11 +66,24 @@ const handleSave = async (blogData) => {
   }
 }
 
-const selectBlog = (blog) => {
-  // Guarda solo el UUID del blog en localStorage (clave 'activeBlog')
-  localStorage.setItem('activeBlog', blog.uuid);
-  // Redirige al dashboard del CMS usando Vue Router
-  router.push({ name: 'dashboard' });
+const selectBlog = async (blog) => {
+  try {
+    // Verificar que el blog existe antes de guardarlo
+    const response = await api.get(`/api/blogs/uuid/${blog.uuid}`);
+    if (response.data && response.data.id) {
+      // Guarda solo el UUID del blog en localStorage (clave 'activeBlog')
+      localStorage.setItem('activeBlog', blog.uuid);
+      // Redirige al dashboard del CMS usando Vue Router
+      router.push({ name: 'dashboard' });
+    } else {
+      throw new Error('Blog no encontrado');
+    }
+  } catch (error) {
+    console.error('Error al seleccionar blog:', error);
+    alert('No se pudo seleccionar el blog. Por favor, inténtalo de nuevo o selecciona otro blog.');
+    // Recargar la lista de blogs para asegurarse de que están actualizados
+    fetchBlogs();
+  }
 }
 
 const user = computed(() => {

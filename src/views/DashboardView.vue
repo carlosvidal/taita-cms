@@ -99,8 +99,7 @@ import { useRouter } from 'vue-router'
 import ViewLayout from './ViewLayout.vue'
 import StatCard from '@/components/StatCard.vue'
 import api from '@/utils/api'
-import { RefreshCw, AlertTriangle } from 'lucide-vue-next'
-import { File, Tag, Settings, History, Edit, PlusCircle, Trash2 } from 'lucide-vue-next'
+import { RefreshCw, AlertTriangle, FileText, File, Tag, Settings, History, Edit, PlusCircle, Trash2 } from 'lucide-vue-next'
 
 const router = useRouter()
 const isLoading = ref(false)
