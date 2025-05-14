@@ -47,7 +47,7 @@ const postTitle = computed(() => {
 })
 
 const apiBaseUrl = computed(() => {
-  return import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  return api.baseURL || 'http://localhost:3000'
 })
 
 // Función para obtener la URL completa de una imagen
@@ -65,7 +65,7 @@ const fetchPost = async () => {
   isLoading.value = true
   try {
     console.log(`Obteniendo post con UUID: ${postUuid.value}`);
-    console.log('URL completa:', `${api.defaults.baseURL}/api/posts/uuid/${postUuid.value}`);
+    console.log('URL completa:', `${api.baseURL}/api/posts/uuid/${postUuid.value}`);
     
     const response = await api.get(`/api/posts/uuid/${postUuid.value}`);
     console.log('Respuesta completa del servidor:', response);
