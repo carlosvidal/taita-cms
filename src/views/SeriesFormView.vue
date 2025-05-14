@@ -225,7 +225,7 @@ const handleSubmit = async () => {
       }
     }
 
-    router.push('/series');
+    router.push('/cms/series');
 
   } catch (err) {
     console.error('Series error:', err);
@@ -411,7 +411,7 @@ onMounted(async () => {
           <div class="flex flex-wrap items-center justify-between pt-6 border-t border-gray-100">
             <BaseButton
               variant="secondary"
-              @click="router.push('/series')"
+              @click="router.push('/cms/series')"
               class="mb-4 sm:mb-0"
             >
               <span class="flex items-center">

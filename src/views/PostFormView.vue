@@ -340,7 +340,7 @@ const handleSubmit = async () => {
       }
     }
 
-    router.push('/posts');
+    router.push('/cms/posts');
 
   } catch (err) {
     console.error('Post error:', err);
@@ -616,7 +616,7 @@ const checkSlugAvailability = async (slug) => {
 
             <!-- Buttons -->
             <div class="flex gap-3 ml-auto">
-              <BaseButton type="button" variant="secondary" @click="router.push('/posts')" :disabled="isSaving">
+              <BaseButton type="button" variant="secondary" @click="router.push('/cms/posts')" :disabled="isSaving">
                 Cancelar
               </BaseButton>
               <BaseButton type="submit" variant="primary" :disabled="isSaving">

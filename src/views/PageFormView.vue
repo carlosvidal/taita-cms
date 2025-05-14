@@ -262,7 +262,7 @@ const handleSubmit = async () => {
       }
     }
 
-    router.push('/pages');
+    router.push('/cms/pages');
   } catch (err) {
     console.error('Error completo:', err);
     error.value = err.response?.data?.message ||
@@ -365,7 +365,7 @@ const checkSlugAvailability = async (slug) => {
       <div :class="['bg-panel overflow-hidden sm:border sm:border-panel sm:rounded sm:shadow-md']">
         <div class="p-3 sm:p-6 border-b border-panel flex justify-between items-center">
           <h1 class="text-2xl font-bold text-gray-900">{{ pageTitle }}</h1>
-          <BaseButton variant="ghost" size="sm" @click="router.push('/pages')" :disabled="isSaving">
+          <BaseButton variant="ghost" size="sm" @click="router.push('/cms/pages')" :disabled="isSaving">
             <span class="flex items-center whitespace-nowrap">
               <ArrowLeft class="w-4 h-4 mr-2" />
               Volver a páginas
@@ -474,7 +474,7 @@ const checkSlugAvailability = async (slug) => {
 
             <!-- Buttons -->
             <div class="flex gap-3 ml-auto">
-              <BaseButton type="button" variant="secondary" @click="router.push('/pages')" :disabled="isSaving">
+              <BaseButton type="button" variant="secondary" @click="router.push('/cms/pages')" :disabled="isSaving">
                 Cancelar
               </BaseButton>
               <BaseButton type="submit" variant="primary" :disabled="isSaving">
