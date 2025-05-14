@@ -71,7 +71,7 @@ const selectBlog = async (blog) => {
   
   try {
     // Verificar que el blog existe antes de guardarlo
-    const apiUrl = `${api.defaults.baseURL}/api/blogs/uuid/${blog.uuid}`;
+    const apiUrl = `${api.baseURL}/api/blogs/uuid/${blog.uuid}`;
     console.log('Consultando API en:', apiUrl);
     
     const response = await api.get(`/api/blogs/uuid/${blog.uuid}`);

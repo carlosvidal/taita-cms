@@ -50,10 +50,16 @@ apiClient.interceptors.response.use(
   }
 )
 
-export default {
+// Exportar la instancia de apiClient y los métodos
+const api = {
   get: (url) => apiClient.get(url),
   post: (url, data) => apiClient.post(url, data),
   put: (url, data) => apiClient.put(url, data),
   patch: (url, data) => apiClient.patch(url, data),
-  delete: (url) => apiClient.delete(url)
+  delete: (url) => apiClient.delete(url),
+  // Exponer la instancia de Axios y la URL base
+  client: apiClient,
+  baseURL: apiUrl
 }
+
+export default api

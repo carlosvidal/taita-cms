@@ -125,7 +125,7 @@ const verifyActiveBlog = async () => {
   
   try {
     // Mostrar la URL completa para depuración
-    const apiUrl = `${api.defaults.baseURL}/api/blogs/uuid/${activeBlogUuid}`
+    const apiUrl = `${api.baseURL}/api/blogs/uuid/${activeBlogUuid}`
     console.log('Consultando API en:', apiUrl)
     
     // Intentar obtener información del blog para verificar que existe
