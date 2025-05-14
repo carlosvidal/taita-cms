@@ -103,6 +103,11 @@ const resetActiveBlog = () => {
 };
 
 onMounted(() => {
+  // Limpiar automáticamente el localStorage al cargar la página
+  // Esto forzará al usuario a seleccionar un blog válido
+  localStorage.removeItem('activeBlog');
+  console.log('Se ha limpiado la selección de blog automáticamente');
+  
   if (user.value && user.value.id) {
     fetchBlogs();
   }

@@ -130,7 +130,11 @@ const verifyActiveBlog = async () => {
   } catch (error) {
     console.error('Error al verificar el blog activo:', error)
     // El blog no existe o hay un problema con la API
-    blogError.value = true
+    // Limpiar localStorage y redirigir a la página de blogs
+    localStorage.removeItem('activeBlog')
+    console.log('Se ha limpiado la selección de blog debido a un error')
+    alert('El blog seleccionado no existe. Serás redirigido a la página de selección de blogs.')
+    router.push('/blogs')
     return false
   }
 }
