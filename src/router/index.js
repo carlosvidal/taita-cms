@@ -28,6 +28,17 @@ import ResetPassword from '../views/ResetPassword.vue'
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
+    // Rutas protegidas para compatibilidad con URLs antiguas
+    {
+      path: '/posts',
+      component: CmsLayout,
+      meta: { requiresAuth: true },
+      children: [
+        { path: '', redirect: '/cms/posts' },
+        { path: 'new', redirect: '/cms/posts/new' },
+        { path: ':id/edit', redirect: to => `/cms/posts/${to.params.id}/edit` },
+      ],
+    },
     // Layout público para landing, login, signup
     {
       path: '/',
@@ -39,10 +50,6 @@ const router = createRouter({
         { path: 'blogs', name: 'blogs', component: BlogsView },
         { path: 'forgot-password', name: 'forgot-password', component: ForgotPassword },
         { path: 'reset-password', name: 'reset-password', component: ResetPassword },
-        // Rutas adicionales para compatibilidad
-        { path: 'posts', redirect: '/cms/posts' },
-        { path: 'posts/new', redirect: '/cms/posts/new' },
-        { path: 'posts/:id/edit', redirect: to => `/cms/posts/${to.params.id}/edit` },
       ],
     },
     // Layout para SUPER_ADMIN
