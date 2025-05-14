@@ -6,17 +6,19 @@ import { useRouter } from 'vue-router'
 const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
 
 // Determinar la URL de la API basada en el entorno
-let apiUrl = isProduction 
-  ? 'https://taita-api.onrender.com' 
-  : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
+let apiUrl = 'https://taita-api.onrender.com'; // Forzar siempre a usar la URL de producción
 
 console.log(`Ambiente: ${isProduction ? 'Producción' : 'Desarrollo'}, Usando API: ${apiUrl}`);
+console.log('Hostname actual:', window.location.hostname);
 
+// Configuración de Axios con tiempo de espera aumentado
 const apiClient = axios.create({
   baseURL: apiUrl,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 10000, // 10 segundos de timeout
+  withCredentials: true // Incluir cookies en las solicitudes cross-origin
 })
 
 // Interceptor para añadir el token de autenticación a cada solicitud

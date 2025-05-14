@@ -114,6 +114,7 @@ const stats = ref({
 // Verificar si el blog activo existe
 const verifyActiveBlog = async () => {
   const activeBlogUuid = localStorage.getItem('activeBlog')
+  console.log('Verificando blog activo con UUID:', activeBlogUuid)
   
   // Si no hay un blog seleccionado, redirigir a la página de selección de blogs
   if (!activeBlogUuid) {
@@ -123,17 +124,27 @@ const verifyActiveBlog = async () => {
   }
   
   try {
+    // Mostrar la URL completa para depuración
+    const apiUrl = `${api.defaults.baseURL}/api/blogs/uuid/${activeBlogUuid}`
+    console.log('Consultando API en:', apiUrl)
+    
     // Intentar obtener información del blog para verificar que existe
     const response = await api.get(`/api/blogs/uuid/${activeBlogUuid}`)
     console.log('Blog activo verificado:', response.data)
     return true
   } catch (error) {
     console.error('Error al verificar el blog activo:', error)
-    // El blog no existe o hay un problema con la API
+    console.log('Detalles del error:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    })
+    
     // Limpiar localStorage y redirigir a la página de blogs
     localStorage.removeItem('activeBlog')
     console.log('Se ha limpiado la selección de blog debido a un error')
-    alert('El blog seleccionado no existe. Serás redirigido a la página de selección de blogs.')
+    alert(`El blog seleccionado no existe o no se puede acceder. Error: ${error.response?.status || error.message}. Serás redirigido a la página de selección de blogs.`)
     router.push('/blogs')
     return false
   }

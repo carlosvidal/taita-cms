@@ -67,21 +67,41 @@ const handleSave = async (blogData) => {
 }
 
 const selectBlog = async (blog) => {
+  console.log('Intentando seleccionar blog:', blog);
+  
   try {
     // Verificar que el blog existe antes de guardarlo
+    const apiUrl = `${api.defaults.baseURL}/api/blogs/uuid/${blog.uuid}`;
+    console.log('Consultando API en:', apiUrl);
+    
     const response = await api.get(`/api/blogs/uuid/${blog.uuid}`);
+    console.log('Respuesta de la API:', response.data);
+    
     if (response.data && response.data.id) {
       // Guarda solo el UUID del blog en localStorage (clave 'activeBlog')
+      console.log('Guardando UUID en localStorage:', blog.uuid);
       localStorage.setItem('activeBlog', blog.uuid);
+      
       // Redirige al dashboard del CMS usando Vue Router
+      console.log('Redirigiendo al dashboard...');
       router.push({ name: 'dashboard' });
     } else {
-      throw new Error('Blog no encontrado');
+      console.warn('La API respondió pero no se encontró el blog');
+      throw new Error('Blog no encontrado en la respuesta de la API');
     }
   } catch (error) {
     console.error('Error al seleccionar blog:', error);
-    alert('No se pudo seleccionar el blog. Por favor, inténtalo de nuevo o selecciona otro blog.');
+    console.log('Detalles del error:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    
+    alert(`No se pudo seleccionar el blog. Error: ${error.response?.status || error.message}. Por favor, inténtalo de nuevo o selecciona otro blog.`);
+    
     // Recargar la lista de blogs para asegurarse de que están actualizados
+    console.log('Recargando lista de blogs...');
     fetchBlogs();
   }
 }
@@ -105,11 +125,15 @@ const resetActiveBlog = () => {
 onMounted(() => {
   // Limpiar automáticamente el localStorage al cargar la página
   // Esto forzará al usuario a seleccionar un blog válido
+  const oldActiveBlog = localStorage.getItem('activeBlog');
   localStorage.removeItem('activeBlog');
-  console.log('Se ha limpiado la selección de blog automáticamente');
+  console.log('Se ha limpiado la selección de blog automáticamente. Valor anterior:', oldActiveBlog);
   
   if (user.value && user.value.id) {
+    console.log('Usuario autenticado:', user.value);
     fetchBlogs();
+  } else {
+    console.log('No hay usuario autenticado o falta ID');
   }
 })
 </script>
