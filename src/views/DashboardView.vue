@@ -4,6 +4,23 @@
     <template #subtitle>Bienvenido a tu panel de control</template>
     
     <div class="space-y-8">
+      <!-- Advertencia de blog no válido -->
+      <section v-if="blogError" class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <AlertTriangle class="w-5 h-5 text-red-500 mt-0.5 mr-3" />
+          <div>
+            <h3 class="font-medium text-red-800">Error con el blog seleccionado</h3>
+            <p class="text-red-700 mt-1">El blog seleccionado no existe o no se puede acceder. Por favor, selecciona otro blog.</p>
+            <button 
+              @click="router.push('/blogs')" 
+              class="mt-3 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-md transition-colors"
+            >
+              Seleccionar blog
+            </button>
+          </div>
+        </div>
+      </section>
+      
       <!-- Stats Overview -->
       <section>
         <div class="flex items-center justify-between mb-4">
@@ -79,19 +96,45 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import ViewLayout from '@/views/ViewLayout.vue'
+import ViewLayout from './ViewLayout.vue'
 import StatCard from '@/components/StatCard.vue'
 import api from '@/utils/api'
-import { RefreshCw, FileText, File, Tag, Settings, History, Edit, PlusCircle, Trash2 } from 'lucide-vue-next'
+import { RefreshCw, AlertTriangle } from 'lucide-vue-next'
+import { File, Tag, Settings, History, Edit, PlusCircle, Trash2 } from 'lucide-vue-next'
 
 const router = useRouter()
 const isLoading = ref(false)
+const blogError = ref(false)
 
 const stats = ref({
   posts: 0,
   pages: 0,
   categories: 0
 })
+
+// Verificar si el blog activo existe
+const verifyActiveBlog = async () => {
+  const activeBlogUuid = localStorage.getItem('activeBlog')
+  
+  // Si no hay un blog seleccionado, redirigir a la página de selección de blogs
+  if (!activeBlogUuid) {
+    console.log('No hay un blog seleccionado, redirigiendo a la página de blogs')
+    router.push('/blogs')
+    return false
+  }
+  
+  try {
+    // Intentar obtener información del blog para verificar que existe
+    const response = await api.get(`/api/blogs/uuid/${activeBlogUuid}`)
+    console.log('Blog activo verificado:', response.data)
+    return true
+  } catch (error) {
+    console.error('Error al verificar el blog activo:', error)
+    // El blog no existe o hay un problema con la API
+    blogError.value = true
+    return false
+  }
+}
 
 const recentActivity = ref([
   {
@@ -186,7 +229,13 @@ const getIconComponent = (iconName) => {
   return iconMap[iconName] || Edit
 }
 
-onMounted(() => {
-  fetchStats()
+onMounted(async () => {
+  // Verificar si el blog activo existe antes de cargar las estadísticas
+  const blogValid = await verifyActiveBlog()
+  
+  // Solo cargar estadísticas si el blog es válido
+  if (blogValid) {
+    fetchStats()
+  }
 })
 </script>
