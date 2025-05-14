@@ -39,6 +39,10 @@ const router = createRouter({
         { path: 'blogs', name: 'blogs', component: BlogsView },
         { path: 'forgot-password', name: 'forgot-password', component: ForgotPassword },
         { path: 'reset-password', name: 'reset-password', component: ResetPassword },
+        // Rutas adicionales para compatibilidad
+        { path: 'posts', redirect: '/cms/posts' },
+        { path: 'posts/new', redirect: '/cms/posts/new' },
+        { path: 'posts/:id/edit', redirect: to => `/cms/posts/${to.params.id}/edit` },
       ],
     },
     // Layout para SUPER_ADMIN

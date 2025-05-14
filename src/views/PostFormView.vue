@@ -57,12 +57,18 @@ const getFullImageUrl = (path) => {
 }
 
 const fetchPost = async () => {
-  if (!isEditMode.value || !postUuid.value) return;
+  if (!isEditMode.value || !postUuid.value) {
+    console.log('No estamos en modo edición o no hay UUID:', { isEditMode: isEditMode.value, postUuid: postUuid.value });
+    return;
+  }
   
   isLoading.value = true
   try {
-    console.log(`Obteniendo post con UUID: ${postUuid.value}`)
-    const response = await api.get(`/api/posts/uuid/${postUuid.value}`)
+    console.log(`Obteniendo post con UUID: ${postUuid.value}`);
+    console.log('URL completa:', `${api.defaults.baseURL}/api/posts/uuid/${postUuid.value}`);
+    
+    const response = await api.get(`/api/posts/uuid/${postUuid.value}`);
+    console.log('Respuesta completa del servidor:', response);
 
     // Asegurarse de que todos los campos estén presentes
     post.value = {
@@ -90,10 +96,25 @@ const fetchPost = async () => {
 
     console.log('Post cargado:', post.value)
   } catch (err) {
-    console.error('Error al obtener post:', err)
-    error.value = err.response?.data?.message || err.response?.data?.error || err.message || 'Error al cargar el post'
+    console.error('Error al obtener post:', err);
+    console.error('Detalles del error:', {
+      mensaje: err.message,
+      respuesta: err.response?.data,
+      status: err.response?.status,
+      config: err.config
+    });
+    
+    // Si el error es 404, mostrar un mensaje más claro
+    if (err.response?.status === 404) {
+      error.value = `No se encontró el post con UUID: ${postUuid.value}. Por favor, regresa a la lista de posts.`;
+      alert(error.value);
+      router.push('/cms/posts');
+      return;
+    }
+    
+    error.value = err.response?.data?.message || err.response?.data?.error || err.message || 'Error al cargar el post';
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
