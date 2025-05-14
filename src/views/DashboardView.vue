@@ -124,9 +124,8 @@ const verifyActiveBlog = async () => {
   }
   
   try {
-    // Mostrar la URL completa para depuración
-    const apiUrl = `${api.baseURL}/api/blogs/uuid/${activeBlogUuid}`
-    console.log('Consultando API en:', apiUrl)
+    // URL directa sin usar api.baseURL
+    console.log('Consultando blog con UUID:', activeBlogUuid)
     
     // Intentar obtener información del blog para verificar que existe
     const response = await api.get(`/api/blogs/uuid/${activeBlogUuid}`)
@@ -185,13 +184,13 @@ const quickActions = [
     name: 'Gestionar categorías',
     icon: 'tag',
     bgColor: 'bg-panel',
-    action: () => router.push('/categories')
+    action: () => router.push('/cms/categories')
   },
   {
     name: 'Configuración',
     icon: 'settings',
     bgColor: 'bg-panel',
-    action: () => router.push('/settings')
+    action: () => router.push('/cms/settings')
   }
 ]
 

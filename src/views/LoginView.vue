@@ -27,7 +27,7 @@ const handleLogin = async () => {
       name: response.data.user.name,
       role: response.data.user.role
     }));
-    router.push('/dashboard');
+    router.push('/cms/dashboard');
   } catch (error) {
     // ... error handling ...
   }

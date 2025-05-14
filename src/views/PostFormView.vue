@@ -512,7 +512,7 @@ const checkSlugAvailability = async (slug) => {
                   {{ item.title }}
                 </option>
               </select>
-              <button v-if="series.length > 0" type="button" @click="router.push('/series/new')"
+              <button v-if="series.length > 0" type="button" @click="router.push('/cms/series/new')"
                 class="px-3 py-2 bg-panel rounded border border-gray-300 hover:bg-gray-200 text-gray-700"
                 title="Crear nueva serie">
                 <Library class="w-4 h-4" />

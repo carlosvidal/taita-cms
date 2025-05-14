@@ -177,7 +177,7 @@
         <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
           <BaseButton 
             type="button" 
-            @click="router.push('/users')" 
+            @click="router.push('/cms/users')" 
             variant="secondary"
           >
             Cancelar
@@ -306,7 +306,7 @@ const fetchUser = async () => {
     console.log('Usuario cargado:', user.value)
   } catch (error) {
     console.error('Error al cargar usuario:', error)
-    router.push('/users')
+    router.push('/cms/users')
   } finally {
     isLoading.value = false
   }
@@ -488,7 +488,7 @@ const handleSubmit = async () => {
       showSuccess.value = false
       
       // Redirigir a la lista de usuarios
-      router.push('/users')
+      router.push('/cms/users')
     }, 2000)
     
     console.log('Usuario guardado:', userData)

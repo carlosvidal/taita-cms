@@ -13,7 +13,7 @@
         </div>
         
         <BaseButton 
-          @click="router.push('/users/new')" 
+          @click="router.push('/cms/users/new')" 
           variant="primary"
           class="flex items-center gap-2"
         >
@@ -35,7 +35,7 @@
         <h3 class="text-lg font-medium text-gray-700 mb-1">No hay usuarios</h3>
         <p class="text-gray-500 text-sm mb-4">Comienza creando un nuevo usuario</p>
         <BaseButton 
-          @click="router.push('/users/new')" 
+          @click="router.push('/cms/users/new')" 
           variant="primary" 
           size="sm"
         >
