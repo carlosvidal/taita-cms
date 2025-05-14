@@ -80,10 +80,6 @@ const selectBlog = async (blog) => {
     router.push({ name: 'dashboard' });
   } catch (error) {
     console.error('Error al seleccionar blog:', error);
-    alert(`Error al seleccionar el blog: ${error.message}. Por favor, inténtalo de nuevo.`);
-  }
-  } catch (error) {
-    console.error('Error al seleccionar blog:', error);
     console.log('Detalles del error:', {
       status: error.response?.status,
       statusText: error.response?.statusText,
