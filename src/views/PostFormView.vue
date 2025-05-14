@@ -69,7 +69,15 @@ const fetchPost = async (uuid) => {
       categoryId: response.data.category?.id || null,
       // Extraer información de la serie si existe
       seriesId: response.data.series?.id || null,
-      sequenceNumber: response.data.sequenceNumber || null
+      sequenceNumber: response.data.sequenceNumber || null,
+      // Guardar el blogId del post
+      blogId: response.data.blogId || (response.data.blog ? response.data.blog.id : null)
+    }
+    
+    // Si el post tiene un blog asociado, actualizar el blog activo en localStorage
+    if (response.data.blog && response.data.blog.uuid) {
+      console.log('Actualizando blog activo a partir del post:', response.data.blog.uuid);
+      localStorage.setItem('activeBlog', response.data.blog.uuid);
     }
 
     console.log('Post cargado:', post.value)
@@ -117,40 +125,48 @@ const handleSubmit = async () => {
       authorId = authUser.id;
     }
 
-    // Verificar que hay un blog seleccionado
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    if (!activeBlogUuid) {
-      alert('No hay un blog seleccionado. Serás redirigido a la página de selección de blogs.');
-      router.push('/blogs');
-      return; // Detener la ejecución
-    }
-    
-    console.log('Obteniendo información del blog activo...');
-    
-    // Primero necesitamos obtener el ID numérico del blog a partir del UUID
-    let blogData;
-    try {
-      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-      blogData = blogResponse.data;
-      console.log('Información del blog obtenida:', blogData);
+    // Si estamos en modo edición y el post ya tiene un blogId, usamos ese
+    let blogId;
+    if (isEditMode.value && post.value.blogId) {
+      console.log('Usando blogId del post en edición:', post.value.blogId);
+      blogId = post.value.blogId;
+    } else {
+      // Verificar que hay un blog seleccionado
+      const activeBlogUuid = localStorage.getItem('activeBlog');
+      if (!activeBlogUuid) {
+        alert('No hay un blog seleccionado. Serás redirigido a la página de selección de blogs.');
+        router.push('/blogs');
+        return; // Detener la ejecución
+      }
       
-      if (!blogData || !blogData.id) {
-        alert('No se pudo obtener la información del blog. Serás redirigido a la página de selección de blogs.');
-        router.push('/blogs');
+      console.log('Obteniendo información del blog activo...');
+      
+      // Primero necesitamos obtener el ID numérico del blog a partir del UUID
+      try {
+        const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+        const blogData = blogResponse.data;
+        console.log('Información del blog obtenida:', blogData);
+        
+        if (!blogData || !blogData.id) {
+          alert('No se pudo obtener la información del blog. Serás redirigido a la página de selección de blogs.');
+          router.push('/blogs');
+          return; // Detener la ejecución
+        }
+        
+        blogId = blogData.id;
+      } catch (error) {
+        // Si el blog no existe (error 404), limpiar localStorage y redirigir
+        if (error.response && error.response.status === 404) {
+          console.error('El blog seleccionado no existe:', activeBlogUuid);
+          localStorage.removeItem('activeBlog'); // Eliminar el UUID inválido
+          alert('El blog seleccionado no existe. Serás redirigido a la página de selección de blogs.');
+          router.push('/blogs');
+          return; // Detener la ejecución
+        }
+        console.error('Error al obtener información del blog:', error);
+        alert('Error al obtener información del blog. Por favor, inténtalo de nuevo.');
         return; // Detener la ejecución
       }
-    } catch (error) {
-      // Si el blog no existe (error 404), limpiar localStorage y redirigir
-      if (error.response && error.response.status === 404) {
-        console.error('El blog seleccionado no existe:', activeBlogUuid);
-        localStorage.removeItem('activeBlog'); // Eliminar el UUID inválido
-        alert('El blog seleccionado no existe. Serás redirigido a la página de selección de blogs.');
-        router.push('/blogs');
-        return; // Detener la ejecución
-      }
-      console.error('Error al obtener información del blog:', error);
-      alert('Error al obtener información del blog. Por favor, inténtalo de nuevo.');
-      return; // Detener la ejecución
     }
     
     // Prepare payload with simplified structure según lo que espera el backend
@@ -162,7 +178,7 @@ const handleSubmit = async () => {
       // Convertir el status a mayúsculas para que coincida con el enum PublishStatus
       status: (post.value.status === 'published' ? 'PUBLISHED' : 'DRAFT'),
       authorId: authorId, // Usar el ID que determinamos anteriormente
-      blogId: blogData.id // Usar el ID numérico del blog, no el UUID
+      blogId: blogId // Usar el ID numérico del blog que obtuvimos
     };
     
     console.log('Datos del post a enviar:', postData);
