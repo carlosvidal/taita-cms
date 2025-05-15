@@ -455,7 +455,7 @@ const handleSubmit = async () => {
       }
       
       // Actualizar usuario
-      const response = await api.put(`/api/users/uuid/${route.params.uuid}`, updateData)
+      const response = await api.patch(`/api/users/uuid/${route.params.uuid}`, updateData) // Cambiado de PUT a PATCH
       userData = response.data
       
       // Si se ha seleccionado una nueva imagen, subirla

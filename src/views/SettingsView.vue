@@ -289,7 +289,7 @@ const saveSettings = async () => {
     }
 
     // Enviar al servidor
-    await api.put('/api/settings', dataToSend)
+    await api.patch('/api/settings', dataToSend) // Cambiado de PUT a PATCH
 
     // Mostrar mensaje de éxito
     showSuccess.value = true

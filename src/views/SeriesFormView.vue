@@ -133,7 +133,7 @@ const handleSubmit = async () => {
     let savedSeries;
     if (isEditMode.value) {
       console.log(`Enviando PUT a /api/series/uuid/${route.params.uuid}`);
-      const response = await api.put(`/api/series/uuid/${route.params.uuid}`, seriesData);
+      const response = await api.patch(`/api/series/uuid/${route.params.uuid}`, seriesData); // Cambiado de PUT a PATCH
       console.log('Respuesta del servidor (PUT):', response.data);
       savedSeries = response.data;
     } else {
@@ -188,7 +188,7 @@ const handleSubmit = async () => {
           try {
             // Usar fetch nativo para actualizar la serie con la imagen
             const updateResponse = await fetch(`${apiBaseUrl.value}/api/series/uuid/${savedSeries.uuid}`, {
-              method: 'PUT',
+              method: 'PATCH', // Cambiado de PUT a PATCH
               headers: {
                 'Content-Type': 'application/json'
               },
@@ -216,7 +216,7 @@ const handleSubmit = async () => {
     } else if (series.value.removeCoverImage) {
       // Si se solicitó eliminar la imagen
       try {
-        await api.put(`/api/series/uuid/${savedSeries.uuid}`, {
+        await api.patch(`/api/series/uuid/${savedSeries.uuid}`, { // Cambiado de PUT a PATCH
           coverImage: null
         });
         console.log('Imagen eliminada exitosamente');

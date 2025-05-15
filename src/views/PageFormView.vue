@@ -158,7 +158,7 @@ const handleSubmit = async () => {
     let savedPage;
     if (isEditMode.value) {
       console.log(`Enviando PUT a /api/pages/uuid/${route.params.uuid}`);
-      const response = await api.put(`/api/pages/uuid/${route.params.uuid}`, pageData);
+      const response = await api.patch(`/api/pages/uuid/${route.params.uuid}`, pageData); // Cambiado de PUT a PATCH
       console.log('Respuesta del servidor (PUT):', response.data);
       savedPage = response.data;
     } else {
@@ -226,7 +226,7 @@ const handleSubmit = async () => {
 
           try {
             // Actualizar la página con la URL de la imagen
-            const imageUpdateResponse = await api.put(`/api/pages/uuid/${savedPage.uuid}`, imageUpdateData);
+            const imageUpdateResponse = await api.patch(`/api/pages/uuid/${savedPage.uuid}`, imageUpdateData); // Cambiado de PUT a PATCH
             console.log('Respuesta de actualización de página:', imageUpdateResponse);
 
             // Actualizar también el objeto page local para que se muestre la imagen inmediatamente
@@ -253,7 +253,7 @@ const handleSubmit = async () => {
     } else if (page.value.removeImage) {
       // Si se solicitó eliminar la imagen
       try {
-        await api.put(`/api/pages/uuid/${savedPage.uuid}`, {
+        await api.patch(`/api/pages/uuid/${savedPage.uuid}`, { // Cambiado de PUT a PATCH
           removeImage: true
         });
         console.log('Imagen eliminada exitosamente');

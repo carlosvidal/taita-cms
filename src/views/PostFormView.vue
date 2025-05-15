@@ -366,7 +366,7 @@ const handleSubmit = async () => {
     } else if (post.value.removeImage) {
       // Si se solicitó eliminar la imagen
       try {
-        await api.put(`/api/posts/uuid/${savedPost.uuid}`, {
+        await api.patch(`/api/posts/uuid/${savedPost.uuid}`, { // Cambiado de PUT a PATCH
           removeImage: true
         });
         console.log('Imagen eliminada exitosamente');

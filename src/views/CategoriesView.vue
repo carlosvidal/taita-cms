@@ -45,7 +45,7 @@ const handleCreate = () => {
 const handleSave = async (categoryData) => {
   try {
     if (categoryData.id) {
-      await api.put(`/api/categories/${categoryData.id}`, categoryData);
+      await api.patch(`/api/categories/${categoryData.id}`, categoryData); // Cambiado de PUT a PATCH
     } else {
       await api.post('/api/categories', categoryData);
     }
