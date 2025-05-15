@@ -46,15 +46,17 @@ export default {
     }
   },
   methods: {
-    async togglePostStatus(post) {
+    ,async togglePostStatus(post) {
       try {
+        const apiUrl = 'https://taita-api.onrender.com'; // URL completa de la API
         const newStatus = post.status === 'published' ? 'draft' : 'published';
-        const response = await fetch(`/api/posts/${post.uuid}`, {  // Changed from id to uuid
+        const response = await fetch(`${apiUrl}/api/posts/uuid/${post.uuid}`, {
           method: 'PATCH',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
           },
-          body: JSON.stringify({ status: newStatus })
+          body: JSON.stringify({ status: newStatus.toUpperCase() })
         });
         
         if (!response.ok) throw new Error('Update failed');
@@ -62,7 +64,7 @@ export default {
       } catch (error) {
         console.error('Error toggling status:', error);
       }
-    },
+    }
     async fetchPosts() {
       try {
         const response = await fetch('/api/posts?includeDrafts=true');
