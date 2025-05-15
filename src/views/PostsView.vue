@@ -19,9 +19,14 @@ const viewPost = (post) => {
     return
   }
   
+  if (!post.slug) {
+    alert('Este post no tiene un slug válido')
+    return
+  }
+  
   const blogSubdomain = activeBlog.value?.subdomain || 'demo'
   const blogDomain = activeBlog.value?.domain || 'taita.blog'
-  const url = `https://${blogSubdomain}.${blogDomain}/blog/${post.id}`
+  const url = `https://${blogSubdomain}.${blogDomain}/blog/${post.slug}`
   window.open(url, '_blank')
 }
 
