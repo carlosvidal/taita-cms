@@ -5,11 +5,38 @@ import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import api from '@/utils/api'
-import { Plus, FileText, Edit, Trash2 } from 'lucide-vue-next'
+import { Plus, FileText, Edit, Trash2, Eye } from 'lucide-vue-next'
 
 const router = useRouter()
 const posts = ref([])
 const isLoading = ref(false)
+const activeBlog = ref(null)
+
+// Función para ver el post en el frontend
+const viewPost = (post) => {
+  if (post.status?.toUpperCase() !== 'PUBLISHED') {
+    alert('Solo los posts publicados pueden ser visualizados en el frontend')
+    return
+  }
+  
+  const blogSubdomain = activeBlog.value?.subdomain || 'demo'
+  const blogDomain = activeBlog.value?.domain || 'taita.blog'
+  const url = `https://${blogSubdomain}.${blogDomain}/blog/${post.id}`
+  window.open(url, '_blank')
+}
+
+// Obtener el blog activo del localStorage
+const getActiveBlog = async () => {
+  try {
+    const blogUuid = localStorage.getItem('activeBlog')
+    if (blogUuid) {
+      const response = await api.get(`/api/blogs/uuid/${blogUuid}`)
+      activeBlog.value = response.data
+    }
+  } catch (error) {
+    console.error('Error al obtener el blog activo:', error)
+  }
+}
 
 // Función para formatear fechas
 const formatDate = (dateString) => {
@@ -55,6 +82,7 @@ const handleDelete = async (uuid) => {
 }
 
 onMounted(() => {
+  getActiveBlog()
   fetchPosts()
 })
 </script>
@@ -149,6 +177,14 @@ onMounted(() => {
           </td>
           <td>
             <div class="flex gap-2">
+              <button 
+                v-if="post.status?.toUpperCase() === 'PUBLISHED'"
+                @click="() => viewPost(post)" 
+                class="p-1 rounded hover:bg-blue-50 text-blue-600 transition-colors"
+                title="Ver en el frontend"
+              >
+                <Eye class="w-4 h-4" />
+              </button>
               <button 
                 @click="() => router.push(`/cms/posts/${post.uuid}/edit`)" 
                 class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"

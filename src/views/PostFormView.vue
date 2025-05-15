@@ -6,7 +6,7 @@ import TipTapEditor from '@/components/TipTapEditor.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import SlugField from '@/components/SlugField.vue'
 import { transitions, rounded, shadows } from '@/styles/designSystem'
-import { Save, Library } from 'lucide-vue-next'
+import { Save, Library, Eye } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -24,13 +24,16 @@ const post = ref({
   author: '', // Add author field
   categoryId: null, // Add categoryId field
   seriesId: null, // Add seriesId field
-  sequenceNumber: null // Add sequenceNumber field
+  sequenceNumber: null, // Add sequenceNumber field
+  id: null, // Añadir ID para la URL del frontend
+  blogId: null // Añadir blogId para identificar el blog
 })
 
 // Remove the HTML template code from here
 const error = ref('')
 const categories = ref([])
 const series = ref([])
+const activeBlog = ref(null)
 
 const isEditMode = computed(() => {
   // Comprobar si hay un parámetro id en la ruta (podría ser un id o un uuid)
@@ -54,6 +57,32 @@ const apiBaseUrl = computed(() => {
 const getFullImageUrl = (path) => {
   if (!path) return ''
   return `${apiBaseUrl.value}/${path}`
+}
+
+// Función para ver el post en el frontend
+const viewPost = () => {
+  if (post.value.status?.toLowerCase() !== 'published') {
+    alert('Solo los posts publicados pueden ser visualizados en el frontend')
+    return
+  }
+  
+  const blogSubdomain = activeBlog.value?.subdomain || 'demo'
+  const blogDomain = activeBlog.value?.domain || 'taita.blog'
+  const url = `https://${blogSubdomain}.${blogDomain}/blog/${post.value.id}`
+  window.open(url, '_blank')
+}
+
+// Obtener el blog activo del localStorage
+const getActiveBlog = async () => {
+  try {
+    const blogUuid = localStorage.getItem('activeBlog')
+    if (blogUuid) {
+      const response = await api.get(`/api/blogs/uuid/${blogUuid}`)
+      activeBlog.value = response.data
+    }
+  } catch (error) {
+    console.error('Error al obtener el blog activo:', error)
+  }
 }
 
 const fetchPost = async () => {
@@ -616,6 +645,18 @@ const checkSlugAvailability = async (slug) => {
 
             <!-- Buttons -->
             <div class="flex gap-3 ml-auto">
+              <BaseButton 
+                v-if="isEditMode.value && post.status?.toLowerCase() === 'published' && post.id" 
+                type="button" 
+                variant="secondary" 
+                @click="viewPost" 
+                :disabled="isSaving"
+              >
+                <span class="flex items-center whitespace-nowrap">
+                  <Eye class="w-4 h-4 mr-2" />
+                  Ver en el frontend
+                </span>
+              </BaseButton>
               <BaseButton type="button" variant="secondary" @click="router.push('/cms/posts')" :disabled="isSaving">
                 Cancelar
               </BaseButton>
