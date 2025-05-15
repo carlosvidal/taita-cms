@@ -264,11 +264,28 @@ const handleSubmit = async () => {
     // Primero guardar el post sin imagen
     let savedPost;
     if (isEditMode.value) {
-      console.log(`Enviando PATCH a /api/posts/uuid/${postUuid.value}`);
-      // Usar método PATCH en lugar de PUT para actualizaciones parciales
-      const response = await api.patch(`/api/posts/uuid/${postUuid.value}`, postData);
-      console.log('Respuesta del servidor (PATCH):', response.data);
-      savedPost = response.data;
+      // Primero necesitamos obtener el ID numérico del post a partir del UUID
+      console.log(`Obteniendo ID numérico del post con UUID: ${postUuid.value}`);
+      try {
+        // Obtener el post actual para obtener su ID numérico
+        const getResponse = await api.get(`/api/posts/uuid/${postUuid.value}`);
+        const postId = getResponse.data.id;
+        
+        if (!postId) {
+          throw new Error('No se pudo obtener el ID numérico del post');
+        }
+        
+        console.log(`ID numérico del post obtenido: ${postId}`);
+        console.log(`Enviando PATCH a /api/posts/${postId}`);
+        
+        // Ahora sí actualizamos el post usando el ID numérico
+        const response = await api.patch(`/api/posts/${postId}`, postData);
+        console.log('Respuesta del servidor (PATCH):', response.data);
+        savedPost = response.data;
+      } catch (error) {
+        console.error('Error al obtener el ID numérico del post:', error);
+        throw error;
+      }
     } else {
       try {
         console.log('Enviando POST a /api/posts');
@@ -335,8 +352,9 @@ const handleSubmit = async () => {
             console.log('Datos para actualizar post con imagen:', imageUpdateData);
 
             // Usar fetch nativo en lugar de axios para evitar problemas de formato
-            const updateResponse = await fetch(`${apiBaseUrl.value}/api/posts/uuid/${savedPost.uuid}`, {
-              method: 'PATCH', // Cambiar de PUT a PATCH para actualizaciones parciales
+            // Usamos el ID numérico del post en lugar del UUID
+            const updateResponse = await fetch(`${apiBaseUrl.value}/api/posts/${savedPost.id}`, {
+              method: 'PATCH', // Usar PATCH para actualizaciones parciales
               headers: {
                 'Content-Type': 'application/json'
               },
@@ -366,7 +384,7 @@ const handleSubmit = async () => {
     } else if (post.value.removeImage) {
       // Si se solicitó eliminar la imagen
       try {
-        await api.patch(`/api/posts/uuid/${savedPost.uuid}`, { // Cambiado de PUT a PATCH
+        await api.patch(`/api/posts/${savedPost.id}`, { // Usar ID numérico en lugar de UUID
           removeImage: true
         });
         console.log('Imagen eliminada exitosamente');

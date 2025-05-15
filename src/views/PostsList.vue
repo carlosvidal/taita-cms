@@ -46,11 +46,37 @@ export default {
     }
   },
   methods: {
-    ,async togglePostStatus(post) {
+    async togglePostStatus(post) {
       try {
         const apiUrl = 'https://taita-api.onrender.com'; // URL completa de la API
         const newStatus = post.status === 'published' ? 'draft' : 'published';
-        const response = await fetch(`${apiUrl}/api/posts/uuid/${post.uuid}`, {
+        
+        // Primero obtenemos el ID numérico del post a partir del UUID
+        console.log(`Obteniendo ID numérico del post con UUID: ${post.uuid}`);
+        
+        // Obtener el post actual para obtener su ID numérico
+        const getResponse = await fetch(`${apiUrl}/api/posts/uuid/${post.uuid}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+        
+        if (!getResponse.ok) {
+          throw new Error('No se pudo obtener el post');
+        }
+        
+        const postData = await getResponse.json();
+        const postId = postData.id;
+        
+        if (!postId) {
+          throw new Error('No se pudo obtener el ID numérico del post');
+        }
+        
+        console.log(`ID numérico del post obtenido: ${postId}`);
+        console.log(`Enviando PATCH a /api/posts/${postId}`);
+        
+        // Ahora sí actualizamos el estado del post usando el ID numérico
+        const response = await fetch(`${apiUrl}/api/posts/${postId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
