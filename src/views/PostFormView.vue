@@ -264,9 +264,10 @@ const handleSubmit = async () => {
     // Primero guardar el post sin imagen
     let savedPost;
     if (isEditMode.value) {
-      console.log(`Enviando PUT a /api/posts/uuid/${postUuid.value}`);
-      const response = await api.put(`/api/posts/uuid/${postUuid.value}`, postData);
-      console.log('Respuesta del servidor (PUT):', response.data);
+      console.log(`Enviando PATCH a /api/posts/uuid/${postUuid.value}`);
+      // Usar método PATCH en lugar de PUT para actualizaciones parciales
+      const response = await api.patch(`/api/posts/uuid/${postUuid.value}`, postData);
+      console.log('Respuesta del servidor (PATCH):', response.data);
       savedPost = response.data;
     } else {
       try {
@@ -335,7 +336,7 @@ const handleSubmit = async () => {
 
             // Usar fetch nativo en lugar de axios para evitar problemas de formato
             const updateResponse = await fetch(`${apiBaseUrl.value}/api/posts/uuid/${savedPost.uuid}`, {
-              method: 'PUT',
+              method: 'PATCH', // Cambiar de PUT a PATCH para actualizaciones parciales
               headers: {
                 'Content-Type': 'application/json'
               },
