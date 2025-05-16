@@ -23,16 +23,28 @@ const isSaving = ref(false)
 const error = ref('')
 
 const generateSlug = (name) => {
+  if (!name) return '';
   return name
+    .toString()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
+    .normalize('NFD') // Normaliza caracteres acentuados
+    .replace(/[\u0300-\u036f]/g, '') // Elimina los acentos
+    .replace(/[^a-z0-9]+/g, '-') // Reemplaza caracteres no alfanuméricos por guiones
+    .replace(/(^-+|-+$)/g, '') // Elimina guiones al inicio y final
+    .substring(0, 50); // Limita la longitud del slug
 }
 
 const handleNameChange = () => {
+  // Solo generar automáticamente el slug si el campo de slug está vacío
+  // o si el usuario no lo ha modificado manualmente
   if (!formData.value.slug || formData.value.slug === '') {
-    formData.value.slug = generateSlug(formData.value.name)
+    formData.value.slug = generateSlug(formData.value.name);
   }
+}
+
+const handleSlugInput = (event) => {
+  // Aplicar formato al slug mientras el usuario escribe
+  formData.value.slug = generateSlug(event.target.value);
 }
 
 const handleSubmit = () => {
@@ -127,10 +139,12 @@ onMounted(() => {
             <div class="flex rounded border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-gray-500 focus-within:border-gray-500">
               <span class="bg-gray-50 px-3 py-2 text-gray-500 text-sm border-r border-gray-300">/</span>
               <input 
-                v-model="formData.slug" 
+                :value="formData.slug"
+                @input="handleSlugInput"
                 required
                 placeholder="categoria-url"
                 class="flex-1 px-4 py-2 focus:outline-none"
+                @blur="formData.slug = generateSlug(formData.slug)"
               >
             </div>
             <p class="mt-1 text-xs text-gray-500">Este será el URL de la categoría en tu blog</p>

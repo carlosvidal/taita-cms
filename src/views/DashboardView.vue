@@ -206,9 +206,9 @@ const fetchStats = async () => {
     
     // Usar Promise.allSettled en lugar de Promise.all para manejar mejor los errores
     const results = await Promise.allSettled([
-      api.get('/api/posts/count'),
-      api.get('/api/pages/count'),
-      api.get('/api/categories/count')
+      api.get('/api/stats/posts/count'),
+      api.get('/api/stats/pages/count'),
+      api.get('/api/stats/categories/count')
     ])
     
     // Procesar los resultados solo si fueron exitosos

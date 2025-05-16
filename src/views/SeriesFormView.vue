@@ -112,35 +112,50 @@ const handleSubmit = async () => {
     const authUser = JSON.parse(localStorage.getItem('authUser'));
     console.log('Auth user from localStorage:', authUser);
 
-    // Si no hay usuario autenticado, usaremos un ID temporal para pruebas
-    let authorId;
     if (!authUser?.id) {
-      console.log('No hay usuario autenticado, usando ID temporal');
-      authorId = 1; // ID temporal para pruebas
-    } else {
-      authorId = authUser.id;
+      throw new Error('No se pudo obtener la información del usuario autenticado');
     }
+    
+    const authorId = authUser.id;
 
     // Preparar los datos para enviar
     const seriesData = {
       title: series.value.title.trim(),
       description: series.value.description?.trim() || '',
       slug: series.value.slug?.trim() || null,
-      authorId: authorId
+      authorId: parseInt(authorId), // Asegurarse de que sea un número entero
+      coverImage: series.value.coverImage || null
     };
+    
+    console.log('Datos a enviar a la API:', seriesData);
     
     // Guardar la serie
     let savedSeries;
-    if (isEditMode.value) {
-      console.log(`Enviando PUT a /api/series/uuid/${route.params.uuid}`);
-      const response = await api.patch(`/api/series/uuid/${route.params.uuid}`, seriesData); // Cambiado de PUT a PATCH
-      console.log('Respuesta del servidor (PUT):', response.data);
-      savedSeries = response.data;
-    } else {
-      console.log('Enviando POST a /api/series');
-      const response = await api.post('/api/series', seriesData);
-      console.log('Respuesta del servidor (POST):', response.data);
-      savedSeries = response.data;
+    try {
+      if (isEditMode.value) {
+        console.log(`Enviando PATCH a /api/series/uuid/${route.params.uuid}`, seriesData);
+        const response = await api.patch(`/api/series/uuid/${route.params.uuid}`, seriesData);
+        console.log('Respuesta del servidor (PATCH):', response.data);
+        savedSeries = response.data;
+      } else {
+        console.log('Enviando POST a /api/series', seriesData);
+        const response = await api.post('/api/series', seriesData);
+        console.log('Respuesta del servidor (POST):', response.data);
+        savedSeries = response.data;
+      }
+    } catch (err) {
+      console.error('Error al guardar la serie:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        config: {
+          url: err.config?.url,
+          method: err.config?.method,
+          data: err.config?.data
+        }
+      });
+      throw new Error(err.response?.data?.error || err.response?.data?.message || 'Error al guardar la serie');
     }
 
     // Si hay una imagen, subirla después de guardar la serie

@@ -84,6 +84,7 @@ import { ref, computed, onMounted } from 'vue';
 import ViewLayout from './ViewLayout.vue';
 import BaseButton from '@/components/BaseButton.vue';
 import { Check, X, ShieldOff } from 'lucide-vue-next';
+import api from '@/utils/api';
 
 const comments = ref([]);
 const loading = ref(false);
@@ -113,13 +114,15 @@ async function fetchComments() {
   loading.value = true;
   error.value = '';
   try {
-    const res = await fetch('/api/comments?status=' + (filterStatus.value || ''));
-    if (!res.ok) throw new Error('No se pudieron cargar los comentarios');
-    const data = await res.json();
-    // Si la API no incluye el post, puedes hacer un join en el backend o fetch extra aquí
-    comments.value = data;
+    const response = await api.get('/comments', {
+      params: {
+        status: filterStatus.value || ''
+      }
+    });
+    comments.value = response.data;
   } catch (err) {
-    error.value = err.message;
+    console.error('Error al cargar comentarios:', err);
+    error.value = err.response?.data?.error || 'Error al cargar los comentarios';
   } finally {
     loading.value = false;
   }
@@ -129,11 +132,11 @@ async function approveComment(comment) {
   if (!confirm('¿Aprobar este comentario?')) return;
   loading.value = true;
   try {
-    const res = await fetch(`/api/comments/${comment.uuid}/approve`, { method: 'PATCH' });
-    if (!res.ok) throw new Error('No se pudo aprobar el comentario');
+    await api.patch(`/comments/${comment.uuid}/approve`);
     comment.status = 'APPROVED';
   } catch (err) {
-    error.value = err.message;
+    console.error('Error al aprobar comentario:', err);
+    error.value = err.response?.data?.error || 'No se pudo aprobar el comentario';
   } finally {
     loading.value = false;
   }
@@ -143,11 +146,11 @@ async function rejectComment(comment) {
   if (!confirm('¿Rechazar este comentario?')) return;
   loading.value = true;
   try {
-    const res = await fetch(`/api/comments/${comment.uuid}/reject`, { method: 'PATCH' });
-    if (!res.ok) throw new Error('No se pudo rechazar el comentario');
+    await api.patch(`/comments/${comment.uuid}/reject`);
     comment.status = 'REJECTED';
   } catch (err) {
-    error.value = err.message;
+    console.error('Error al rechazar comentario:', err);
+    error.value = err.response?.data?.error || 'No se pudo rechazar el comentario';
   } finally {
     loading.value = false;
   }
@@ -157,11 +160,11 @@ async function spamComment(comment) {
   if (!confirm('¿Marcar este comentario como spam?')) return;
   loading.value = true;
   try {
-    const res = await fetch(`/api/comments/${comment.uuid}/spam`, { method: 'PATCH' });
-    if (!res.ok) throw new Error('No se pudo marcar como spam');
+    await api.patch(`/comments/${comment.uuid}/spam`);
     comment.status = 'SPAM';
   } catch (err) {
-    error.value = err.message;
+    console.error('Error al marcar como spam:', err);
+    error.value = err.response?.data?.error || 'No se pudo marcar como spam';
   } finally {
     loading.value = false;
   }

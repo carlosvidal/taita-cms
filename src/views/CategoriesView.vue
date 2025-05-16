@@ -44,16 +44,33 @@ const handleCreate = () => {
 
 const handleSave = async (categoryData) => {
   try {
-    if (categoryData.id) {
-      await api.patch(`/api/categories/${categoryData.id}`, categoryData); // Cambiado de PUT a PATCH
-    } else {
-      await api.post('/api/categories', categoryData);
+    // Obtener el blog activo del localStorage
+    const activeBlogUuid = localStorage.getItem('activeBlog');
+    if (!activeBlogUuid) {
+      throw new Error('No hay un blog seleccionado');
     }
+
+    // Buscar el blog para obtener el ID
+    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+    const blogId = blogResponse.data.id;
+
+    // Preparar los datos con el blogId
+    const categoryWithBlog = {
+      ...categoryData,
+      blogId: blogId
+    };
+
+    if (categoryData.id) {
+      await api.patch(`/api/categories/${categoryData.id}`, categoryWithBlog);
+    } else {
+      await api.post('/api/categories', categoryWithBlog);
+    }
+    
     await fetchCategories();
     showModal.value = false;
   } catch (err) {
-    error.value = err.response?.data?.message || 'Error saving category';
-    console.error('Save Error:', err.response?.data);
+    error.value = err.response?.data?.error || err.message || 'Error al guardar la categoría';
+    console.error('Save Error:', err.response?.data || err);
   }
 };
 
