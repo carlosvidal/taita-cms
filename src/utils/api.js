@@ -35,23 +35,36 @@ apiClient.interceptors.request.use(config => {
 })
 
 // Interceptor para manejar errores de autenticación
-apiClient.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response && error.response.status === 401) {
-      console.error('[api.js] Error 401 - No autorizado. Headers enviados:', error.config.headers)
-      // Si recibimos un error 401 (no autorizado), redirigimos al login
-      localStorage.removeItem('authToken')
-      // Importar y usar router directamente no funciona bien en interceptores
-      // En su lugar, usamos hash mode para la navegación
-      window.location.href = '/#/login'
+export const setupResponseInterceptors = (router) => {
+  apiClient.interceptors.response.use(
+    response => response,
+    error => {
+      if (error.response) {
+        console.error(`[api.js] Error ${error.response.status} - ${error.response.statusText}`);
+        
+        // Manejar errores de autenticación (401) y permisos (403)
+        if (error.response.status === 401 || error.response.status === 403) {
+          console.error('[api.js] Error de autenticación/permisos. Redirigiendo a login...');
+          
+          // Limpiar datos de autenticación
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('authUser');
+          
+          // Redirigir a login con hash mode
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/#/login';
+          }
+        }
+      }
+      return Promise.reject(error);
     }
-    return Promise.reject(error)
-  }
-)
+  );
+};
 
 // Exportar la instancia de apiClient y los métodos
-const api = {
+export { apiClient };
+
+export const api = {
   get: (url) => apiClient.get(url),
   post: (url, data) => apiClient.post(url, data),
   put: (url, data) => apiClient.put(url, data),
