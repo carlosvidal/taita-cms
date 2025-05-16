@@ -204,23 +204,44 @@ const fetchStats = async () => {
       return
     }
     
-    // Usar Promise.allSettled en lugar de Promise.all para manejar mejor los errores
-    const results = await Promise.allSettled([
-      api.get('/api/stats/posts/count'),
-      api.get('/api/stats/pages/count'),
-      api.get('/api/stats/categories/count')
-    ])
-    
-    // Procesar los resultados solo si fueron exitosos
-    if (results[0].status === 'fulfilled') {
-      stats.value.posts = results[0].value.data.count
+    // Función para cargar los contadores
+    const loadCounts = async () => {
+      try {
+        // Obtener el blog activo
+        const activeBlogUuid = localStorage.getItem('activeBlog');
+        if (!activeBlogUuid) {
+          console.warn('No hay un blog activo seleccionado');
+          return;
+        }
+        
+        // Obtener el ID del blog
+        const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+        const blogId = blogResponse.data?.id;
+        
+        if (!blogId) {
+          console.error('No se pudo obtener el ID del blog activo');
+          return;
+        }
+        
+        // Hacer las peticiones de estadísticas incluyendo el blogId
+        const [postsRes, pagesRes, categoriesRes] = await Promise.all([
+          api.get('/api/stats/posts/count', { params: { blogId } }),
+          api.get('/api/stats/pages/count', { params: { blogId } }),
+          api.get('/api/stats/categories/count', { params: { blogId } })
+        ]);
+
+        stats.value.posts = postsRes.data.count || 0;
+        stats.value.pages = pagesRes.data.count || 0;
+        stats.value.categories = categoriesRes.data.count || 0;
+      } catch (error) {
+        console.error('Error cargando estadísticas:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+      }
     }
-    if (results[1].status === 'fulfilled') {
-      stats.value.pages = results[1].value.data.count
-    }
-    if (results[2].status === 'fulfilled') {
-      stats.value.categories = results[2].value.data.count
-    }
+    await loadCounts();
   } catch (error) {
     console.error('Fetch error:', error)
   } finally {

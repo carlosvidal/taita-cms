@@ -54,16 +54,27 @@ const handleSave = async (categoryData) => {
     const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
     const blogId = blogResponse.data.id;
 
+    // Validar que tengamos un blogId válido
+    if (!blogId) {
+      throw new Error('No se pudo obtener el ID del blog');
+    }
+
     // Preparar los datos con el blogId
     const categoryWithBlog = {
       ...categoryData,
       blogId: blogId
     };
 
+    console.log('Guardando categoría con datos:', categoryWithBlog);
+
     if (categoryData.id) {
-      await api.patch(`/api/categories/${categoryData.id}`, categoryWithBlog);
+      // Actualizar categoría existente
+      const response = await api.patch(`/api/categories/${categoryData.id}`, categoryWithBlog);
+      console.log('Categoría actualizada:', response.data);
     } else {
-      await api.post('/api/categories', categoryWithBlog);
+      // Crear nueva categoría
+      const response = await api.post('/api/categories', categoryWithBlog);
+      console.log('Nueva categoría creada:', response.data);
     }
     
     await fetchCategories();
