@@ -224,17 +224,31 @@ const fetchStats = async () => {
         }
         
         // Hacer las peticiones de estadísticas incluyendo el blogId
-        const [postsRes, pagesRes, categoriesRes] = await Promise.all([
+        const [postsRes, pagesRes, categoriesRes] = await Promise.allSettled([
           api.get('/api/stats/posts/count', { params: { blogId } }),
           api.get('/api/stats/pages/count', { params: { blogId } }),
           api.get('/api/stats/categories/count', { params: { blogId } })
         ]);
 
-        stats.value.posts = postsRes.data.count || 0;
-        stats.value.pages = pagesRes.data.count || 0;
-        stats.value.categories = categoriesRes.data.count || 0;
+        // Procesar cada respuesta individualmente
+        const processResponse = (response, type) => {
+          if (response.status === 'fulfilled') {
+            return response.value.data?.count || 0;
+          } else {
+            console.error(`Error cargando estadísticas de ${type}:`, {
+              message: response.reason?.message,
+              response: response.reason?.response?.data,
+              status: response.reason?.response?.status
+            });
+            return 0; // Valor por defecto en caso de error
+          }
+        };
+
+        stats.value.posts = processResponse(postsRes, 'posts');
+        stats.value.pages = processResponse(pagesRes, 'pages');
+        stats.value.categories = processResponse(categoriesRes, 'categories');
       } catch (error) {
-        console.error('Error cargando estadísticas:', {
+        console.error('Error en loadCounts:', {
           message: error.message,
           response: error.response?.data,
           status: error.response?.status
