@@ -54,24 +54,48 @@ const editingItem = ref(null)
 const isLoading = ref(false)
 const error = ref(null)
 
+// Obtener el blogId de la URL o del estado de la aplicación
+const getCurrentBlogId = () => {
+  // Intenta obtener el blogId de la URL (ej: /blog/1/menu)
+  const pathParts = window.location.pathname.split('/');
+  const blogIdIndex = pathParts.findIndex(part => part === 'blog') + 1;
+  const blogId = pathParts[blogIdIndex];
+  
+  if (blogId && !isNaN(blogId)) {
+    return parseInt(blogId);
+  }
+  
+  // Si no se encuentra en la URL, intenta obtenerlo del localStorage
+  const storedBlogId = localStorage.getItem('currentBlogId');
+  if (storedBlogId) {
+    return parseInt(storedBlogId);
+  }
+  
+  // Si no se encuentra en ningún lado, usa 1 como valor por defecto
+  // NOTA: Deberías manejar este caso según tu lógica de negocio
+  return 1;
+};
+
 const fetchMenuItems = async () => {
-  isLoading.value = true
-  error.value = null
+  isLoading.value = true;
+  error.value = null;
+  const blogId = getCurrentBlogId();
+  
   try {
-    const response = await api.get('/api/menu')
-    menuItems.value = response.data
+    const response = await api.get(`/api/menu?blogId=${blogId}`);
+    menuItems.value = response.data;
   } catch (err) {
     error.value = err.response?.data?.message || 
-                 'Failed to load menu. Server may be unavailable.'
+                 'Failed to load menu. Server may be unavailable.';
     console.error('Menu API Error:', {
       url: err.config?.url,
       status: err.response?.status,
       data: err.response?.data
-    })
+    });
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 const handleSave = async (itemData) => {
   try {
@@ -89,15 +113,20 @@ const handleSave = async (itemData) => {
       throw new Error('URL must start with http://, https:// or /');
     }
 
+    // Obtener el blogId actual
+    const blogId = getCurrentBlogId();
+    
     // Structured payload with all required fields
     const payload = {
       label: itemData.label.trim(),
       url: url,
       order: itemData.order || 0,
+      blogId: blogId, // Incluir el blogId en el payload
       ...(itemData.parentId && { parentId: Number(itemData.parentId) }),
       ...(itemData.icon && { icon: itemData.icon.trim() })
     };
 
+    console.log('Enviando payload al servidor:', payload);
     const response = await api.post('/api/menu', payload);
     await fetchMenuItems();
     showCreateModal.value = false;
@@ -118,23 +147,38 @@ const handleSave = async (itemData) => {
 
 const handleReorder = async (items) => {
   try {
-    await api.patch('/api/menu/reorder', { items })
-    await fetchMenuItems()
+    const blogId = getCurrentBlogId();
+    await api.patch('/api/menu/reorder', { 
+      items,
+      blogId // Incluir blogId en la petición
+    });
+    await fetchMenuItems();
   } catch (error) {
-    console.error('Error reordering menu:', error)
+    console.error('Error reordering menu items:', error);
+    throw error;
   }
 }
 
 const handleEdit = (item) => {
-  editingItem.value = { ...item }
+  // Asegurarse de que el blogId esté incluido al editar
+  editingItem.value = { 
+    ...item,
+    blogId: item.blogId || getCurrentBlogId()
+  };
 }
 
 const handleDelete = async (id) => {
-  try {
-    await api.delete(`/api/menu/${id}`) // Will call http://localhost:3000/api/menu/:id
-    await fetchMenuItems()
-  } catch (error) {
-    console.error('Error deleting menu item:', error)
+  if (confirm('Are you sure you want to delete this menu item?')) {
+    try {
+      const blogId = getCurrentBlogId();
+      // Incluir blogId como parámetro de consulta
+      await api.delete(`/api/menu/${id}?blogId=${blogId}`);
+      await fetchMenuItems();
+    } catch (error) {
+      console.error('Error deleting menu item:', error);
+      // Mostrar mensaje de error al usuario
+      error.value = error.response?.data?.message || 'Failed to delete menu item';
+    }
   }
 }
 
