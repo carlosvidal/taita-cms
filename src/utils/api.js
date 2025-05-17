@@ -15,10 +15,14 @@ console.log('Hostname actual:', window.location.hostname);
 const apiClient = axios.create({
   baseURL: apiUrl,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
   },
   timeout: 10000, // 10 segundos de timeout
-  withCredentials: true // Incluir cookies en las solicitudes cross-origin
+  withCredentials: true, // Incluir cookies en las solicitudes cross-origin
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN'
 })
 
 // Interceptor para añadir el token de autenticación a cada solicitud

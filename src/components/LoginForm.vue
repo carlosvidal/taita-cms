@@ -66,15 +66,29 @@ export default {
       isLoading.value = true
 
       try {
+        // Limpiar cualquier token previo
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+        
+        console.log('Intentando iniciar sesión con:', { email: email.value });
+        
         // Usar la instancia de api configurada
         const response = await api.post('/api/auth/login', {
           email: email.value,
           password: password.value
+        }, {
+          // Asegurarse de que las credenciales se envíen
+          withCredentials: true,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         });
 
-        // Verificar si la respuesta es exitosa (código 2xx)
-        if (response.status >= 200 && response.status < 300) {
-          // Guardar el token JWT y los datos del usuario por separado
+        console.log('Respuesta del servidor:', response);
+        
+        if (response.status === 200 && response.data && response.data.token) {
+          // Guardar el token JWT y los datos del usuario
           localStorage.setItem('authToken', response.data.token);
           localStorage.setItem('authUser', JSON.stringify({
             id: response.data.user.id,
@@ -83,8 +97,10 @@ export default {
             name: response.data.user.name || 'Usuario',
             role: response.data.user.role || 'AUTHOR'
           }));
+          
+          console.log('Usuario autenticado:', response.data.user.email);
         } else {
-          throw new Error(response.data?.error || 'Error de autenticación');
+          throw new Error(response.data?.error || 'Error en la autenticación');
         }
 
         console.log('Usuario autenticado:', JSON.parse(localStorage.getItem('authUser')));
