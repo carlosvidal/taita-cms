@@ -17,72 +17,49 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 10000 // 10 segundos de timeout
+  timeout: 10000, // 10 segundos de timeout
+  withCredentials: true // Incluir cookies en las solicitudes cross-origin
 })
 
 // Interceptor para añadir el token de autenticación a cada solicitud
-apiClient.interceptors.request.use(
-  (config) => {
-    // No añadir el token para las rutas públicas
-    const publicEndpoints = ['/api/auth/login', '/api/auth/register'];
-    if (publicEndpoints.some(endpoint => config.url.endsWith(endpoint))) {
-      return config;
-    }
-    
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      console.log('Añadiendo token a la solicitud:', config.url);
-    } else {
-      console.warn('No se encontró token de autenticación para la solicitud:', config.url);
-    }
-    return config;
-  },
-  (error) => {
-    console.error('Error en la configuración de la solicitud:', error);
-    return Promise.reject(error);
+apiClient.interceptors.request.use(config => {
+  const token = localStorage.getItem('authToken')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+    //console.log('[api.js] Enviando token:', token)
+    //console.log('[api.js] Header Authorization:', config.headers.Authorization)
+  } else {
+    //console.warn('[api.js] No se encontró token en localStorage')
   }
-);
+  return config
+})
 
 // Interceptor para manejar errores de autenticación
-apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (!error.response) {
-      console.error('Error de red o servidor no disponible:', error);
-      return Promise.reject({
-        message: 'No se pudo conectar al servidor. Verifica tu conexión a internet.'
-      });
-    }
-
-    const { status, data } = error.response;
-    
-    // Manejar errores de autenticación
-    if (status === 401 || status === 403) {
-      console.warn('Error de autenticación/permisos:', data);
-      
-      // Solo redirigir si no estamos ya en la página de login
-      if (!window.location.pathname.includes('login')) {
-        // Limpiar datos de autenticación
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('authUser');
+export const setupResponseInterceptors = (router) => {
+  apiClient.interceptors.response.use(
+    response => response,
+    error => {
+      if (error.response) {
+        console.error(`[api.js] Error ${error.response.status} - ${error.response.statusText}`);
         
-        // Redirigir al login con parámetro de sesión expirada
-        const redirectUrl = window.location.pathname.includes('/cms/') 
-          ? '/login?sessionExpired=true' 
-          : '/#/login?sessionExpired=true';
-        
-        window.location.href = redirectUrl;
+        // Manejar errores de autenticación (401) y permisos (403)
+        if (error.response.status === 401 || error.response.status === 403) {
+          console.error('[api.js] Error de autenticación/permisos. Redirigiendo a login...');
+          
+          // Limpiar datos de autenticación
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('authUser');
+          
+          // Redirigir a login con hash mode
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/#/login';
+          }
+        }
       }
+      return Promise.reject(error);
     }
-    
-    // Proporcionar un mensaje de error más descriptivo
-    const errorMessage = data?.error || data?.message || `Error en la solicitud (${status})`;
-    return Promise.reject(new Error(errorMessage));
-  }
-);
+  );
+};
 
 // Exportar la instancia de apiClient y los métodos
 export { apiClient };
