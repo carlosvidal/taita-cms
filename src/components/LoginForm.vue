@@ -74,7 +74,7 @@ export default {
         }
         
         // Usar la instancia de api configurada en api.js
-        const response = await api.post('/auth/login', {
+        const response = await api.post('/api/auth/login', {
           email: email.value.trim(),
           password: password.value
         }).catch(err => {
