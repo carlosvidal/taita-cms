@@ -223,12 +223,16 @@ const fetchStats = async () => {
           return;
         }
         
+        console.log('Obteniendo estadísticas para blogId:', blogId);
+        
         // Hacer las peticiones de estadísticas incluyendo el blogId
         const [postsRes, pagesRes, categoriesRes] = await Promise.allSettled([
-          api.get('/api/stats/posts/count', { params: { blogId } }),
-          api.get('/api/stats/pages/count', { params: { blogId } }),
-          api.get('/api/stats/categories/count', { params: { blogId } })
+          api.get(`/api/stats/posts/count?blogId=${blogId}`),
+          api.get(`/api/stats/pages/count?blogId=${blogId}`),
+          api.get(`/api/stats/categories/count?blogId=${blogId}`)
         ]);
+        
+        console.log('Respuestas de estadísticas:', { postsRes, pagesRes, categoriesRes });
 
         // Procesar cada respuesta individualmente
         const processResponse = (response, type) => {
