@@ -77,6 +77,11 @@ export default {
         const response = await api.post('/api/auth/login', {
           email: email.value.trim(),
           password: password.value
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: false  // Deshabilitar el envío automático de credenciales
         }).catch(err => {
           console.error('Error en la petición de login:', err);
           
