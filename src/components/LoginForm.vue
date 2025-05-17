@@ -66,10 +66,6 @@ export default {
       isLoading.value = true
 
       try {
-        // Limpiar cualquier token previo
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('authUser');
-        
         // Siempre usar la URL de la API en Render.com para producción
         const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
         
@@ -80,37 +76,22 @@ export default {
         
         console.log(`LoginForm: Ambiente: ${isProduction ? 'Producción' : 'Desarrollo'}, Usando API: ${apiUrl}`);
         
-        // Usar fetch directamente para tener más control
         const response = await fetch(`${apiUrl}/api/auth/login`, {
           method: 'POST',
-          credentials: 'include', // Importante para incluir cookies
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email: email.value.trim(),
+            email: email.value,
             password: password.value
           })
         });
 
         const data = await response.json();
-        
-        console.log('Respuesta del servidor:', {
-          status: response.status,
-          statusText: response.statusText,
-          data
-        });
 
         if (!response.ok) {
-          throw new Error(data.error || `Error de autenticación (${response.status})`);
+          throw new Error(data.error || 'Error de autenticación');
         }
 
-        if (!data.token) {
-          throw new Error('No se recibió un token de autenticación');
-        }
-
-        // Guardar el token JWT y los datos del usuario
+        // Guardar el token JWT y los datos del usuario por separado
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('authUser', JSON.stringify({
           id: data.user.id,
