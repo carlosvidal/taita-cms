@@ -15,9 +15,12 @@ console.log('Hostname actual:', window.location.hostname);
 const apiClient = axios.create({
   baseURL: apiUrl,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
   },
-  timeout: 10000 // 10 segundos de timeout
+  timeout: 10000, // 10 segundos de timeout
+  withCredentials: true // Importante para enviar cookies en solicitudes CORS
 })
 
 // Interceptor para añadir el token de autenticación a cada solicitud
