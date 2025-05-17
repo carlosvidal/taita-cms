@@ -66,42 +66,40 @@ export default {
       isLoading.value = true
 
       try {
-        // Limpiar cualquier token previo
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('authUser');
+        // Siempre usar la URL de la API en Render.com para producción
+        const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
         
-        console.log('Intentando iniciar sesión con:', { email: email.value });
+        // Determinar la URL de la API basada en el entorno
+        let apiUrl = isProduction 
+          ? 'https://taita-api.onrender.com' 
+          : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
         
-        // Usar la instancia de api configurada
-        const response = await api.post('/api/auth/login', {
-          email: email.value,
-          password: password.value
-        }, {
-          // Asegurarse de que las credenciales se envíen
-          withCredentials: true,
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
+        console.log(`LoginForm: Ambiente: ${isProduction ? 'Producción' : 'Desarrollo'}, Usando API: ${apiUrl}`);
+        
+        const response = await fetch(`${apiUrl}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email.value,
+            password: password.value
+          })
         });
 
-        console.log('Respuesta del servidor:', response);
-        
-        if (response.status === 200 && response.data && response.data.token) {
-          // Guardar el token JWT y los datos del usuario
-          localStorage.setItem('authToken', response.data.token);
-          localStorage.setItem('authUser', JSON.stringify({
-            id: response.data.user.id,
-            uuid: response.data.user.uuid,
-            email: response.data.user.email,
-            name: response.data.user.name || 'Usuario',
-            role: response.data.user.role || 'AUTHOR'
-          }));
-          
-          console.log('Usuario autenticado:', response.data.user.email);
-        } else {
-          throw new Error(response.data?.error || 'Error en la autenticación');
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Error de autenticación');
         }
+
+        // Guardar el token JWT y los datos del usuario por separado
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('authUser', JSON.stringify({
+          id: data.user.id,
+          uuid: data.user.uuid,
+          email: data.user.email,
+          name: data.user.name || 'Usuario',
+          role: data.user.role || 'AUTHOR'
+        }));
 
         console.log('Usuario autenticado:', JSON.parse(localStorage.getItem('authUser')));
         const user = JSON.parse(localStorage.getItem('authUser'));

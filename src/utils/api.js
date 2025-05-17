@@ -15,14 +15,9 @@ console.log('Hostname actual:', window.location.hostname);
 const apiClient = axios.create({
   baseURL: apiUrl,
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
+    'Content-Type': 'application/json'
   },
-  timeout: 10000, // 10 segundos de timeout
-  withCredentials: true, // Incluir cookies en las solicitudes cross-origin
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN'
+  timeout: 10000 // 10 segundos de timeout
 })
 
 // Interceptor para añadir el token de autenticación a cada solicitud
@@ -46,16 +41,20 @@ export const setupResponseInterceptors = (router) => {
       if (error.response) {
         console.error(`[api.js] Error ${error.response.status} - ${error.response.statusText}`);
         
-        // Manejar errores de autenticación (401) y permisos (403)
-        if (error.response.status === 401 || error.response.status === 403) {
-          console.error('[api.js] Error de autenticación/permisos. Redirigiendo a login...');
+        // Solo manejar errores 401/403 si ya estamos en una ruta protegida
+        const isProtectedRoute = window.location.pathname.includes('/cms/');
+        
+        if ((error.response.status === 401 || error.response.status === 403) && isProtectedRoute) {
+          console.error('[api.js] Error de autenticación/permisos.');
           
-          // Limpiar datos de autenticación
+          // Solo limpiar y redirigir si estamos en una ruta protegida
           localStorage.removeItem('authToken');
           localStorage.removeItem('authUser');
           
-          // Redirigir a login con hash mode
-          if (window.location.pathname !== '/login') {
+          // Usar el router para la navegación en lugar de window.location
+          if (router) {
+            router.push('/login');
+          } else {
             window.location.href = '/#/login';
           }
         }
