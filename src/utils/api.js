@@ -21,48 +21,68 @@ const apiClient = axios.create({
 })
 
 // Interceptor para añadir el token de autenticación a cada solicitud
-apiClient.interceptors.request.use(config => {
-  const token = localStorage.getItem('authToken')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-    //console.log('[api.js] Enviando token:', token)
-    //console.log('[api.js] Header Authorization:', config.headers.Authorization)
-  } else {
-    //console.warn('[api.js] No se encontró token en localStorage')
+apiClient.interceptors.request.use(
+  (config) => {
+    // No añadir el token para las rutas públicas
+    const publicEndpoints = ['/api/auth/login', '/api/auth/register'];
+    if (publicEndpoints.some(endpoint => config.url.endsWith(endpoint))) {
+      return config;
+    }
+    
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log('Añadiendo token a la solicitud:', config.url);
+    } else {
+      console.warn('No se encontró token de autenticación para la solicitud:', config.url);
+    }
+    return config;
+  },
+  (error) => {
+    console.error('Error en la configuración de la solicitud:', error);
+    return Promise.reject(error);
   }
-  return config
-})
+);
 
 // Interceptor para manejar errores de autenticación
-export const setupResponseInterceptors = (router) => {
-  apiClient.interceptors.response.use(
-    response => response,
-    error => {
-      if (error.response) {
-        console.error(`[api.js] Error ${error.response.status} - ${error.response.statusText}`);
-        
-        // Solo manejar errores 401/403 si ya estamos en una ruta protegida
-        const isProtectedRoute = window.location.pathname.includes('/cms/');
-        
-        if ((error.response.status === 401 || error.response.status === 403) && isProtectedRoute) {
-          console.error('[api.js] Error de autenticación/permisos.');
-          
-          // Solo limpiar y redirigir si estamos en una ruta protegida
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('authUser');
-          
-          // Usar el router para la navegación en lugar de window.location
-          if (router) {
-            router.push('/login');
-          } else {
-            window.location.href = '/#/login';
-          }
-        }
-      }
-      return Promise.reject(error);
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (!error.response) {
+      console.error('Error de red o servidor no disponible:', error);
+      return Promise.reject({
+        message: 'No se pudo conectar al servidor. Verifica tu conexión a internet.'
+      });
     }
-  );
-};
+
+    const { status, data } = error.response;
+    
+    // Manejar errores de autenticación
+    if (status === 401 || status === 403) {
+      console.warn('Error de autenticación/permisos:', data);
+      
+      // Solo redirigir si no estamos ya en la página de login
+      if (!window.location.pathname.includes('login')) {
+        // Limpiar datos de autenticación
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+        
+        // Redirigir al login con parámetro de sesión expirada
+        const redirectUrl = window.location.pathname.includes('/cms/') 
+          ? '/login?sessionExpired=true' 
+          : '/#/login?sessionExpired=true';
+        
+        window.location.href = redirectUrl;
+      }
+    }
+    
+    // Proporcionar un mensaje de error más descriptivo
+    const errorMessage = data?.error || data?.message || `Error en la solicitud (${status})`;
+    return Promise.reject(new Error(errorMessage));
+  }
+);
 
 // Exportar la instancia de apiClient y los métodos
 export { apiClient };
