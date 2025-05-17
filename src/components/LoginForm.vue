@@ -66,52 +66,87 @@ export default {
       isLoading.value = true
 
       try {
-        // Siempre usar la URL de la API en Render.com para producción
-        const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+        console.log('Iniciando proceso de login...', { email: email.value });
         
-        // Determinar la URL de la API basada en el entorno
-        let apiUrl = isProduction 
-          ? 'https://taita-api.onrender.com' 
-          : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
+        // Validar campos requeridos
+        if (!email.value || !password.value) {
+          throw new Error('Por favor ingresa tu correo y contraseña');
+        }
         
-        console.log(`LoginForm: Ambiente: ${isProduction ? 'Producción' : 'Desarrollo'}, Usando API: ${apiUrl}`);
-        
-        const response = await fetch(`${apiUrl}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: email.value,
-            password: password.value
-          })
+        // Usar la instancia de api configurada en api.js
+        const response = await api.post('/auth/login', {
+          email: email.value.trim(),
+          password: password.value
+        }).catch(err => {
+          console.error('Error en la petición de login:', err);
+          
+          // Manejar errores de red
+          if (err.code === 'ECONNABORTED') {
+            throw new Error('El servidor está tardando demasiado en responder. Por favor, verifica tu conexión.');
+          }
+          
+          // Manejar errores de respuesta HTTP
+          if (err.response) {
+            console.error('Respuesta del servidor:', err.response.data);
+            
+            if (err.response.status === 401) {
+              throw new Error('Correo o contraseña incorrectos');
+            } else if (err.response.status >= 500) {
+              throw new Error('Error en el servidor. Por favor, inténtalo más tarde.');
+            } else if (err.response.data && err.response.data.error) {
+              throw new Error(err.response.data.error);
+            }
+          }
+          
+          throw new Error('Error de conexión. Por favor, verifica tu conexión a internet.');
         });
 
-        const data = await response.json();
+        const data = response.data;
+        console.log('Respuesta del servidor:', { success: data.success, user: data.user?.email });
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Error de autenticación');
+        if (!data.success) {
+          throw new Error(data.error || 'Error en la autenticación. Por favor, verifica tus credenciales.');
         }
 
-        // Guardar el token JWT y los datos del usuario por separado
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('authUser', JSON.stringify({
-          id: data.user.id,
-          uuid: data.user.uuid,
-          email: data.user.email,
-          name: data.user.name || 'Usuario',
-          role: data.user.role || 'AUTHOR'
-        }));
+        if (!data.token || !data.user) {
+          throw new Error('Respuesta del servidor incompleta. Por favor, intenta nuevamente.');
+        }
 
-        console.log('Usuario autenticado:', JSON.parse(localStorage.getItem('authUser')));
-        const user = JSON.parse(localStorage.getItem('authUser'));
-        if (user.role === 'SUPER_ADMIN') {
-          router.push({ name: 'super-admin-blogs' });
-        } else {
-          router.push({ name: 'dashboard' });
+        try {
+          // Guardar el token JWT y los datos del usuario por separado
+          const userData = {
+            id: data.user.id,
+            uuid: data.user.uuid,
+            email: data.user.email,
+            name: data.user.name || 'Usuario',
+            role: data.user.role || 'AUTHOR'
+          };
+          
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('authUser', JSON.stringify(userData));
+
+          console.log('Usuario autenticado exitosamente:', userData);
+          
+          // Redirigir según el rol
+          const redirectRoute = userData.role === 'SUPER_ADMIN' 
+            ? { name: 'super-admin-blogs' } 
+            : { name: 'dashboard' };
+            
+          console.log('Redirigiendo a:', redirectRoute);
+          router.push(redirectRoute);
+          
+        } catch (storageError) {
+          console.error('Error al guardar los datos de sesión:', storageError);
+          throw new Error('Error al iniciar sesión. Por favor, verifica la configuración de tu navegador.');
         }
 
       } catch (err) {
-        console.error('Login error:', err);
-        error.value = err.message || 'Error al iniciar sesión. Inténtalo de nuevo.';
+        console.error('Error en handleLogin:', {
+          message: err.message,
+          name: err.name,
+          stack: err.stack
+        });
+        error.value = err.message || 'Error inesperado al iniciar sesión. Por favor, inténtalo de nuevo.';
       } finally {
         isLoading.value = false;
       }
