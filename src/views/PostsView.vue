@@ -62,16 +62,61 @@ const formatDate = (dateString) => {
   }).format(date)
 }
 
-const fetchPosts = async () => {
-  isLoading.value = true
+async fetchPosts() {
   try {
-    const response = await api.get('/api/posts')
-    posts.value = response.data
-    console.log('Posts cargados:', posts.value)
+    console.log('Starting fetchPosts...');
+    const activeBlogUuid = localStorage.getItem('activeBlog');
+    console.log('Active blog UUID from localStorage:', activeBlogUuid);
+    
+    if (!activeBlogUuid) {
+      console.error('No hay un blog activo seleccionado');
+      return;
+    }
+
+    console.log('Fetching blog details for UUID:', activeBlogUuid);
+    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+    console.log('Blog response:', blogResponse.data);
+    
+    const blogId = blogResponse.data?.id;
+    console.log('Extracted blog ID:', blogId);
+    
+    if (!blogId) {
+      console.error('No se pudo obtener el ID del blog activo');
+      return;
+    }
+
+    console.log('Preparing to fetch posts with params:', {
+      blogId: blogId,
+      includeDrafts: true
+    });
+    
+    const response = await api.get('/api/posts', {
+      params: {
+        blogId: blogId,
+        includeDrafts: true
+      },
+      paramsSerializer: params => {
+        console.log('Params being serialized:', params);
+        return new URLSearchParams(params).toString();
+      }
+    });
+    
+    console.log('Posts API response:', response);
+    this.posts = response.data;
+    console.log('Posts set in component:', this.posts);
   } catch (error) {
-    console.error('Error fetching posts:', error)
-  } finally {
-    isLoading.value = false
+    console.error('Error in fetchPosts:', {
+      message: error.message,
+      response: error.response?.data,
+      config: {
+        ...error.config,
+        // Remove potentially sensitive data
+        headers: { 
+          ...error.config?.headers,
+          'Authorization': error.config?.headers?.Authorization ? '[REDACTED]' : undefined
+        }
+      }
+    });
   }
 }
 
