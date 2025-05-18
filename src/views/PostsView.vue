@@ -75,11 +75,7 @@ const fetchPosts = async () => {
     }
 
     console.log('Fetching blog details for UUID:', activeBlogUuid);
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`, {
-      headers: {
-        'Cache-Control': 'no-cache'
-      }
-    });
+    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
     console.log('Blog response:', blogResponse.data);
     
     const blogId = blogResponse.data?.id;
@@ -90,25 +86,27 @@ const fetchPosts = async () => {
       return;
     }
 
-    // Get fresh token from localStorage
-    const token = localStorage.getItem('token');
+    // Debug: List all localStorage keys
+    console.log('All localStorage keys:', Object.keys(localStorage));
+    
+    // Get the token from the correct key
+    const token = localStorage.getItem('authToken') || 
+                 localStorage.getItem('token') || 
+                 localStorage.getItem('userToken');
+    
+    console.log('Using token from storage:', token ? 'Token exists' : 'No token found');
+    
     if (!token) {
-      console.error('No se encontró el token de autenticación');
-      // Redirect to login or refresh token
-      router.push('/login');
+      console.error('No se encontró el token de autenticación en localStorage');
+      // Don't redirect, just show an error
       return;
     }
 
-    console.log('Using token:', token ? 'Token exists' : 'No token');
-    
+    console.log('Fetching posts with blogId:', blogId);
     const response = await api.get('/api/posts', {
       params: {
         blogId: blogId,
         includeDrafts: true
-      },
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Cache-Control': 'no-cache'
       }
     });
     
@@ -122,10 +120,9 @@ const fetchPosts = async () => {
       data: error.response?.data
     });
     
+    // Only redirect on 401 if we're sure it's an auth issue
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      router.push('/login');
+      console.log('Authentication error, check token');
     }
   } finally {
     isLoading.value = false;
