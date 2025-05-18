@@ -75,7 +75,11 @@ const fetchPosts = async () => {
     }
 
     console.log('Fetching blog details for UUID:', activeBlogUuid);
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`, {
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
     console.log('Blog response:', blogResponse.data);
     
     const blogId = blogResponse.data?.id;
@@ -86,19 +90,25 @@ const fetchPosts = async () => {
       return;
     }
 
-    console.log('Preparing to fetch posts with params:', {
-      blogId: blogId,
-      includeDrafts: true
-    });
+    // Get fresh token from localStorage
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No se encontró el token de autenticación');
+      // Redirect to login or refresh token
+      router.push('/login');
+      return;
+    }
+
+    console.log('Using token:', token ? 'Token exists' : 'No token');
     
     const response = await api.get('/api/posts', {
       params: {
         blogId: blogId,
         includeDrafts: true
       },
-      paramsSerializer: params => {
-        console.log('Params being serialized:', params);
-        return new URLSearchParams(params).toString();
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Cache-Control': 'no-cache'
       }
     });
     
@@ -108,28 +118,17 @@ const fetchPosts = async () => {
   } catch (error) {
     console.error('Error in fetchPosts:', {
       message: error.message,
-      response: error.response?.data,
-      config: {
-        ...error.config,
-        headers: { 
-          ...error.config?.headers,
-          'Authorization': error.config?.headers?.Authorization ? '[REDACTED]' : undefined
-        }
-      }
+      status: error.response?.status,
+      data: error.response?.data
     });
+    
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('token');
+      router.push('/login');
+    }
   } finally {
     isLoading.value = false;
-  }
-}
-
-const handleDelete = async (uuid) => {
-  if (!confirm('¿Estás seguro de que deseas eliminar este post?')) return
-  
-  try {
-    await api.delete(`/api/posts/uuid/${uuid}`)
-    await fetchPosts()
-  } catch (error) {
-    console.error('Error deleting post:', error)
   }
 }
 
