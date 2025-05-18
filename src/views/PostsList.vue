@@ -37,13 +37,18 @@
 
 <script>
 import BaseButton from '@/components/BaseButton.vue'
+import api from '@/utils/api'
 
 export default {
   components: { BaseButton },
   data() {
     return {
-      isSaving: false
+      isSaving: false,
+      posts: []
     }
+  },
+  mounted() {
+    this.fetchPosts();
   },
   methods: {
     async togglePostStatus(post) {
@@ -93,8 +98,25 @@ export default {
     }
     async fetchPosts() {
       try {
-        const response = await fetch('/api/posts?includeDrafts=true');
-        this.posts = await response.json();
+        // Obtener el blog activo
+        const activeBlogUuid = localStorage.getItem('activeBlog');
+        if (!activeBlogUuid) {
+          console.error('No hay un blog activo seleccionado');
+          return;
+        }
+        
+        // Obtener el ID del blog
+        const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+        const blogId = blogResponse.data?.id;
+        
+        if (!blogId) {
+          console.error('No se pudo obtener el ID del blog activo');
+          return;
+        }
+        
+        // Obtener los posts del blog activo
+        const response = await api.get(`/api/posts?blogId=${blogId}&includeDrafts=true`);
+        this.posts = response.data;
       } catch (error) {
         console.error('Error fetching posts:', error);
       }
