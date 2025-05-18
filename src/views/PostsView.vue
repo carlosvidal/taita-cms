@@ -62,7 +62,8 @@ const formatDate = (dateString) => {
   }).format(date)
 }
 
-async fetchPosts() {
+const fetchPosts = async () => {
+  isLoading.value = true;
   try {
     console.log('Starting fetchPosts...');
     const activeBlogUuid = localStorage.getItem('activeBlog');
@@ -102,21 +103,22 @@ async fetchPosts() {
     });
     
     console.log('Posts API response:', response);
-    this.posts = response.data;
-    console.log('Posts set in component:', this.posts);
+    posts.value = response.data;
+    console.log('Posts set in component:', posts.value);
   } catch (error) {
     console.error('Error in fetchPosts:', {
       message: error.message,
       response: error.response?.data,
       config: {
         ...error.config,
-        // Remove potentially sensitive data
         headers: { 
           ...error.config?.headers,
           'Authorization': error.config?.headers?.Authorization ? '[REDACTED]' : undefined
         }
       }
     });
+  } finally {
+    isLoading.value = false;
   }
 }
 
