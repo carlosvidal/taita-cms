@@ -114,8 +114,14 @@ export default {
           return;
         }
         
-        // Obtener los posts del blog activo
-        const response = await api.get(`/api/posts?blogId=${blogId}&includeDrafts=true`);
+        // Obtener los posts del blog activo usando parámetros de consulta
+        const response = await api.get('/api/posts', {
+          params: {
+            blogId: blogId,
+            includeDrafts: true
+          }
+        });
+        console.log('Posts recibidos:', response.data);
         this.posts = response.data;
       } catch (error) {
         console.error('Error fetching posts:', error);
