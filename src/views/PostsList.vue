@@ -98,33 +98,44 @@ export default {
     }
     async fetchPosts() {
       try {
-        // Obtener el blog activo
+        console.log('Starting fetchPosts...');
         const activeBlogUuid = localStorage.getItem('activeBlog');
+        console.log('Active blog UUID from localStorage:', activeBlogUuid);
+        
         if (!activeBlogUuid) {
           console.error('No hay un blog activo seleccionado');
           return;
         }
-        
-        // Obtener el ID del blog
+    
+        console.log('Fetching blog details for UUID:', activeBlogUuid);
         const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+        console.log('Blog response:', blogResponse.data);
+        
         const blogId = blogResponse.data?.id;
+        console.log('Extracted blog ID:', blogId);
         
         if (!blogId) {
           console.error('No se pudo obtener el ID del blog activo');
           return;
         }
-        
-        // Obtener los posts del blog activo usando parámetros de consulta
+    
+        console.log('Fetching posts for blog ID:', blogId);
         const response = await api.get('/api/posts', {
           params: {
             blogId: blogId,
             includeDrafts: true
           }
         });
-        console.log('Posts recibidos:', response.data);
+        
+        console.log('Posts API response:', response);
         this.posts = response.data;
+        console.log('Posts set in component:', this.posts);
       } catch (error) {
-        console.error('Error fetching posts:', error);
+        console.error('Error in fetchPosts:', {
+          message: error.message,
+          response: error.response?.data,
+          config: error.config
+        });
       }
     }
   }
