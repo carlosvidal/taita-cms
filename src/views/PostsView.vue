@@ -86,44 +86,38 @@ const fetchPosts = async () => {
       return;
     }
 
-    // Debug: List all localStorage keys
-    console.log('All localStorage keys:', Object.keys(localStorage));
-    
-    // Get the token from the correct key
-    const token = localStorage.getItem('authToken') || 
-                 localStorage.getItem('token') || 
-                 localStorage.getItem('userToken');
-    
-    console.log('Using token from storage:', token ? 'Token exists' : 'No token found');
-    
-    if (!token) {
-      console.error('No se encontró el token de autenticación en localStorage');
-      // Don't redirect, just show an error
-      return;
-    }
-
     console.log('Fetching posts with blogId:', blogId);
-    const response = await api.get('/api/posts', {
-      params: {
-        blogId: blogId,
-        includeDrafts: true
+    
+    // Make a direct fetch call to bypass any axios interceptors
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`https://taita-api.onrender.com/api/posts?blogId=${blogId}&includeDrafts=true`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     });
     
-    console.log('Posts API response:', response);
-    posts.value = response.data;
-    console.log('Posts set in component:', posts.value);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Raw API response data:', data);
+    
+    // Make sure we have an array
+    const postsData = Array.isArray(data) ? data : (data.data || []);
+    console.log('Processed posts data:', postsData);
+    
+    // Update the ref
+    posts.value = postsData;
+    console.log('Updated posts ref with', posts.value.length, 'posts');
+    
   } catch (error) {
     console.error('Error in fetchPosts:', {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data
     });
-    
-    // Only redirect on 401 if we're sure it's an auth issue
-    if (error.response?.status === 401) {
-      console.log('Authentication error, check token');
-    }
   } finally {
     isLoading.value = false;
   }
