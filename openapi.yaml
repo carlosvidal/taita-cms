@@ -13,8 +13,10 @@ info:
 servers:
   - url: http://localhost:3000/api
     description: Development server
-  - url: https://api.taita.app/api
+  - url: https://taita-api.onrender.com/api
     description: Production server
+  - url: https://api.taita.app/api
+    description: Production server (legacy)
 
 components:
   securitySchemes:
@@ -463,7 +465,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
-          description: Internal server error
+          $ref: '#/components/responses/ServerError'
 
   /auth/signup:
     post:
@@ -541,6 +543,9 @@ paths:
                     type: boolean
                     example: true
                   token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  authToken:
                     type: string
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                   user:
@@ -682,7 +687,21 @@ paths:
     get:
       tags: [Posts]
       summary: List all posts
+      security:
+        - BearerAuth: []
       parameters:
+        - name: blogId
+          in: query
+          required: true
+          schema:
+            type: integer
+            description: ID of the blog to get posts from
+        - name: includeDrafts
+          in: query
+          schema:
+            type: boolean
+            default: false
+            description: Include draft posts in the results
         - name: status
           in: query
           schema:
@@ -702,6 +721,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
     
     post:
       tags: [Posts]
