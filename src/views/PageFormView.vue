@@ -119,14 +119,39 @@ const handleSubmit = async () => {
       authorId = authUser.id;
     }
 
+    // Obtener el blog activo desde localStorage y la API
+    let blogId = null;
+    const activeBlogUuid = localStorage.getItem('activeBlog');
+    if (!activeBlogUuid) {
+      alert('No hay un blog seleccionado. Serás redirigido a la página de selección de blogs.');
+      router.push('/blogs');
+      return;
+    }
+    try {
+      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+      const blogData = blogResponse.data;
+      if (!blogData || !blogData.id) {
+        alert('No se pudo obtener la información del blog. Serás redirigido a la página de selección de blogs.');
+        router.push('/blogs');
+        return;
+      }
+      blogId = blogData.id;
+    } catch (error) {
+      alert('Error al obtener información del blog. Por favor, inténtalo de nuevo.');
+      router.push('/blogs');
+      return;
+    }
+
     // Preparar datos para enviar
     const pageData = {
       title: page.value.title,
       content: page.value.content,
       excerpt: page.value.excerpt,
       status: page.value.status,
-      authorId: authorId
+      authorId: authorId,
+      blogId: blogId // Campo obligatorio para la relación
     };
+
 
     // Generar un slug único si no se proporciona uno
     if (page.value.slug && page.value.slug.trim() !== '') {
