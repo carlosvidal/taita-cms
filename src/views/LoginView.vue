@@ -1,7 +1,7 @@
 <template>
   <PublicLayout>
-    <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-100">
-      <div class="bg-white px-8 py-10 rounded-2xl shadow-xl max-w-md w-full">
+    <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 transition-colors">
+      <div class="bg-white dark:bg-gray-800 px-8 py-10 rounded-2xl shadow-xl max-w-md w-full transition-colors">
         <LoginForm />
       </div>
     </div>

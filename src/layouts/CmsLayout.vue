@@ -73,6 +73,14 @@
           </li>
         </ul>
         <div class="sidebar-footer">
+          <!-- Dark Mode Toggle -->
+          <div class="dark-mode-section">
+            <label class="dark-mode-label">
+              <span>Tema</span>
+              <DarkModeToggle />
+            </label>
+          </div>
+          
           <a v-if="activeBlogUrl" :href="activeBlogUrl" target="_blank" class="view-blog-button">
             <Eye class="icon" />
             <span>Ver Blog</span>
@@ -96,6 +104,7 @@ import { ref, onMounted, computed } from 'vue';
 import router from '@/router';
 import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database, Eye } from 'lucide-vue-next';
 import api from '@/utils/api';
+import DarkModeToggle from '@/components/DarkModeToggle.vue';
 
 const userRole = ref('');
 const userUuid = ref('');
@@ -157,10 +166,33 @@ function handleLogout() {
   display: flex;
   min-height: 100vh;
 }
+
 .cms-content {
   flex: 1;
   background: #f8fafc;
   padding: 2rem 0;
+  transition: background-color 0.2s ease;
+}
+
+/* Dark mode styles */
+:global(.dark) .cms-content {
+  background: #111827;
+}
+
+/* Dark mode toggle styles */
+.dark-mode-section {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+  font-size: 0.875rem;
+  gap: 8px;
 }
 
 .view-blog-button,
