@@ -224,9 +224,17 @@ const handleSubmit = async () => {
           return entry;
         }));
 
-        // Usar fetch nativo para mayor control sobre la solicitud
+        // Usar fetch nativo con autenticación
+        const token = localStorage.getItem('authToken')
+        if (!token) {
+          throw new Error('Token de autenticación no encontrado')
+        }
+        
         const response = await fetch(`${apiBaseUrl.value}/api/media/upload`, {
           method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
           body: formData
         });
 
