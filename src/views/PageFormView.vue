@@ -250,9 +250,11 @@ const handleSubmit = async () => {
           console.log('Imagen subida exitosamente:', responseData);
 
           // Construir los datos para actualizar la página
+          // La API devuelve {success: true, media: {id, url, variants}}
+          const mediaData = responseData.media || responseData;
           const imageUpdateData = {
-            image: responseData.original || responseData.urls?.original,
-            imageId: responseData.id
+            image: mediaData.url || mediaData.path,
+            imageId: mediaData.id
           };
 
           console.log('Actualizando página con datos de imagen:', imageUpdateData);

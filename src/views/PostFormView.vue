@@ -351,10 +351,11 @@ const handleSubmit = async () => {
 
           try {
             // Crear un objeto con los campos de imagen para la actualización
-            // Ahora el modelo Post tiene campo imageId, igual que Page
+            // La API devuelve {success: true, media: {id, url, variants}}
+            const mediaData = responseData.media || responseData;
             const imageUpdateData = {
-              image: responseData.original || responseData.path,
-              imageId: responseData.id
+              image: mediaData.url || mediaData.path,
+              imageId: mediaData.id
             };
 
             console.log('Datos para actualizar post con imagen:', imageUpdateData);
