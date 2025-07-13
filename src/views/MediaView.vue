@@ -21,7 +21,14 @@ const apiBaseUrl = computed(() => {
 // Función para obtener la URL completa de una imagen
 const getFullImageUrl = (path) => {
   if (!path) return ''
-  return `${apiBaseUrl.value}/${path}`
+  
+  // Si la URL ya es completa (Cloudinary), devolverla tal como está
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
+  
+  // Si es una ruta local, agregar la base URL del API
+  return `${apiBaseUrl.value}${path.startsWith('/') ? '' : '/'}${path}`
 }
 
 // Obtener todas las imágenes
@@ -38,17 +45,23 @@ const fetchMedia = async () => {
     
     // Procesar las URLs para asegurarnos de que sean correctas
     mediaItems.value = mediaData.map(item => {
-      // Asegurarse de que las URLs no sean undefined
-      if (item.urls) {
-        // Verificar si las URLs ya tienen la base URL
-        Object.keys(item.urls).forEach(key => {
-          if (item.urls[key] && !item.urls[key].startsWith('http')) {
-            // Solo añadir la base URL si no la tiene ya
-            console.log(`Corrigiendo URL para ${key}:`, item.urls[key])
-          }
-        })
+      console.log('Processing item:', item)
+      
+      // La nueva API devuelve { url, variants } en lugar de { urls }
+      // Convertir al formato que espera el CMS
+      const processedItem = {
+        ...item,
+        // Crear urls desde el nuevo formato si no existe
+        urls: item.urls || {
+          original: item.url || item.cloudinaryUrl || item.path,
+          small: item.variants?.small || item.url || item.cloudinaryUrl || item.path,
+          medium: item.variants?.medium || item.url || item.cloudinaryUrl || item.path,
+          large: item.variants?.large || item.url || item.cloudinaryUrl || item.path
+        }
       }
-      return item
+      
+      console.log('Processed item:', processedItem)
+      return processedItem
     })
     
     console.log('Media items loaded:', mediaItems.value)
