@@ -359,12 +359,17 @@ const handleSubmit = async () => {
 
             console.log('Datos para actualizar post con imagen:', imageUpdateData);
 
-            // Usar fetch nativo en lugar de axios para evitar problemas de formato
-            // Usamos el ID numérico del post en lugar del UUID
+            // Usar fetch nativo con autenticación
+            const token = localStorage.getItem('authToken')
+            if (!token) {
+              throw new Error('Token de autenticación no encontrado')
+            }
+            
             const updateResponse = await fetch(`${apiBaseUrl.value}/api/posts/${savedPost.id}`, {
               method: 'PATCH', // Usar PATCH para actualizaciones parciales
               headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
               },
               body: JSON.stringify(imageUpdateData)
             });

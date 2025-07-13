@@ -30,9 +30,14 @@ const fetchMedia = async () => {
   error.value = null
   try {
     const response = await api.get('/api/media')
+    console.log('Full response from API:', response.data)
+    
+    // La API devuelve {success: true, data: [...]} así que usamos response.data.data
+    const mediaData = response.data.data || response.data || []
+    console.log('Media data to process:', mediaData)
     
     // Procesar las URLs para asegurarnos de que sean correctas
-    mediaItems.value = response.data.map(item => {
+    mediaItems.value = mediaData.map(item => {
       // Asegurarse de que las URLs no sean undefined
       if (item.urls) {
         // Verificar si las URLs ya tienen la base URL
