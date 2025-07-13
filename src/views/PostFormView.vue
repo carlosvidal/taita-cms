@@ -342,23 +342,25 @@ const handleSubmit = async () => {
         if (responseData) {
           console.log('Imagen subida exitosamente:', responseData);
 
-          // Actualizar el post con la URL de la imagen usando fetch en lugar de axios
-          console.log('Actualizando post con imagen:', {
-            uuid: savedPost.uuid,
-            image: responseData.original || responseData.path,
-            imageId: responseData.id
-          });
-
           try {
             // Crear un objeto con los campos de imagen para la actualización
             // La API devuelve {success: true, media: {id, url, variants}}
             const mediaData = responseData.media || responseData;
+            console.log('Media data extraída:', mediaData);
+            
             const imageUpdateData = {
               image: mediaData.url || mediaData.path,
               imageId: mediaData.id
             };
 
             console.log('Datos para actualizar post con imagen:', imageUpdateData);
+            
+            // Actualizar el post con la URL de la imagen
+            console.log('Actualizando post con imagen:', {
+              uuid: savedPost.uuid,
+              image: imageUpdateData.image,
+              imageId: imageUpdateData.imageId
+            });
 
             // Usar fetch nativo con autenticación
             const token = localStorage.getItem('authToken')
