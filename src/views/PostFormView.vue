@@ -121,7 +121,9 @@ const fetchPost = async () => {
       status: response.data.status?.toLowerCase() === 'published' ? 'published' : 'draft',
       // Manejar la imagen existente si hay una
       existingImage: response.data.image || null,
+      imageId: response.data.imageId || null,
       removeImage: false,
+      imagePreview: null, // No hay preview al cargar
       // Extraer el ID de categoría si existe
       categoryId: response.data.category?.id || null,
       // Extraer información de la serie si existe
@@ -252,7 +254,7 @@ const handleSubmit = async () => {
       authorId: authorId, // Usar el ID que determinamos anteriormente
       blogId: blogId // Usar el ID numérico del blog que obtuvimos
     };
-    
+
     console.log('Datos del post a enviar:', postData);
 
     // Add category if selected
@@ -268,6 +270,18 @@ const handleSubmit = async () => {
         postData.sequenceNumber = parseInt(post.value.sequenceNumber);
       }
       console.log('Agregando serie al post:', { seriesId: post.value.seriesId, sequenceNumber: post.value.sequenceNumber });
+    }
+
+    // Add image data if an existing image is selected from library or if removeImage is true
+    if (post.value.existingImage && !post.value.removeImage && !post.value.featuredImage) {
+      // Imagen seleccionada de la biblioteca (no es un archivo nuevo)
+      postData.image = post.value.existingImage;
+      postData.imageId = post.value.imageId;
+      console.log('Agregando imagen de biblioteca al post:', { image: postData.image, imageId: postData.imageId });
+    } else if (post.value.removeImage) {
+      // Marcar para eliminar la imagen
+      postData.removeImage = true;
+      console.log('Marcando imagen para eliminación');
     }
 
     // Primero guardar el post sin imagen
