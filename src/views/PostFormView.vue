@@ -37,6 +37,8 @@ const post = ref({
 const error = ref('')
 const categories = ref([])
 const series = ref([])
+const tags = ref([])
+const selectedTags = ref([])
 const activeBlog = ref(null)
 
 const isEditMode = computed(() => {
@@ -133,6 +135,12 @@ const fetchPost = async () => {
       blogId: response.data.blogId || (response.data.blog ? response.data.blog.id : null)
     }
     
+    // Cargar los tags del post
+    if (response.data.tags && Array.isArray(response.data.tags)) {
+      selectedTags.value = response.data.tags.map(tag => tag.id);
+      console.log('Tags del post cargados:', selectedTags.value);
+    }
+
     // Si el post tiene un blog asociado, actualizar el blog activo en localStorage
     if (response.data.blog && response.data.blog.uuid) {
       console.log('Actualizando blog activo a partir del post:', response.data.blog.uuid);
@@ -270,6 +278,12 @@ const handleSubmit = async () => {
         postData.sequenceNumber = parseInt(post.value.sequenceNumber);
       }
       console.log('Agregando serie al post:', { seriesId: post.value.seriesId, sequenceNumber: post.value.sequenceNumber });
+    }
+
+    // Add tags if selected
+    if (selectedTags.value && selectedTags.value.length > 0) {
+      postData.tagIds = selectedTags.value;
+      console.log('Agregando tags al post:', selectedTags.value);
     }
 
     // Add image data if an existing image is selected from library or if removeImage is true
@@ -508,6 +522,25 @@ onMounted(async () => {
     series.value = []
   }
 
+  // Load tags
+  try {
+    const activeBlogUuid = localStorage.getItem('activeBlog');
+    let blogId = null;
+    if (activeBlogUuid) {
+      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+      blogId = blogResponse.data.id;
+    }
+
+    const response = await api.get('/api/tags', {
+      params: blogId ? { blogId } : {}
+    });
+    tags.value = response.data
+    console.log('Tags cargados:', tags.value)
+  } catch (error) {
+    console.error('Error al cargar tags:', error)
+    tags.value = []
+  }
+
   // If in edit mode, fetch the post
   if (isEditMode.value) {
     await fetchPost()
@@ -669,6 +702,26 @@ const checkSlugAvailability = async (slug) => {
                 class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200">
               <p class="mt-1 text-xs text-gray-500">Define el orden de este post dentro de la serie.</p>
             </div>
+          </div>
+
+          <!-- Tags Selector -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Tags (opcional)</label>
+            <div class="flex flex-wrap gap-2 p-3 border border-gray-300 rounded min-h-[80px]">
+              <label v-for="tag in tags" :key="tag.id"
+                class="inline-flex items-center px-3 py-1.5 rounded-full border cursor-pointer transition-all duration-200"
+                :class="{
+                  'bg-blue-100 border-blue-500 text-blue-700': selectedTags.includes(tag.id),
+                  'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100': !selectedTags.includes(tag.id)
+                }">
+                <input type="checkbox" :value="tag.id" v-model="selectedTags" class="hidden">
+                <Tag class="w-3 h-3 mr-1.5" />
+                <span class="text-sm">{{ tag.name }}</span>
+              </label>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">
+              Selecciona uno o varios tags para este post. Puedes crear nuevos tags desde el menú Tags.
+            </p>
           </div>
 
           <!-- Slug Input usando el componente SlugField -->

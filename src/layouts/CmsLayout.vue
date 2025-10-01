@@ -29,6 +29,12 @@
             </RouterLink>
           </li>
           <li>
+            <RouterLink to="/cms/tags" class="nav-link">
+              <Tag class="icon" />
+              <span>Tags</span>
+            </RouterLink>
+          </li>
+          <li>
             <RouterLink to="/cms/series" class="nav-link">
               <Library class="icon" />
               <span>Series</span>

@@ -15,6 +15,7 @@ import UsersView from '../views/UsersView.vue'
 import UserFormView from '../views/UserFormView.vue'
 import SeriesView from '../views/SeriesView.vue'
 import SeriesFormView from '../views/SeriesFormView.vue'
+import TagsView from '../views/TagsView.vue'
 import ProfilePictureTestView from '../views/ProfilePictureTestView.vue'
 import CommentsView from '../views/CommentsView.vue'
 import PublicLayout from '../layouts/PublicLayout.vue'
@@ -68,6 +69,7 @@ const router = createRouter({
         { path: 'dashboard', name: 'dashboard', component: DashboardView },
         { path: 'menu', name: 'menu', component: MenuView },
         { path: 'categories', name: 'categories', component: CategoriesView },
+        { path: 'tags', name: 'tags', component: TagsView },
         { path: 'posts', name: 'posts', component: PostsView },
         { path: 'posts/new', name: 'new-post', component: PostFormView, props: true },
         { path: 'posts/:id/edit', name: 'edit-post', component: PostFormView },
