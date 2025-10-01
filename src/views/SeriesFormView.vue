@@ -115,8 +115,20 @@ const handleSubmit = async () => {
     if (!authUser?.id) {
       throw new Error('No se pudo obtener la información del usuario autenticado');
     }
-    
+
     const authorId = authUser.id;
+
+    // Obtener el blog activo del localStorage
+    const activeBlogUuid = localStorage.getItem('activeBlog');
+    if (!activeBlogUuid) {
+      throw new Error('No hay un blog activo seleccionado');
+    }
+
+    // Obtener la información del blog activo
+    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+    const blogId = blogResponse.data.id;
+
+    console.log('Blog activo:', { uuid: activeBlogUuid, id: blogId });
 
     // Preparar los datos para enviar
     const seriesData = {
@@ -124,6 +136,7 @@ const handleSubmit = async () => {
       description: series.value.description?.trim() || '',
       slug: series.value.slug?.trim() || null,
       authorId: parseInt(authorId), // Asegurarse de que sea un número entero
+      blogId: parseInt(blogId), // Agregar blogId
       coverImage: series.value.coverImage || null
     };
     
