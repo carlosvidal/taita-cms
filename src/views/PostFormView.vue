@@ -5,6 +5,7 @@ import api from '@/utils/api'
 import TipTapEditor from '@/components/TipTapEditor.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import SlugField from '@/components/SlugField.vue'
+import MediaLibraryModal from '@/components/MediaLibraryModal.vue'
 import { transitions, rounded, shadows } from '@/styles/designSystem'
 import { Save, Library, Eye } from 'lucide-vue-next'
 
@@ -12,6 +13,7 @@ const route = useRoute()
 const router = useRouter()
 const isLoading = ref(false)
 const isSaving = ref(false)
+const showMediaLibrary = ref(false)
 const post = ref({
   title: '',
   slug: '',
@@ -21,12 +23,14 @@ const post = ref({
   featuredImage: null,
   existingImage: null,
   removeImage: false,
+  imagePreview: null,
   author: '', // Add author field
   categoryId: null, // Add categoryId field
   seriesId: null, // Add seriesId field
   sequenceNumber: null, // Add sequenceNumber field
   id: null, // Añadir ID para la URL del frontend
-  blogId: null // Añadir blogId para identificar el blog
+  blogId: null, // Añadir blogId para identificar el blog
+  imageId: null // Añadir imageId para asociar con media
 })
 
 // Remove the HTML template code from here
@@ -509,6 +513,33 @@ const removeImage = () => {
   post.value.featuredImage = null;
   post.value.removeImage = true;
   post.value.imagePreview = null;
+  post.value.existingImage = null;
+  post.value.imageId = null;
+};
+
+const openMediaLibrary = () => {
+  showMediaLibrary.value = true;
+};
+
+const handleMediaSelect = (mediaItem) => {
+  console.log('Media seleccionada:', mediaItem);
+
+  // Usar la URL de Cloudinary o la URL del path
+  const imageUrl = mediaItem.cloudinaryUrl || mediaItem.url || mediaItem.path;
+
+  post.value.existingImage = imageUrl;
+  post.value.imageId = mediaItem.id;
+  post.value.removeImage = false;
+  post.value.featuredImage = null; // Limpiar el archivo si había uno
+  post.value.imagePreview = null; // Limpiar preview temporal
+
+  showMediaLibrary.value = false;
+};
+
+const handleMediaUploadFromModal = () => {
+  // Cerrar el modal y abrir el selector de archivos
+  showMediaLibrary.value = false;
+  document.getElementById('featuredImage').click();
 };
 
 /**
@@ -657,15 +688,30 @@ const checkSlugAvailability = async (slug) => {
               </div>
             </div>
 
-            <!-- Selector de nueva imagen -->
-            <div v-if="!post.existingImage || post.removeImage || post.imagePreview" class="mt-1 flex items-center">
+            <!-- Botones de selección -->
+            <div class="mt-1 flex flex-wrap items-center gap-3">
+              <!-- Botón de biblioteca de medios -->
+              <button
+                type="button"
+                @click="openMediaLibrary"
+                class="flex items-center gap-2 px-4 py-2 rounded-md bg-panel text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+              >
+                <Library class="w-4 h-4" />
+                Seleccionar de biblioteca
+              </button>
+
+              <!-- Botón de subir nueva -->
               <input type="file" id="featuredImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload"
                 class="sr-only">
               <label for="featuredImage"
-                class="cursor-pointer rounded-md bg-panel py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-panel focus:outline-none focus:ring-2 focus:ring-gray-300">
-                {{ post.existingImage && !post.removeImage ? 'Cambiar imagen' : 'Seleccionar imagen' }}
+                class="cursor-pointer flex items-center gap-2 rounded-md bg-panel py-2 px-4 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Subir nueva imagen
               </label>
-              <span class="ml-4 text-sm text-gray-500" v-if="post.featuredImage">
+
+              <span class="text-sm text-gray-500" v-if="post.featuredImage">
                 {{ post.featuredImage.name }}
               </span>
             </div>
@@ -733,6 +779,15 @@ const checkSlugAvailability = async (slug) => {
         </form>
       </div>
     </template>
+
+    <!-- Media Library Modal -->
+    <MediaLibraryModal
+      :show="showMediaLibrary"
+      :selected-image="post.imageId ? { id: post.imageId } : null"
+      @close="showMediaLibrary = false"
+      @select="handleMediaSelect"
+      @upload="handleMediaUploadFromModal"
+    />
   </div>
 </template>
 
