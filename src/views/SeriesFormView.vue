@@ -5,21 +5,25 @@ import api from '@/utils/api'
 import TipTapEditor from '@/components/TipTapEditor.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import SlugField from '@/components/SlugField.vue'
+import MediaLibraryModal from '@/components/MediaLibraryModal.vue'
 import { transitions, rounded, shadows } from '@/styles/designSystem'
-import { ArrowLeft, Save, Library } from 'lucide-vue-next'
+import { ArrowLeft, Save, Library, Upload } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
 const isLoading = ref(false)
 const isSaving = ref(false)
 const error = ref('')
+const showMediaLibrary = ref(false)
 const series = ref({
   title: '',
   slug: '',
   description: '',
   coverImage: null,
   existingCoverImage: null,
-  removeCoverImage: false
+  removeCoverImage: false,
+  imagePreview: null,
+  imageId: null
 })
 const posts = ref([]) // Posts asociados a la serie
 
@@ -40,19 +44,16 @@ const apiBaseUrl = computed(() => {
 
 // Función para obtener la URL completa de una imagen
 const getFullImageUrl = (path) => {
-  if (!path) {
-    console.log('getFullImageUrl: path es null o undefined')
-    return ''
+  if (!path) return ''
+
+  // Si es una URL de Cloudinary o cualquier URL absoluta, devolverla tal cual
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
   }
-  
-  // Asegurarse de que la ruta no comience con una barra
+
+  // Si es una ruta relativa, construir la URL completa
   const cleanPath = path.startsWith('/') ? path.substring(1) : path
-  
-  // Construir la URL completa
-  const fullUrl = `${apiBaseUrl.value}/${cleanPath}`
-  console.log('getFullImageUrl:', { path, cleanPath, fullUrl })
-  
-  return fullUrl
+  return `${apiBaseUrl.value}/${cleanPath}`
 }
 
 // Cargar datos de la serie si estamos en modo edición
@@ -130,15 +131,20 @@ const handleSubmit = async () => {
 
     console.log('Blog activo:', { uuid: activeBlogUuid, id: blogId });
 
-    // Preparar los datos para enviar
+    // Preparar los datos para enviar (sin coverImage si es un File)
     const seriesData = {
       title: series.value.title.trim(),
       description: series.value.description?.trim() || '',
       slug: series.value.slug?.trim() || null,
       authorId: parseInt(authorId), // Asegurarse de que sea un número entero
-      blogId: parseInt(blogId), // Agregar blogId
-      coverImage: series.value.coverImage || null
+      blogId: parseInt(blogId) // Agregar blogId
+      // coverImage se subirá después si hay un archivo nuevo
     };
+
+    // Solo incluir coverImage si es una URL string (no un File object)
+    if (series.value.existingCoverImage && !(series.value.coverImage instanceof File)) {
+      seriesData.coverImage = series.value.existingCoverImage;
+    }
     
     console.log('Datos a enviar a la API:', seriesData);
     
@@ -326,11 +332,39 @@ const handleImageUpload = (event) => {
     // Guardar la imagen y resetear el flag de eliminar imagen
     series.value.coverImage = file;
     series.value.removeCoverImage = false;
+    series.value.imagePreview = URL.createObjectURL(file);
   };
   img.onerror = () => {
     error.value = 'Error al cargar la imagen';
   };
   img.src = URL.createObjectURL(file);
+};
+
+// Función para abrir el modal de biblioteca de medios
+const openMediaLibrary = () => {
+  showMediaLibrary.value = true;
+};
+
+// Función para manejar la selección de una imagen desde la biblioteca
+const handleMediaSelect = (media) => {
+  console.log('Imagen seleccionada de biblioteca:', media);
+  series.value.existingCoverImage = media.url;
+  series.value.imageId = media.id;
+  series.value.coverImage = null;
+  series.value.removeCoverImage = false;
+  series.value.imagePreview = null;
+  showMediaLibrary.value = false;
+};
+
+// Función para manejar la carga de nueva imagen desde el modal
+const handleMediaUploadFromModal = (media) => {
+  console.log('Nueva imagen subida desde modal:', media);
+  series.value.existingCoverImage = media.url;
+  series.value.imageId = media.id;
+  series.value.coverImage = null;
+  series.value.removeCoverImage = false;
+  series.value.imagePreview = null;
+  showMediaLibrary.value = false;
 };
 
 // Eliminar la imagen
@@ -403,37 +437,45 @@ onMounted(async () => {
 
           <!-- Cover Image Upload -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen de portada (JPG/PNG/WebP, min. 800×600px)</label>
-            
-            <!-- Mostrar imagen existente si hay una -->
-            <div v-if="series.existingCoverImage && !series.removeCoverImage" class="mt-2 mb-3">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen de portada</label>
+
+            <!-- Mostrar preview de imagen existente o temporal -->
+            <div v-if="(series.existingCoverImage || series.imagePreview) && !series.removeCoverImage" class="mt-2 mb-3">
               <div class="relative w-64 h-40 overflow-hidden rounded border border-gray-200">
-                <img :src="getFullImageUrl(series.existingCoverImage)" :alt="`Imagen: ${series.existingCoverImage}`" class="object-cover w-full h-full">
-                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 truncate">
-                  {{ series.existingCoverImage }}
-                </div>
+                <img :src="series.imagePreview || getFullImageUrl(series.existingCoverImage)"
+                  :alt="series.imagePreview ? 'Preview' : `Imagen: ${series.existingCoverImage}`"
+                  class="object-cover w-full h-full">
                 <button @click="removeImage" type="button"
                   class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
                   title="Eliminar imagen">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
+              <div v-if="series.imageId" class="mt-2 text-sm text-gray-500">
+                ID de imagen: {{ series.imageId }}
+              </div>
             </div>
-            
-            <!-- Selector de nueva imagen -->
-            <div v-if="!series.existingCoverImage || series.removeCoverImage" class="mt-1 flex items-center">
-              <input type="file" id="coverImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload" class="sr-only">
-              <label for="coverImage"
-                class="cursor-pointer rounded-md bg-white py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                Seleccionar imagen
+
+            <!-- Botones de selección -->
+            <div v-if="!series.existingCoverImage || series.removeCoverImage" class="mt-1 flex flex-wrap gap-2">
+              <BaseButton type="button" variant="secondary" @click="openMediaLibrary">
+                <Library class="w-4 h-4 mr-2" />
+                Seleccionar de biblioteca
+              </BaseButton>
+
+              <input type="file" id="coverImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload"
+                class="sr-only">
+              <label for="coverImage">
+                <BaseButton type="button" variant="secondary" as="span">
+                  <Upload class="w-4 h-4 mr-2" />
+                  Subir nueva imagen
+                </BaseButton>
               </label>
-              <span class="ml-4 text-sm text-gray-500" v-if="series.coverImage">
-                {{ series.coverImage.name }}
-              </span>
             </div>
-            
+
             <!-- Mensaje si la imagen ha sido marcada para eliminación -->
             <div v-if="series.removeCoverImage && !series.coverImage" class="mt-2 text-sm text-yellow-600">
               La imagen será eliminada al guardar
@@ -502,5 +544,9 @@ onMounted(async () => {
         </div>
       </div>
     </template>
+
+    <!-- Media Library Modal -->
+    <MediaLibraryModal :show="showMediaLibrary" @close="showMediaLibrary = false" @select="handleMediaSelect"
+      @upload="handleMediaUploadFromModal" />
   </div>
 </template>

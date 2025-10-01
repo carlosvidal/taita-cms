@@ -136,7 +136,7 @@ onMounted(() => {
           <td>
             <div class="flex gap-2">
               <button
-                @click="router.push(`/series/${item.uuid}`)"
+                @click="router.push(`/cms/series/${item.uuid}`)"
                 class="text-gray-500 hover:text-gray-700"
                 title="Editar serie"
               >
