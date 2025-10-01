@@ -65,11 +65,11 @@ export const setupResponseInterceptors = (router) => {
 export { apiClient };
 
 export const api = {
-  get: (url) => apiClient.get(url),
-  post: (url, data) => apiClient.post(url, data),
-  put: (url, data) => apiClient.put(url, data),
-  patch: (url, data) => apiClient.patch(url, data),
-  delete: (url) => apiClient.delete(url),
+  get: (url, config) => apiClient.get(url, config),
+  post: (url, data, config) => apiClient.post(url, data, config),
+  put: (url, data, config) => apiClient.put(url, data, config),
+  patch: (url, data, config) => apiClient.patch(url, data, config),
+  delete: (url, config) => apiClient.delete(url, config),
   // Exponer la instancia de Axios y la URL base
   client: apiClient,
   baseURL: apiUrl
