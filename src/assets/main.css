@@ -72,11 +72,6 @@ a:hover {
   }
 }
 
-/* Dark mode transitions */
-.dark {
-  @apply transition-colors duration-200;
-}
-
 /* Card styles */
 .card {
   /* Las variantes como dark: deben ir en el HTML, no en @apply */

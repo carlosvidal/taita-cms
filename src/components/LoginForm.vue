@@ -183,12 +183,6 @@ export default {
   transition: background-color 0.2s, box-shadow 0.2s;
 }
 
-/* Dark mode for card */
-:global(.dark) .login-card {
-  background-color: #1f2937;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
 .login-header {
   text-align: center;
   margin-bottom: 2rem;
@@ -202,20 +196,10 @@ export default {
   transition: color 0.2s;
 }
 
-/* Dark mode for title */
-:global(.dark) .login-title {
-  color: #f9fafb;
-}
-
 .login-subtitle {
   font-size: 0.875rem;
   color: #6b7280;
   transition: color 0.2s;
-}
-
-/* Dark mode for subtitle */
-:global(.dark) .login-subtitle {
-  color: #d1d5db;
 }
 
 .login-form {
@@ -237,11 +221,6 @@ export default {
   transition: color 0.2s;
 }
 
-/* Dark mode for labels */
-:global(.dark) .form-label {
-  color: #d1d5db;
-}
-
 .form-input {
   padding: 0.625rem 0.75rem;
   border: 1px solid #d1d5db;
@@ -252,23 +231,10 @@ export default {
   transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s;
 }
 
-/* Dark mode for inputs */
-:global(.dark) .form-input {
-  background-color: #374151;
-  border-color: #4b5563;
-  color: #f9fafb;
-}
-
 .form-input:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-}
-
-/* Dark mode for input focus */
-:global(.dark) .form-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
 .login-button {
@@ -305,12 +271,6 @@ export default {
   transition: background-color 0.2s, color 0.2s;
 }
 
-/* Dark mode for error message */
-:global(.dark) .error-message {
-  background-color: #7f1d1d;
-  color: #fca5a5;
-}
-
 .loading-spinner {
   display: inline-block;
   width: 1rem;
@@ -331,12 +291,6 @@ export default {
   transition: border-color 0.2s, color 0.2s;
 }
 
-/* Dark mode for test credentials */
-:global(.dark) .test-credentials {
-  border-top-color: #4b5563;
-  color: #9ca3af;
-}
-
 .test-credentials p {
   margin-bottom: 0.5rem;
 }
@@ -349,12 +303,6 @@ export default {
   margin-bottom: 0.25rem;
   font-family: monospace;
   transition: background-color 0.2s, color 0.2s;
-}
-
-/* Dark mode for code blocks */
-:global(.dark) .test-credentials code {
-  background-color: #374151;
-  color: #d1d5db;
 }
 
 @keyframes spin {
