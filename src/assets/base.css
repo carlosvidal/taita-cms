@@ -105,32 +105,6 @@ td {
   border-color: var(--color-table-border) !important;
 }
 
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-1);
-
-    --color-panel: #23272e;
-    --color-card: #181a1b;
-    --color-input-bg: #23272e;
-    --color-input-text: #f5f6fa;
-    --color-input-border: #444;
-    --color-input-placeholder: #b0b3b8;
-    --color-button-bg: #2c3e50;
-    --color-button-text: #fff;
-    --color-table-bg: #23272e;
-    --color-table-border: #333;
-  }
-}
-
 *,
 *::before,
 *::after {

@@ -97,14 +97,6 @@ onMounted(() => {
   --hover-bg: #f3f4f6;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #1a1a1a;
-    --text-color: #f3f3f3;
-    --border-color: #2d2d2d;
-    --hover-bg: #2d2d2d;
-  }
-}
 
 * {
   margin: 0;
