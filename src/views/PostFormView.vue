@@ -56,7 +56,12 @@ const apiBaseUrl = computed(() => {
 // Función para obtener la URL completa de una imagen
 const getFullImageUrl = (path) => {
   if (!path) return ''
-  return `${apiBaseUrl.value}/${path}`
+  // Si la URL ya es absoluta (comienza con http/https), devolverla tal cual
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
+  // Si es una ruta relativa, construir la URL completa
+  return `${apiBaseUrl.value}${path.startsWith('/') ? '' : '/'}${path}`
 }
 
 // Función para ver el post en el frontend
@@ -490,6 +495,8 @@ const handleImageUpload = (event) => {
     // Guardar la imagen y resetear el flag de eliminar imagen
     post.value.featuredImage = file;
     post.value.removeImage = false;
+    // Crear preview temporal
+    post.value.imagePreview = URL.createObjectURL(file);
   };
   img.onerror = () => {
     error.value = 'Error al cargar la imagen';
@@ -501,6 +508,7 @@ const removeImage = () => {
   // Marcar la imagen para eliminación
   post.value.featuredImage = null;
   post.value.removeImage = true;
+  post.value.imagePreview = null;
 };
 
 /**
@@ -626,11 +634,15 @@ const checkSlugAvailability = async (slug) => {
             <label class="block text-sm font-medium text-gray-700 mb-1">Imagen destacada (JPG/PNG/WebP, min.
               800×600px)</label>
 
-            <!-- Mostrar imagen existente si hay una -->
-            <div v-if="post.existingImage && !post.removeImage" class="mt-2 mb-3">
+            <!-- Mostrar imagen existente o preview de nueva imagen -->
+            <div v-if="(post.existingImage && !post.removeImage) || post.imagePreview" class="mt-2 mb-3">
               <div class="relative w-64 h-40 overflow-hidden rounded border border-panel">
-                <img :src="getFullImageUrl(post.existingImage)" alt="Imagen destacada"
-                  class="object-cover w-full h-full">
+                <img
+                  :src="post.imagePreview || getFullImageUrl(post.existingImage)"
+                  alt="Imagen destacada"
+                  class="object-cover w-full h-full"
+                  @error="(e) => { console.error('Error cargando imagen:', e); e.target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect fill=\'%23ddd\' width=\'200\' height=\'200\'/%3E%3Ctext fill=\'%23999\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\'%3EError%3C/text%3E%3C/svg%3E' }"
+                >
                 <button @click="removeImage" type="button"
                   class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
                   title="Eliminar imagen">
@@ -639,16 +651,19 @@ const checkSlugAvailability = async (slug) => {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
+                <div v-if="post.imagePreview" class="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                  Nueva imagen
+                </div>
               </div>
             </div>
 
             <!-- Selector de nueva imagen -->
-            <div v-if="!post.existingImage || post.removeImage" class="mt-1 flex items-center">
+            <div v-if="!post.existingImage || post.removeImage || post.imagePreview" class="mt-1 flex items-center">
               <input type="file" id="featuredImage" accept="image/jpeg,image/png,image/webp" @change="handleImageUpload"
                 class="sr-only">
               <label for="featuredImage"
                 class="cursor-pointer rounded-md bg-panel py-2 px-3 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-panel focus:outline-none focus:ring-2 focus:ring-gray-300">
-                Seleccionar imagen
+                {{ post.existingImage && !post.removeImage ? 'Cambiar imagen' : 'Seleccionar imagen' }}
               </label>
               <span class="ml-4 text-sm text-gray-500" v-if="post.featuredImage">
                 {{ post.featuredImage.name }}
@@ -658,7 +673,7 @@ const checkSlugAvailability = async (slug) => {
             <!-- Mensaje si la imagen ha sido marcada para eliminación -->
             <div v-if="post.removeImage && !post.featuredImage" class="mt-2 text-sm text-yellow-600">
               La imagen será eliminada al guardar
-              <button @click="post.removeImage = false" type="button" class="ml-2 text-blue-600 hover:underline">
+              <button @click="post.removeImage = false; post.imagePreview = null" type="button" class="ml-2 text-blue-600 hover:underline">
                 Cancelar
               </button>
             </div>
