@@ -29,10 +29,33 @@ const fetchCategories = async () => {
     const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
     const blogId = blogResponse.data.id;
 
+    console.log('[CategoriesView] Fetching categories for blogId:', blogId);
+
     // Obtener categorías del blog activo
     const response = await api.get('/api/categories', {
       params: { blogId }
     });
+
+    console.log('[CategoriesView] Response data length:', response.data.length);
+    console.log('[CategoriesView] Category IDs:', response.data.map(c => ({ id: c.id, name: c.name, slug: c.slug })));
+
+    // Verificar si hay duplicados
+    const ids = response.data.map(c => c.id);
+    const uniqueIds = [...new Set(ids)];
+    if (ids.length !== uniqueIds.length) {
+      console.error('[CategoriesView] DUPLICATE IDs DETECTED!');
+      console.log('[CategoriesView] All IDs:', ids);
+      console.log('[CategoriesView] Unique IDs:', uniqueIds);
+    }
+
+    const names = response.data.map(c => c.name);
+    const uniqueNames = [...new Set(names)];
+    if (names.length !== uniqueNames.length) {
+      console.error('[CategoriesView] DUPLICATE NAMES DETECTED!');
+      console.log('[CategoriesView] All names:', names);
+      console.log('[CategoriesView] Unique names:', uniqueNames);
+    }
+
     categories.value = response.data;
   } catch (err) {
     error.value = err.response?.data?.message ||
