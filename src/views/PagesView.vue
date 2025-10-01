@@ -139,8 +139,8 @@ onMounted(fetchPages)
           </td>
           <td>
             <div class="flex gap-2">
-              <button 
-                @click="() => router.push(`/pages/${page.uuid}/edit`)" 
+              <button
+                @click="() => router.push(`/cms/pages/${page.uuid}/edit`)"
                 class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
                 title="Editar"
               >
