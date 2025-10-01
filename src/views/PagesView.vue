@@ -65,7 +65,7 @@ const viewPage = (page) => {
 
   const blogSubdomain = activeBlog.value?.subdomain || 'demo'
   const blogDomain = activeBlog.value?.domain || 'taita.blog'
-  const url = `https://${blogSubdomain}.${blogDomain}/${page.slug}`
+  const url = `https://${blogSubdomain}.${blogDomain}/pages/${page.slug}`
   window.open(url, '_blank')
 }
 
