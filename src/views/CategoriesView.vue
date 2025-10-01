@@ -17,10 +17,25 @@ const fetchCategories = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const response = await api.get('/api/categories'); // Added /api prefix
+    // Obtener el blog activo del localStorage
+    const activeBlogUuid = localStorage.getItem('activeBlog');
+    if (!activeBlogUuid) {
+      console.warn('No hay un blog activo seleccionado');
+      categories.value = [];
+      return;
+    }
+
+    // Buscar el blog para obtener el ID
+    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+    const blogId = blogResponse.data.id;
+
+    // Obtener categorías del blog activo
+    const response = await api.get('/api/categories', {
+      params: { blogId }
+    });
     categories.value = response.data;
   } catch (err) {
-    error.value = err.response?.data?.message || 
+    error.value = err.response?.data?.message ||
                  'Failed to connect to server. Please check your connection and try again.';
     console.error('API Error:', {
       url: err.config?.url,

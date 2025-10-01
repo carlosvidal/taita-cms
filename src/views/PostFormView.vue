@@ -469,7 +469,19 @@ onMounted(async () => {
 
   // Load categories
   try {
-    const response = await api.get('/api/categories')
+    // Obtener el blog activo del localStorage
+    const activeBlogUuid = localStorage.getItem('activeBlog');
+    let blogId = null;
+
+    if (activeBlogUuid) {
+      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+      blogId = blogResponse.data.id;
+    }
+
+    // Cargar categorías del blog activo
+    const response = await api.get('/api/categories', {
+      params: blogId ? { blogId } : {}
+    });
     categories.value = response.data
     console.log('Categorías cargadas:', categories.value)
 
