@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import { Tag, Edit, Trash2 } from 'lucide-vue-next'
+import { Tag, Edit, Trash2, Eye } from 'lucide-vue-next'
+import api from '@/utils/api'
 
 const props = defineProps({
   categories: {
@@ -14,6 +15,34 @@ const emit = defineEmits(['edit', 'delete'])
 const sortedCategories = computed(() => {
   return [...props.categories].sort((a, b) => a.name.localeCompare(b.name))
 })
+
+// Función para ver la categoría en el frontend
+const viewCategory = async (category) => {
+  if (!category.slug) {
+    alert('Esta categoría no tiene un slug válido')
+    return
+  }
+
+  try {
+    // Obtener el blog activo
+    const blogUuid = localStorage.getItem('activeBlog')
+    if (!blogUuid) {
+      alert('No hay un blog activo seleccionado')
+      return
+    }
+
+    const response = await api.get(`/api/blogs/uuid/${blogUuid}`)
+    const activeBlog = response.data
+
+    const blogSubdomain = activeBlog?.subdomain || 'demo'
+    const blogDomain = activeBlog?.domain || 'taita.blog'
+    const url = `https://${blogSubdomain}.${blogDomain}/category/${category.slug}`
+    window.open(url, '_blank')
+  } catch (error) {
+    console.error('Error al obtener información del blog:', error)
+    alert('Error al abrir la categoría en el frontend')
+  }
+}
 </script>
 
 <template>
@@ -46,15 +75,22 @@ const sortedCategories = computed(() => {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <div class="flex space-x-2">
-                <button 
-                  @click="() => emit('edit', category)" 
+                <button
+                  @click="() => viewCategory(category)"
+                  class="p-1 rounded hover:bg-blue-50 text-blue-600 transition-colors"
+                  title="Ver en el frontend"
+                >
+                  <Eye class="w-4 h-4" />
+                </button>
+                <button
+                  @click="() => emit('edit', category)"
                   class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
                   title="Editar"
                 >
                   <Edit class="w-4 h-4" />
                 </button>
-                <button 
-                  @click="() => emit('delete', category.id)" 
+                <button
+                  @click="() => emit('delete', category.id)"
                   class="p-1 rounded hover:bg-red-50 text-red-600 transition-colors"
                   title="Eliminar"
                 >

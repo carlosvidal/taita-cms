@@ -5,11 +5,12 @@ import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import api from '@/utils/api'
-import { Plus, Library, Edit, Trash2 } from 'lucide-vue-next'
+import { Plus, Library, Edit, Trash2, Eye } from 'lucide-vue-next'
 
 const router = useRouter()
 const series = ref([])
 const isLoading = ref(false)
+const activeBlog = ref(null)
 
 // Función para formatear fechas
 const formatDate = (dateString) => {
@@ -30,6 +31,19 @@ const formatDate = (dateString) => {
   }).format(date)
 }
 
+// Obtener el blog activo del localStorage
+const getActiveBlog = async () => {
+  try {
+    const blogUuid = localStorage.getItem('activeBlog')
+    if (blogUuid) {
+      const response = await api.get(`/api/blogs/uuid/${blogUuid}`)
+      activeBlog.value = response.data
+    }
+  } catch (error) {
+    console.error('Error al obtener el blog activo:', error)
+  }
+}
+
 const fetchSeries = async () => {
   isLoading.value = true
   try {
@@ -43,9 +57,22 @@ const fetchSeries = async () => {
   }
 }
 
+// Función para ver la serie en el frontend
+const viewSeries = (item) => {
+  if (!item.slug) {
+    alert('Esta serie no tiene un slug válido')
+    return
+  }
+
+  const blogSubdomain = activeBlog.value?.subdomain || 'demo'
+  const blogDomain = activeBlog.value?.domain || 'taita.blog'
+  const url = `https://${blogSubdomain}.${blogDomain}/series/${item.slug}`
+  window.open(url, '_blank')
+}
+
 const handleDelete = async (uuid) => {
   if (!confirm('¿Estás seguro de que deseas eliminar esta serie? Los posts asociados se desasociarán de la serie.')) return
-  
+
   try {
     await api.delete(`/api/series/uuid/${uuid}`)
     await fetchSeries()
@@ -54,8 +81,9 @@ const handleDelete = async (uuid) => {
   }
 }
 
-onMounted(() => {
-  fetchSeries()
+onMounted(async () => {
+  await getActiveBlog()
+  await fetchSeries()
 })
 </script>
 
@@ -136,15 +164,22 @@ onMounted(() => {
           <td>
             <div class="flex gap-2">
               <button
+                @click="() => viewSeries(item)"
+                class="p-1 rounded hover:bg-blue-50 text-blue-600 transition-colors"
+                title="Ver en el frontend"
+              >
+                <Eye class="w-4 h-4" />
+              </button>
+              <button
                 @click="router.push(`/cms/series/${item.uuid}`)"
-                class="text-gray-500 hover:text-gray-700"
+                class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
                 title="Editar serie"
               >
                 <Edit class="w-4 h-4" />
               </button>
               <button
                 @click="handleDelete(item.uuid)"
-                class="text-gray-500 hover:text-red-600"
+                class="p-1 rounded hover:bg-red-50 text-red-600 transition-colors"
                 title="Eliminar serie"
               >
                 <Trash2 class="w-4 h-4" />
