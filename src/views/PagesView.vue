@@ -5,11 +5,12 @@ import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import api from '@/utils/api'
-import { Plus, FileText, Edit, Trash2 } from 'lucide-vue-next'
+import { Plus, FileText, Edit, Trash2, Eye } from 'lucide-vue-next'
 
 const router = useRouter()
 const pages = ref([])
 const isLoading = ref(false)
+const activeBlog = ref(null)
 
 // Función para formatear fechas
 const formatDate = (dateString) => {
@@ -36,11 +37,36 @@ const fetchPages = async () => {
     const response = await api.get('/api/pages')
     pages.value = response.data
     console.log('Páginas cargadas:', pages.value)
+
+    // Obtener información del blog activo
+    const activeBlogUuid = localStorage.getItem('activeBlog')
+    if (activeBlogUuid) {
+      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`)
+      activeBlog.value = blogResponse.data
+    }
   } catch (error) {
     console.error('Error fetching pages:', error)
   } finally {
     isLoading.value = false
   }
+}
+
+// Función para ver la página en el frontend
+const viewPage = (page) => {
+  if (page.status?.toUpperCase() !== 'PUBLISHED') {
+    alert('Solo las páginas publicadas pueden ser visualizadas en el frontend')
+    return
+  }
+
+  if (!page.slug) {
+    alert('Esta página no tiene un slug válido')
+    return
+  }
+
+  const blogSubdomain = activeBlog.value?.subdomain || 'demo'
+  const blogDomain = activeBlog.value?.domain || 'taita.blog'
+  const url = `https://${blogSubdomain}.${blogDomain}/${page.slug}`
+  window.open(url, '_blank')
 }
 
 const handleDelete = async (uuid) => {
@@ -140,14 +166,22 @@ onMounted(fetchPages)
           <td>
             <div class="flex gap-2">
               <button
+                v-if="page.status === 'PUBLISHED'"
+                @click="() => viewPage(page)"
+                class="p-1 rounded hover:bg-blue-50 text-blue-600 transition-colors"
+                title="Ver en el frontend"
+              >
+                <Eye class="w-4 h-4" />
+              </button>
+              <button
                 @click="() => router.push(`/cms/pages/${page.uuid}/edit`)"
                 class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
                 title="Editar"
               >
                 <Edit class="w-4 h-4" />
               </button>
-              <button 
-                @click="() => handleDelete(page.uuid)" 
+              <button
+                @click="() => handleDelete(page.uuid)"
                 class="p-1 rounded hover:bg-red-50 text-red-600 transition-colors"
                 title="Eliminar"
               >
