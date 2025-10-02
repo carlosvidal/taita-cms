@@ -192,13 +192,13 @@ const getRelativeTime = (date) => {
   if (days > 7) {
     return new Date(date).toLocaleDateString()
   } else if (days > 0) {
-    return `Hace ${days} día${days > 1 ? 's' : ''}`
+    return t('dashboard.daysAgo', { count: days }, days)
   } else if (hours > 0) {
-    return `Hace ${hours} hora${hours > 1 ? 's' : ''}`
+    return t('dashboard.hoursAgo', { count: hours }, hours)
   } else if (minutes > 0) {
-    return `Hace ${minutes} minuto${minutes > 1 ? 's' : ''}`
+    return t('dashboard.minutesAgo', { count: minutes }, minutes)
   } else {
-    return 'Hace un momento'
+    return t('dashboard.justNow')
   }
 }
 
@@ -211,9 +211,10 @@ const fetchRecentActivity = async (blogId) => {
     const postsRes = await api.get(`/api/posts?blogId=${blogId}&limit=3&sort=updatedAt&order=desc`)
     if (postsRes.data && Array.isArray(postsRes.data)) {
       postsRes.data.forEach(post => {
+        const action = post.status === 'PUBLISHED' ? t('dashboard.published') : t('dashboard.updated')
         activities.push({
           icon: post.status === 'PUBLISHED' ? 'edit' : 'file-text',
-          message: `${post.status === 'PUBLISHED' ? 'Publicaste' : 'Actualizaste'} el post "${post.title}"`,
+          message: `${action} ${t('dashboard.thePost')} "${post.title}"`,
           time: getRelativeTime(post.updatedAt || post.createdAt),
           date: new Date(post.updatedAt || post.createdAt)
         })
@@ -226,7 +227,7 @@ const fetchRecentActivity = async (blogId) => {
       pagesRes.data.slice(0, 2).forEach(page => {
         activities.push({
           icon: 'file',
-          message: `Actualizaste la página "${page.title}"`,
+          message: `${t('dashboard.updated')} ${t('dashboard.thePage')} "${page.title}"`,
           time: getRelativeTime(page.updatedAt || page.createdAt),
           date: new Date(page.updatedAt || page.createdAt)
         })
@@ -239,7 +240,7 @@ const fetchRecentActivity = async (blogId) => {
       categoriesRes.data.forEach(category => {
         activities.push({
           icon: 'tag',
-          message: `Creaste la categoría "${category.name}"`,
+          message: `${t('dashboard.created')} ${t('dashboard.theCategory')} "${category.name}"`,
           time: getRelativeTime(category.createdAt),
           date: new Date(category.createdAt)
         })
