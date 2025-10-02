@@ -149,23 +149,7 @@ const verifyActiveBlog = async () => {
   }
 }
 
-const recentActivity = ref([
-  {
-    icon: 'edit',
-    message: 'Editaste el post "Introducción a Vue 3"',
-    time: 'Hace 2 horas'
-  },
-  {
-    icon: 'plus-circle',
-    message: 'Creaste una nueva categoría "Tutoriales"',
-    time: 'Ayer'
-  },
-  {
-    icon: 'trash',
-    message: 'Eliminaste el post "Borrador"',
-    time: 'Hace 2 días'
-  }
-])
+const recentActivity = ref([])
 
 const quickActions = [
   {
@@ -194,6 +178,84 @@ const quickActions = [
   }
 ]
 
+// Función para formatear tiempo relativo
+const getRelativeTime = (date) => {
+  const now = new Date()
+  const diff = now - new Date(date)
+  const seconds = Math.floor(diff / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  if (days > 7) {
+    return new Date(date).toLocaleDateString()
+  } else if (days > 0) {
+    return `Hace ${days} día${days > 1 ? 's' : ''}`
+  } else if (hours > 0) {
+    return `Hace ${hours} hora${hours > 1 ? 's' : ''}`
+  } else if (minutes > 0) {
+    return `Hace ${minutes} minuto${minutes > 1 ? 's' : ''}`
+  } else {
+    return 'Hace un momento'
+  }
+}
+
+// Función para cargar actividad reciente
+const fetchRecentActivity = async (blogId) => {
+  try {
+    const activities = []
+
+    // Obtener últimos 3 posts
+    const postsRes = await api.get(`/api/posts?blogId=${blogId}&limit=3&sort=updatedAt&order=desc`)
+    if (postsRes.data && Array.isArray(postsRes.data)) {
+      postsRes.data.forEach(post => {
+        activities.push({
+          icon: post.status === 'PUBLISHED' ? 'edit' : 'file-text',
+          message: `${post.status === 'PUBLISHED' ? 'Publicaste' : 'Actualizaste'} el post "${post.title}"`,
+          time: getRelativeTime(post.updatedAt || post.createdAt),
+          date: new Date(post.updatedAt || post.createdAt)
+        })
+      })
+    }
+
+    // Obtener últimas 2 páginas
+    const pagesRes = await api.get(`/api/cms-pages?blogId=${blogId}&limit=2&sort=updatedAt&order=desc`)
+    if (pagesRes.data && Array.isArray(pagesRes.data)) {
+      pagesRes.data.forEach(page => {
+        activities.push({
+          icon: 'file',
+          message: `Actualizaste la página "${page.title}"`,
+          time: getRelativeTime(page.updatedAt || page.createdAt),
+          date: new Date(page.updatedAt || page.createdAt)
+        })
+      })
+    }
+
+    // Obtener últimas 2 categorías
+    const categoriesRes = await api.get(`/api/categories?blogId=${blogId}&limit=2`)
+    if (categoriesRes.data && Array.isArray(categoriesRes.data)) {
+      categoriesRes.data.forEach(category => {
+        activities.push({
+          icon: 'tag',
+          message: `Creaste la categoría "${category.name}"`,
+          time: getRelativeTime(category.createdAt),
+          date: new Date(category.createdAt)
+        })
+      })
+    }
+
+    // Ordenar por fecha y tomar los 5 más recientes
+    recentActivity.value = activities
+      .sort((a, b) => b.date - a.date)
+      .slice(0, 5)
+      .map(({ date, ...rest }) => rest) // Remover el campo date usado para ordenar
+
+  } catch (error) {
+    console.error('Error al cargar actividad reciente:', error)
+    recentActivity.value = []
+  }
+}
+
 const fetchStats = async () => {
   isLoading.value = true
   try {
@@ -203,7 +265,7 @@ const fetchStats = async () => {
       console.warn('No authentication token found')
       return
     }
-    
+
     // Función para cargar los contadores
     const loadCounts = async () => {
       try {
@@ -213,25 +275,25 @@ const fetchStats = async () => {
           console.warn('No hay un blog activo seleccionado');
           return;
         }
-        
+
         // Obtener el ID del blog
         const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
         const blogId = blogResponse.data?.id;
-        
+
         if (!blogId) {
           console.error('No se pudo obtener el ID del blog activo');
           return;
         }
-        
+
         console.log('Obteniendo estadísticas para blogId:', blogId);
-        
+
         // Hacer las peticiones de estadísticas incluyendo el blogId
         const [postsRes, pagesRes, categoriesRes] = await Promise.allSettled([
           api.get(`/api/stats/posts/count?blogId=${blogId}`),
           api.get(`/api/stats/pages/count?blogId=${blogId}`),
           api.get(`/api/stats/categories/count?blogId=${blogId}`)
         ]);
-        
+
         console.log('Respuestas de estadísticas:', { postsRes, pagesRes, categoriesRes });
 
         // Procesar cada respuesta individualmente
@@ -251,6 +313,9 @@ const fetchStats = async () => {
         stats.value.posts = processResponse(postsRes, 'posts');
         stats.value.pages = processResponse(pagesRes, 'pages');
         stats.value.categories = processResponse(categoriesRes, 'categories');
+
+        // Cargar actividad reciente
+        await fetchRecentActivity(blogId);
       } catch (error) {
         console.error('Error en loadCounts:', {
           message: error.message,
