@@ -7,85 +7,85 @@
           <li>
             <RouterLink to="/cms/dashboard" class="nav-link">
               <LayoutDashboard class="icon" />
-              <span>Dashboard</span>
+              <span>{{ $t('nav.dashboard') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink to="/cms/posts" class="nav-link">
               <FileText class="icon" />
-              <span>Posts</span>
+              <span>{{ $t('nav.posts') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink to="/cms/comments" class="nav-link">
               <MessageSquare class="icon" />
-              <span>Comentarios</span>
+              <span>{{ $t('nav.comments') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink to="/cms/categories" class="nav-link">
               <Tag class="icon" />
-              <span>Categorías</span>
+              <span>{{ $t('nav.categories') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink to="/cms/tags" class="nav-link">
               <Tag class="icon" />
-              <span>Tags</span>
+              <span>{{ $t('nav.tags') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink to="/cms/series" class="nav-link">
               <Library class="icon" />
-              <span>Series</span>
+              <span>{{ $t('nav.series') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink to="/cms/pages" class="nav-link">
               <File class="icon" />
-              <span>Páginas</span>
+              <span>{{ $t('nav.pages') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink to="/cms/menu" class="nav-link">
               <MenuIcon class="icon" />
-              <span>Menu</span>
+              <span>{{ $t('nav.menu') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink to="/cms/media" class="nav-link">
               <Image class="icon" />
-              <span>Medios</span>
+              <span>{{ $t('nav.media') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink :to="`/cms/user/edit/${userUuid}`" class="nav-link">
               <UserCircle class="icon" />
-              <span>Mi perfil</span>
+              <span>{{ $t('users.editUser') }}</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink to="/cms/settings" class="nav-link">
               <Settings class="icon" />
-              <span>Configuración</span>
+              <span>{{ $t('nav.settings') }}</span>
             </RouterLink>
           </li>
           <!-- Botón para super administradores para acceder a la lista de blogs -->
           <li v-if="userRole === 'SUPER_ADMIN'">
             <RouterLink to="/super-admin/blogs" class="nav-link super-admin-link">
               <Database class="icon" />
-              <span>Gestionar Blogs</span>
+              <span>{{ $t('nav.blogs') }}</span>
             </RouterLink>
           </li>
         </ul>
         <div class="sidebar-footer">
           <a v-if="activeBlogUrl" :href="activeBlogUrl" target="_blank" class="view-blog-button">
             <Eye class="icon" />
-            <span>Ver Blog</span>
+            <span>{{ $t('blogs.viewBlog') }}</span>
           </a>
           <button @click="handleLogout" class="logout-button">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span>Cerrar sesión</span>
+            <span>{{ $t('nav.logout') }}</span>
           </button>
         </div>
       </nav>

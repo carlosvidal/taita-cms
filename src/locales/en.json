@@ -285,7 +285,8 @@
     "selectBlog": "Select Blog",
     "activeBlog": "Active blog",
     "switchBlog": "Switch blog",
-    "noBlogsAvailable": "No blogs available"
+    "noBlogsAvailable": "No blogs available",
+    "viewBlog": "View Blog"
   },
   "login": {
     "title": "Login",

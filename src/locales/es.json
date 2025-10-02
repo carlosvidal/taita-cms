@@ -285,7 +285,8 @@
     "selectBlog": "Seleccionar Blog",
     "activeBlog": "Blog activo",
     "switchBlog": "Cambiar de blog",
-    "noBlogsAvailable": "No hay blogs disponibles"
+    "noBlogsAvailable": "No hay blogs disponibles",
+    "viewBlog": "Ver Blog"
   },
   "login": {
     "title": "Iniciar Sesión",
