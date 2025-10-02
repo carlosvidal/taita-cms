@@ -218,10 +218,10 @@ const fetchRecentActivity = async (blogId) => {
       })
     }
 
-    // Obtener últimas 2 páginas
-    const pagesRes = await api.get(`/api/cms-pages?blogId=${blogId}&limit=2&sort=updatedAt&order=desc`)
+    // Obtener últimas 2 páginas (el endpoint ya filtra por blog y ordena por updatedAt desc)
+    const pagesRes = await api.get(`/api/pages`)
     if (pagesRes.data && Array.isArray(pagesRes.data)) {
-      pagesRes.data.forEach(page => {
+      pagesRes.data.slice(0, 2).forEach(page => {
         activities.push({
           icon: 'file',
           message: `Actualizaste la página "${page.title}"`,
