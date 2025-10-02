@@ -6,6 +6,7 @@ import TipTapEditor from '@/components/TipTapEditor.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import SlugField from '@/components/SlugField.vue'
 import MediaLibraryModal from '@/components/MediaLibraryModal.vue'
+import TagInput from '@/components/TagInput.vue'
 import { transitions, rounded, shadows } from '@/styles/designSystem'
 import { Save, Library, Eye } from 'lucide-vue-next'
 
@@ -135,9 +136,9 @@ const fetchPost = async () => {
       blogId: response.data.blogId || (response.data.blog ? response.data.blog.id : null)
     }
     
-    // Cargar los tags del post
+    // Cargar los tags del post (ahora como nombres en lugar de IDs)
     if (response.data.tags && Array.isArray(response.data.tags)) {
-      selectedTags.value = response.data.tags.map(tag => tag.id);
+      selectedTags.value = response.data.tags.map(tag => tag.name);
       console.log('Tags del post cargados:', selectedTags.value);
     }
 
@@ -280,9 +281,9 @@ const handleSubmit = async () => {
       console.log('Agregando serie al post:', { seriesId: post.value.seriesId, sequenceNumber: post.value.sequenceNumber });
     }
 
-    // Add tags if selected
+    // Add tags if selected (ahora como nombres de strings)
     if (selectedTags.value && selectedTags.value.length > 0) {
-      postData.tagIds = selectedTags.value;
+      postData.tagNames = selectedTags.value;
       console.log('Agregando tags al post:', selectedTags.value);
     }
 
@@ -704,24 +705,13 @@ const checkSlugAvailability = async (slug) => {
             </div>
           </div>
 
-          <!-- Tags Selector -->
+          <!-- Tags Input -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Tags (opcional)</label>
-            <div class="flex flex-wrap gap-2 p-3 border border-gray-300 rounded min-h-[80px]">
-              <label v-for="tag in tags" :key="tag.id"
-                class="inline-flex items-center px-3 py-1.5 rounded-full border cursor-pointer transition-all duration-200"
-                :class="{
-                  'bg-blue-100 border-blue-500 text-blue-700': selectedTags.includes(tag.id),
-                  'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100': !selectedTags.includes(tag.id)
-                }">
-                <input type="checkbox" :value="tag.id" v-model="selectedTags" class="hidden">
-                <Tag class="w-3 h-3 mr-1.5" />
-                <span class="text-sm">{{ tag.name }}</span>
-              </label>
-            </div>
-            <p class="mt-1 text-xs text-gray-500">
-              Selecciona uno o varios tags para este post. Puedes crear nuevos tags desde el menú Tags.
-            </p>
+            <TagInput
+              v-model="selectedTags"
+              :existing-tags="tags"
+            />
           </div>
 
           <!-- Slug Input usando el componente SlugField -->
