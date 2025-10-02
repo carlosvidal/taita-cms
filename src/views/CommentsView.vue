@@ -114,7 +114,7 @@ async function fetchComments() {
   loading.value = true;
   error.value = '';
   try {
-    const response = await api.get('/comments', {
+    const response = await api.get('/api/comments', {
       params: {
         status: filterStatus.value || ''
       }
@@ -132,7 +132,7 @@ async function approveComment(comment) {
   if (!confirm('¿Aprobar este comentario?')) return;
   loading.value = true;
   try {
-    await api.patch(`/comments/${comment.uuid}/approve`);
+    await api.patch(`/api/comments/${comment.uuid}/approve`);
     comment.status = 'APPROVED';
   } catch (err) {
     console.error('Error al aprobar comentario:', err);
@@ -146,7 +146,7 @@ async function rejectComment(comment) {
   if (!confirm('¿Rechazar este comentario?')) return;
   loading.value = true;
   try {
-    await api.patch(`/comments/${comment.uuid}/reject`);
+    await api.patch(`/api/comments/${comment.uuid}/reject`);
     comment.status = 'REJECTED';
   } catch (err) {
     console.error('Error al rechazar comentario:', err);
@@ -160,7 +160,7 @@ async function spamComment(comment) {
   if (!confirm('¿Marcar este comentario como spam?')) return;
   loading.value = true;
   try {
-    await api.patch(`/comments/${comment.uuid}/spam`);
+    await api.patch(`/api/comments/${comment.uuid}/spam`);
     comment.status = 'SPAM';
   } catch (err) {
     console.error('Error al marcar como spam:', err);
