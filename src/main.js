@@ -5,6 +5,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { setupResponseInterceptors, api } from './utils/api'
+import i18n from './plugins/i18n'
 
 // Hacer que la instancia de api esté disponible globalmente
 window.api = api;
@@ -16,5 +17,6 @@ setupResponseInterceptors(router)
 
 app.use(createPinia())
 app.use(router)
+app.use(i18n)
 
 app.mount('#app')
