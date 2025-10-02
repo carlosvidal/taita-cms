@@ -1,7 +1,7 @@
 <template>
   <ViewLayout>
-    <template #title>Dashboard</template>
-    <template #subtitle>Bienvenido a tu panel de control</template>
+    <template #title>{{ $t('dashboard.title') }}</template>
+    <template #subtitle>{{ $t('dashboard.subtitle') }}</template>
     
     <div class="space-y-8">
       <!-- Advertencia de blog no válido -->
@@ -9,13 +9,13 @@
         <div class="flex items-start">
           <AlertTriangle class="w-5 h-5 text-red-500 mt-0.5 mr-3" />
           <div>
-            <h3 class="font-medium text-red-800">Error con el blog seleccionado</h3>
-            <p class="text-red-700 mt-1">El blog seleccionado no existe o no se puede acceder. Por favor, selecciona otro blog.</p>
-            <button 
-              @click="router.push('/blogs')" 
+            <h3 class="font-medium text-red-800">{{ $t('dashboard.blogError') }}</h3>
+            <p class="text-red-700 mt-1">{{ $t('dashboard.blogErrorMsg') }}</p>
+            <button
+              @click="router.push('/blogs')"
               class="mt-3 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-md transition-colors"
             >
-              Seleccionar blog
+              {{ $t('dashboard.selectBlog') }}
             </button>
           </div>
         </div>
@@ -24,40 +24,40 @@
       <!-- Stats Overview -->
       <section>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-medium text-panel-heading">Resumen</h2>
-          <button @click="fetchStats" class="p-1 rounded hover:bg-panel text-panel-muted transition-colors" title="Refrescar estadísticas">
+          <h2 class="text-lg font-medium text-panel-heading">{{ $t('dashboard.stats') }}</h2>
+          <button @click="fetchStats" class="p-1 rounded hover:bg-panel text-panel-muted transition-colors" :title="$t('dashboard.refresh')">
             <RefreshCw class="w-4 h-4" />
           </button>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard title="Posts" :value="stats.posts" icon="article" color="blue" />
-          <StatCard title="Páginas" :value="stats.pages" icon="description" color="green">
-            <template #footer>Última actualización: {{ new Date().toLocaleDateString() }}</template>
+          <StatCard :title="$t('dashboard.posts')" :value="stats.posts" icon="article" color="blue" />
+          <StatCard :title="$t('dashboard.pages')" :value="stats.pages" icon="description" color="green">
+            <template #footer>{{ $t('common.date') }}: {{ new Date().toLocaleDateString() }}</template>
           </StatCard>
-          <StatCard title="Categorías" :value="stats.categories" icon="category" color="purple" />
+          <StatCard :title="$t('dashboard.categories')" :value="stats.categories" icon="category" color="purple" />
         </div>
       </section>
       
       <!-- Recent Activity -->
       <section class="border border-panel rounded-lg bg-panel">
         <div class="px-6 py-4 border-b border-panel">
-          <h2 class="text-lg font-medium text-panel-heading">Actividad reciente</h2>
+          <h2 class="text-lg font-medium text-panel-heading">{{ $t('dashboard.recentActivity') }}</h2>
         </div>
-        
+
         <div v-if="isLoading" class="p-8 text-center text-panel-muted">
           <div class="animate-pulse flex justify-center">
             <div class="h-4 w-24 bg-panel rounded"></div>
           </div>
-          <p class="mt-2 text-sm">Cargando actividad...</p>
+          <p class="mt-2 text-sm">{{ $t('common.loading') }}</p>
         </div>
-        
+
         <div v-else-if="!recentActivity.length" class="p-12 text-center">
           <div class="text-panel-muted mb-3">
             <History class="w-10 h-10" />
           </div>
-          <h3 class="text-lg font-medium text-panel-text mb-1">Sin actividad reciente</h3>
-          <p class="text-panel-muted text-sm">Comienza a crear contenido para ver tu actividad aquí</p>
+          <h3 class="text-lg font-medium text-panel-text mb-1">{{ $t('dashboard.noActivity') }}</h3>
+          <p class="text-panel-muted text-sm">{{ $t('dashboard.startCreating') }}</p>
         </div>
         
         <div v-else class="divide-y border-panel">
@@ -75,9 +75,9 @@
       
       <!-- Quick Actions -->
       <section>
-        <h2 class="text-lg font-medium text-panel-heading mb-4">Acciones rápidas</h2>
+        <h2 class="text-lg font-medium text-panel-heading mb-4">{{ $t('dashboard.quickActions') }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div v-for="action in quickActions" :key="action.name" 
+          <div v-for="action in quickActions" :key="action.name"
                class="p-4 border border-panel rounded-lg bg-panel hover:shadow-sm transition-all cursor-pointer"
                @click="action.action">
             <div class="flex items-center">
@@ -94,14 +94,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import ViewLayout from './ViewLayout.vue'
 import StatCard from '@/components/StatCard.vue'
 import api from '@/utils/api'
 import { RefreshCw, AlertTriangle, FileText, File, Tag, Settings, History, Edit, PlusCircle, Trash2 } from 'lucide-vue-next'
 
 const router = useRouter()
+const { t } = useI18n()
 const isLoading = ref(false)
 const blogError = ref(false)
 
@@ -151,32 +153,32 @@ const verifyActiveBlog = async () => {
 
 const recentActivity = ref([])
 
-const quickActions = [
+const quickActions = computed(() => [
   {
-    name: 'Crear post',
+    name: t('dashboard.createPost'),
     icon: 'file-text',
     bgColor: 'bg-panel',
     action: () => router.push('/cms/posts/new')
   },
   {
-    name: 'Crear página',
+    name: t('dashboard.createPage'),
     icon: 'file',
     bgColor: 'bg-panel',
     action: () => router.push('/cms/pages/new')
   },
   {
-    name: 'Gestionar categorías',
+    name: t('dashboard.manageCategories'),
     icon: 'tag',
     bgColor: 'bg-panel',
     action: () => router.push('/cms/categories')
   },
   {
-    name: 'Configuración',
+    name: t('nav.settings'),
     icon: 'settings',
     bgColor: 'bg-panel',
     action: () => router.push('/cms/settings')
   }
-]
+])
 
 // Función para formatear tiempo relativo
 const getRelativeTime = (date) => {

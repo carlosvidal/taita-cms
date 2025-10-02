@@ -69,7 +69,17 @@
     "refresh": "Refresh statistics",
     "blogError": "Error with selected blog",
     "blogErrorMsg": "The selected blog does not exist or cannot be accessed. Please select another blog.",
-    "selectBlog": "Select blog"
+    "selectBlog": "Select blog",
+    "daysAgo": "{count} day ago | {count} days ago",
+    "hoursAgo": "{count} hour ago | {count} hours ago",
+    "minutesAgo": "{count} minute ago | {count} minutes ago",
+    "justNow": "Just now",
+    "published": "You published",
+    "updated": "You updated",
+    "created": "You created",
+    "thePost": "the post",
+    "thePage": "the page",
+    "theCategory": "the category"
   },
   "posts": {
     "title": "Posts",

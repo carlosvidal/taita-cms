@@ -69,7 +69,17 @@
     "refresh": "Refrescar estadísticas",
     "blogError": "Error con el blog seleccionado",
     "blogErrorMsg": "El blog seleccionado no existe o no se puede acceder. Por favor, selecciona otro blog.",
-    "selectBlog": "Seleccionar blog"
+    "selectBlog": "Seleccionar blog",
+    "daysAgo": "Hace {count} día | Hace {count} días",
+    "hoursAgo": "Hace {count} hora | Hace {count} horas",
+    "minutesAgo": "Hace {count} minuto | Hace {count} minutos",
+    "justNow": "Hace un momento",
+    "published": "Publicaste",
+    "updated": "Actualizaste",
+    "created": "Creaste",
+    "thePost": "el post",
+    "thePage": "la página",
+    "theCategory": "la categoría"
   },
   "posts": {
     "title": "Posts",
