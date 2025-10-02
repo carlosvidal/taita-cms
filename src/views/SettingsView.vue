@@ -40,6 +40,27 @@
           </select>
         </div>
 
+        <!-- Zona Horaria -->
+        <div class="space-y-2">
+          <label for="timezone" class="block text-sm font-medium text-gray-700">Zona Horaria</label>
+          <select id="timezone" v-model="settings.timezone"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option value="America/Lima">Lima (UTC-5)</option>
+            <option value="America/New_York">Nueva York (UTC-5/-4)</option>
+            <option value="America/Los_Angeles">Los Angeles (UTC-8/-7)</option>
+            <option value="America/Chicago">Chicago (UTC-6/-5)</option>
+            <option value="America/Mexico_City">Ciudad de México (UTC-6/-5)</option>
+            <option value="America/Bogota">Bogotá (UTC-5)</option>
+            <option value="America/Santiago">Santiago (UTC-4/-3)</option>
+            <option value="America/Buenos_Aires">Buenos Aires (UTC-3)</option>
+            <option value="America/Sao_Paulo">São Paulo (UTC-3)</option>
+            <option value="Europe/Madrid">Madrid (UTC+1/+2)</option>
+            <option value="Europe/London">Londres (UTC+0/+1)</option>
+            <option value="UTC">UTC</option>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">Zona horaria para mostrar fechas en el blog</p>
+        </div>
+
         <!-- Plantilla -->
         <div class="space-y-2">
           <label for="template" class="block text-sm font-medium text-gray-700">Plantilla</label>
@@ -106,6 +127,14 @@
                 <label for="instagram" class="block text-sm text-gray-600">Instagram</label>
               </div>
               <input type="text" id="instagram" v-model="socialNetworks.instagram" placeholder="@usuario"
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <div class="flex items-center space-x-4">
+              <div class="w-24">
+                <label for="tiktok" class="block text-sm text-gray-600">TikTok</label>
+              </div>
+              <input type="text" id="tiktok" v-model="socialNetworks.tiktok" placeholder="@usuario"
                 class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
             </div>
           </div>
@@ -214,6 +243,7 @@ const settings = reactive({
   title: 'Mi Blog',
   description: 'Un blog personal',
   language: 'es',
+  timezone: 'America/Lima',
   template: 'default',
   domain: '',
   googleAnalyticsId: '',
@@ -224,7 +254,8 @@ const settings = reactive({
 const socialNetworks = reactive({
   twitter: '',
   facebook: '',
-  instagram: ''
+  instagram: '',
+  tiktok: ''
 })
 
 // Cargar configuraciones
@@ -240,6 +271,7 @@ const fetchSettings = async () => {
     settings.title = data.title || 'Mi Blog'
     settings.description = data.description || 'Un blog personal'
     settings.language = data.language || 'es'
+    settings.timezone = data.timezone || 'America/Lima'
     settings.template = data.template || 'default'
     settings.domain = data.domain || ''
     settings.googleAnalyticsId = data.googleAnalyticsId || ''
@@ -254,6 +286,7 @@ const fetchSettings = async () => {
         socialNetworks.twitter = socialData.twitter || ''
         socialNetworks.facebook = socialData.facebook || ''
         socialNetworks.instagram = socialData.instagram || ''
+        socialNetworks.tiktok = socialData.tiktok || ''
       } catch (e) {
         console.error('Error parsing social networks:', e)
       }
