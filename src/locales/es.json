@@ -249,7 +249,9 @@
     "passwordsDoNotMatch": "Las contraseñas no coinciden",
     "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
     "currentPasswordRequired": "Debes introducir tu contraseña actual para cambiarla",
-    "role": "Rol"
+    "role": "Rol",
+    "adminAccessInfo": "Los administradores tienen acceso completo al CMS.",
+    "bioPlaceholder": "Escribe una breve biografía..."
   },
   "settings": {
     "title": "Configuración",

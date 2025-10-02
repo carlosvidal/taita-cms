@@ -249,7 +249,9 @@
     "passwordsDoNotMatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 6 characters",
     "currentPasswordRequired": "You must enter your current password to change it",
-    "role": "Role"
+    "role": "Role",
+    "adminAccessInfo": "Administrators have full access to the CMS.",
+    "bioPlaceholder": "Write a brief biography..."
   },
   "settings": {
     "title": "Settings",

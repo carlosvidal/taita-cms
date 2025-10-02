@@ -1,7 +1,7 @@
 <template>
   <ViewLayout>
-    <template #title>{{ isEditMode ? 'Editar Usuario' : 'Nuevo Usuario' }}</template>
-    <template #subtitle>{{ isEditMode ? 'Actualiza la información del perfil' : 'Crea un nuevo perfil de usuario' }}</template>
+    <template #title>{{ isEditMode ? $t('users.editUser') : $t('users.newUser') }}</template>
+    <template #subtitle>{{ isEditMode ? $t('users.updateProfile') : $t('users.createUserAndPassword') }}</template>
 
     <div class="space-y-6">
       <!-- Indicador de carga -->
@@ -12,7 +12,7 @@
       <div v-else class="space-y-8">
         <!-- Formulario de información de perfil -->
         <form @submit.prevent="handleProfileSubmit" class="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Información de perfil</h3>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('users.profileInfo') }}</h3>
 
           <!-- Sección de foto de perfil -->
           <div class="flex items-start space-x-6">
@@ -20,14 +20,14 @@
               <div v-if="previewImage || user.picture" class="relative w-24 h-24 rounded-full overflow-hidden">
                 <img
                   :src="previewImage || getImageUrl(user.picture)"
-                  alt="Foto de perfil"
+                  :alt="$t('users.profilePicture')"
                   class="w-full h-full object-cover"
                 />
                 <button
                   type="button"
                   @click="removeImage"
                   class="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
-                  title="Eliminar imagen"
+                  :title="$t('common.delete')"
                 >
                   <X class="w-3 h-3" />
                 </button>
@@ -38,7 +38,7 @@
             </div>
 
             <div class="flex-1">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Foto de perfil</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('users.profilePicture') }}</label>
               <input
                 type="file"
                 ref="fileInput"
@@ -54,10 +54,10 @@
                   size="sm"
                   class="w-fit"
                 >
-                  Seleccionar imagen
+                  {{ $t('users.selectImage') }}
                 </BaseButton>
                 <p class="text-xs text-gray-500">
-                  Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB
+                  {{ $t('users.allowedFormats') }}
                 </p>
               </div>
             </div>
@@ -66,67 +66,67 @@
           <!-- Información básica -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
-              <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+              <label for="name" class="block text-sm font-medium text-gray-700">{{ $t('common.name') }}</label>
               <input
                 type="text"
                 id="name"
                 v-model="user.name"
                 class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Nombre completo"
+                :placeholder="$t('users.userName')"
                 required
               />
             </div>
 
             <div class="space-y-2">
-              <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+              <label for="email" class="block text-sm font-medium text-gray-700">{{ $t('common.email') }}</label>
               <input
                 type="email"
                 id="email"
                 v-model="user.email"
                 :disabled="isEditMode"
                 class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
-                placeholder="ejemplo@dominio.com"
+                :placeholder="$t('users.userEmail')"
                 required
               />
               <p v-if="isEditMode" class="text-xs text-gray-500">
-                El email no se puede modificar
+                {{ $t('users.emailCannotBeChanged') }}
               </p>
             </div>
           </div>
 
           <!-- Selección de rol (solo visible para crear nuevo usuario y si es admin) -->
           <div v-if="!isEditMode && isAdmin" class="space-y-2">
-            <label for="role" class="block text-sm font-medium text-gray-700">Rol</label>
+            <label for="role" class="block text-sm font-medium text-gray-700">{{ $t('users.role') }}</label>
             <select
               id="role"
               v-model="user.role"
               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="AUTHOR">Autor</option>
-              <option value="ADMIN">Administrador</option>
+              <option value="AUTHOR">{{ $t('users.author') }}</option>
+              <option value="ADMIN">{{ $t('users.admin') }}</option>
             </select>
             <p class="text-xs text-gray-500">
-              Los administradores tienen acceso completo al CMS.
+              {{ $t('users.adminAccessInfo') }}
             </p>
           </div>
 
           <!-- Mostrar rol en modo edición (solo lectura) -->
           <div v-if="isEditMode" class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Rol</label>
+            <label class="block text-sm font-medium text-gray-700">{{ $t('users.role') }}</label>
             <div class="text-gray-900 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
-              {{ user.role === 'ADMIN' ? 'Administrador' : 'Autor' }}
+              {{ user.role === 'ADMIN' ? $t('users.admin') : $t('users.author') }}
             </div>
           </div>
 
           <!-- Biografía -->
           <div class="space-y-2">
-            <label for="bio" class="block text-sm font-medium text-gray-700">Biografía</label>
+            <label for="bio" class="block text-sm font-medium text-gray-700">{{ $t('users.userBio') }}</label>
             <textarea
               id="bio"
               v-model="user.bio"
               rows="4"
               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Escribe una breve biografía..."
+              :placeholder="$t('users.bioPlaceholder')"
             ></textarea>
           </div>
 
@@ -137,44 +137,44 @@
               @click="router.push('/cms/users')"
               variant="secondary"
             >
-              Cancelar
+              {{ $t('common.cancel') }}
             </BaseButton>
             <BaseButton
               type="submit"
               :disabled="isSavingProfile"
               variant="primary"
             >
-              <span v-if="isSavingProfile">Guardando...</span>
-              <span v-else>{{ isEditMode ? 'Actualizar Perfil' : 'Crear Usuario y Establecer Contraseña' }}</span>
+              <span v-if="isSavingProfile">{{ $t('common.saving') }}</span>
+              <span v-else>{{ isEditMode ? $t('users.updateProfile') : $t('users.createUserAndPassword') }}</span>
             </BaseButton>
           </div>
         </form>
 
         <!-- Formulario de contraseña (solo en modo crear o si estamos editando) -->
         <form v-if="!isEditMode" @submit.prevent="handleProfileSubmit" class="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Contraseña</h3>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('common.password') }}</h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
-              <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+              <label for="password" class="block text-sm font-medium text-gray-700">{{ $t('common.password') }}</label>
               <input
                 type="password"
                 id="password"
                 v-model="passwords.password"
                 class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Contraseña"
+                :placeholder="$t('common.password')"
                 required
               />
             </div>
 
             <div class="space-y-2">
-              <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar contraseña</label>
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700">{{ $t('users.confirmPassword') }}</label>
               <input
                 type="password"
                 id="confirmPassword"
                 v-model="passwords.confirmPassword"
                 class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Confirma la contraseña"
+                :placeholder="$t('users.confirmPassword')"
                 required
               />
             </div>
@@ -187,40 +187,40 @@
 
         <!-- Formulario de cambio de contraseña (solo en modo edición) -->
         <form v-if="isEditMode" @submit.prevent="handlePasswordSubmit" class="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Cambiar contraseña</h3>
-          <p class="text-sm text-gray-600 mb-4">Deja los campos vacíos si no deseas cambiar tu contraseña.</p>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('users.changePassword') }}</h3>
+          <p class="text-sm text-gray-600 mb-4">{{ $t('users.passwordHint') }}</p>
 
           <div class="space-y-2">
-            <label for="currentPassword" class="block text-sm font-medium text-gray-700">Contraseña actual</label>
+            <label for="currentPassword" class="block text-sm font-medium text-gray-700">{{ $t('users.currentPassword') }}</label>
             <input
               type="password"
               id="currentPassword"
               v-model="passwords.currentPassword"
               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Introduce tu contraseña actual"
+              :placeholder="$t('users.currentPassword')"
             />
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
-              <label for="newPassword" class="block text-sm font-medium text-gray-700">Nueva contraseña</label>
+              <label for="newPassword" class="block text-sm font-medium text-gray-700">{{ $t('users.newPassword') }}</label>
               <input
                 type="password"
                 id="newPassword"
                 v-model="passwords.password"
                 class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Nueva contraseña"
+                :placeholder="$t('users.newPassword')"
               />
             </div>
 
             <div class="space-y-2">
-              <label for="confirmNewPassword" class="block text-sm font-medium text-gray-700">Confirmar nueva contraseña</label>
+              <label for="confirmNewPassword" class="block text-sm font-medium text-gray-700">{{ $t('users.confirmPassword') }}</label>
               <input
                 type="password"
                 id="confirmNewPassword"
                 v-model="passwords.confirmPassword"
                 class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Confirma la nueva contraseña"
+                :placeholder="$t('users.confirmPassword')"
               />
             </div>
           </div>
@@ -236,15 +236,15 @@
               @click="resetPasswordForm"
               variant="secondary"
             >
-              Cancelar
+              {{ $t('common.cancel') }}
             </BaseButton>
             <BaseButton
               type="submit"
               :disabled="isSavingPassword || !passwords.currentPassword || !passwords.password"
               variant="primary"
             >
-              <span v-if="isSavingPassword">Actualizando...</span>
-              <span v-else>Actualizar Contraseña</span>
+              <span v-if="isSavingPassword">{{ $t('common.saving') }}</span>
+              <span v-else>{{ $t('users.updatePasswordBtn') }}</span>
             </BaseButton>
           </div>
         </form>
@@ -266,10 +266,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import { UserCircle, X } from 'lucide-vue-next'
 import api from '@/utils/api'
+
+const { t } = useI18n()
 
 // Usuario actual (para verificar permisos)
 const currentUser = ref(null)
@@ -429,19 +432,19 @@ const validatePasswords = () => {
 
   // Verificar que las contraseñas coinciden
   if (passwords.value.password !== passwords.value.confirmPassword) {
-    passwordError.value = 'Las contraseñas no coinciden'
+    passwordError.value = t('users.passwordsDoNotMatch')
     return false
   }
 
   // Verificar longitud mínima
   if (passwords.value.password.length < 6) {
-    passwordError.value = 'La contraseña debe tener al menos 6 caracteres'
+    passwordError.value = t('users.passwordTooShort')
     return false
   }
 
   // En modo edición, verificar que se haya proporcionado la contraseña actual
   if (isEditMode.value && passwords.value.password && !passwords.value.currentPassword) {
-    passwordError.value = 'Debes introducir tu contraseña actual para cambiarla'
+    passwordError.value = t('users.currentPasswordRequired')
     return false
   }
 
@@ -524,7 +527,7 @@ const handleProfileSubmit = async () => {
         if (fileInput.value) fileInput.value.value = ''
       }
 
-      successMessage.value = 'Perfil actualizado correctamente'
+      successMessage.value = t('users.profileUpdated')
     } else {
       // Modo creación: crear nuevo usuario con contraseña
       const createData = {
@@ -544,7 +547,7 @@ const handleProfileSubmit = async () => {
         await uploadProfilePicture(userData.uuid)
       }
 
-      successMessage.value = 'Usuario creado correctamente'
+      successMessage.value = t('users.saveSuccess')
 
       // Redirigir después de crear
       showSuccess.value = true
@@ -597,7 +600,7 @@ const handlePasswordSubmit = async () => {
     resetPasswordForm()
 
     // Mostrar mensaje de éxito
-    successMessage.value = 'Contraseña actualizada correctamente'
+    successMessage.value = t('users.passwordUpdated')
     showSuccess.value = true
     setTimeout(() => {
       showSuccess.value = false
