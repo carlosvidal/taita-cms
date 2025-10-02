@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '@/utils/api'
 import TipTapEditor from '@/components/TipTapEditor.vue'
 import BaseButton from '@/components/BaseButton.vue'
@@ -10,6 +11,7 @@ import TagInput from '@/components/TagInput.vue'
 import { transitions, rounded, shadows } from '@/styles/designSystem'
 import { Save, Library, Eye } from 'lucide-vue-next'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const isLoading = ref(false)
@@ -53,7 +55,7 @@ const postUuid = computed(() => {
 })
 
 const postTitle = computed(() => {
-  return isEditMode.value ? 'Editar Post' : 'Crear Post'
+  return isEditMode.value ? t('posts.editPost') : t('posts.newPost')
 })
 
 const apiBaseUrl = computed(() => {
@@ -71,15 +73,21 @@ const getFullImageUrl = (path) => {
   return `${apiBaseUrl.value}${path.startsWith('/') ? '' : '/'}${path}`
 }
 
+// Función para manejar errores de carga de imagen
+const handleImageError = (e) => {
+  console.error('Error cargando imagen:', e)
+  e.target.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3E${t('common.error')}%3C/text%3E%3C/svg%3E`
+}
+
 // Función para ver el post en el frontend
 const viewPost = () => {
   if (post.value.status?.toLowerCase() !== 'published') {
-    alert('Solo los posts publicados pueden ser visualizados en el frontend')
+    alert(t('posts.viewPostOnlyPublishedWarning'))
     return
   }
   
   if (!post.value.slug) {
-    alert('Este post no tiene un slug válido')
+    alert(t('posts.viewPostInvalidSlugWarning'))
     return
   }
   
@@ -160,13 +168,13 @@ const fetchPost = async () => {
     
     // Si el error es 404, mostrar un mensaje más claro
     if (err.response?.status === 404) {
-      error.value = `No se encontró el post con UUID: ${postUuid.value}. Por favor, regresa a la lista de posts.`;
+      error.value = t('posts.postNotFound', { uuid: postUuid.value });
       alert(error.value);
       router.push('/cms/posts');
       return;
     }
     
-    error.value = err.response?.data?.message || err.response?.data?.error || err.message || 'Error al cargar el post';
+    error.value = err.response?.data?.message || err.response?.data?.error || err.message || t('posts.loadError');
   } finally {
     isLoading.value = false;
   }
@@ -186,13 +194,13 @@ const handleSubmit = async () => {
 
     // Validate required fields
     if (!post.value.title?.trim()) {
-      throw new Error('Title is required');
+      throw new Error(t('validation.titleRequired'));
     }
     if (!post.value.content?.trim()) {
-      throw new Error('Content is required');
+      throw new Error(t('validation.contentRequired'));
     }
     if (post.value.excerpt?.length > 160) {
-      throw new Error('Excerpt must be 160 characters or less');
+      throw new Error(t('validation.excerptTooLong'));
     }
 
     // Get authenticated user ID (replace with your actual auth logic)
@@ -217,7 +225,7 @@ const handleSubmit = async () => {
       // Verificar que hay un blog seleccionado
       const activeBlogUuid = localStorage.getItem('activeBlog');
       if (!activeBlogUuid) {
-        alert('No hay un blog seleccionado. Serás redirigido a la página de selección de blogs.');
+        alert(t('posts.noBlogSelectedRedirect'));
         router.push('/blogs');
         return; // Detener la ejecución
       }
@@ -231,7 +239,7 @@ const handleSubmit = async () => {
         console.log('Información del blog obtenida:', blogData);
         
         if (!blogData || !blogData.id) {
-          alert('No se pudo obtener la información del blog. Serás redirigido a la página de selección de blogs.');
+          alert(t('posts.blogInfoErrorRedirect'));
           router.push('/blogs');
           return; // Detener la ejecución
         }
@@ -242,12 +250,12 @@ const handleSubmit = async () => {
         if (error.response && error.response.status === 404) {
           console.error('El blog seleccionado no existe:', activeBlogUuid);
           localStorage.removeItem('activeBlog'); // Eliminar el UUID inválido
-          alert('El blog seleccionado no existe. Serás redirigido a la página de selección de blogs.');
+          alert(t('posts.blogNotFoundRedirect'));
           router.push('/blogs');
           return; // Detener la ejecución
         }
         console.error('Error al obtener información del blog:', error);
-        alert('Error al obtener información del blog. Por favor, inténtalo de nuevo.');
+        alert(t('posts.blogInfoError'));
         return; // Detener la ejecución
       }
     }
@@ -310,7 +318,7 @@ const handleSubmit = async () => {
         const postId = getResponse.data.id;
         
         if (!postId) {
-          throw new Error('No se pudo obtener el ID numérico del post');
+          throw new Error(t('posts.numericIdError'));
         }
         
         console.log(`ID numérico del post obtenido: ${postId}`);
@@ -359,7 +367,7 @@ const handleSubmit = async () => {
         // Usar fetch nativo con autenticación
         const token = localStorage.getItem('authToken')
         if (!token) {
-          throw new Error('Token de autenticación no encontrado')
+          throw new Error(t('errors.authTokenNotFound'))
         }
         
         const response = await fetch(`${apiBaseUrl.value}/api/media/upload`, {
@@ -403,7 +411,7 @@ const handleSubmit = async () => {
             // Usar fetch nativo con autenticación
             const token = localStorage.getItem('authToken')
             if (!token) {
-              throw new Error('Token de autenticación no encontrado')
+              throw new Error(t('errors.authTokenNotFound'))
             }
             
             const updateResponse = await fetch(`${apiBaseUrl.value}/api/posts/${savedPost.id}`, {
@@ -456,7 +464,7 @@ const handleSubmit = async () => {
       response: err.response?.data,
       stack: err.stack
     });
-    error.value = err.response?.data?.message || err.message || 'Error saving post';
+    error.value = err.response?.data?.message || err.message || t('posts.saveError');
   } finally {
     isSaving.value = false;
   }
@@ -474,7 +482,7 @@ onMounted(async () => {
     // This is a temporary solution - you should ideally decode the JWT properly
     const userId = authToken.split('-').pop();
     if (!userId) {
-      throw new Error('Invalid token format');
+      throw new Error(t('errors.invalidTokenFormat'));
     }
     post.value.author = userId;
   } catch (error) {
@@ -554,7 +562,7 @@ const handleImageUpload = (event) => {
 
   // Validate file type
   if (!file.type.match('image/(jpeg|jpg|png|webp)')) {
-    error.value = 'Solo se permiten imágenes JPG, PNG o WebP';
+    error.value = t('media.invalidImageFormat');
     return;
   }
 
@@ -562,7 +570,7 @@ const handleImageUpload = (event) => {
   const img = new Image();
   img.onload = function () {
     if (this.width < 800 || this.height < 600) {
-      error.value = `La imagen debe ser de al menos 800×600px (actual: ${this.width}×${this.height}px)`;
+      error.value = t('media.imageTooSmall', { width: this.width, height: this.height });
       return;
     }
     // Guardar la imagen y resetear el flag de eliminar imagen
@@ -572,7 +580,7 @@ const handleImageUpload = (event) => {
     post.value.imagePreview = URL.createObjectURL(file);
   };
   img.onerror = () => {
-    error.value = 'Error al cargar la imagen';
+    error.value = t('media.imageLoadError');
   };
   img.src = URL.createObjectURL(file);
 };
@@ -623,7 +631,7 @@ const checkSlugAvailability = async (slug) => {
 
     if (response.data.exists) {
       // El slug ya está en uso, mostrar mensaje de error
-      error.value = `El slug "${slug}" ya está en uso. Por favor, elige otro.`;
+      error.value = t('posts.slugInUse', { slug });
       return false;
     } else {
       // El slug está disponible
@@ -643,7 +651,7 @@ const checkSlugAvailability = async (slug) => {
     <!-- Loading state -->
     <div v-if="isLoading" class="text-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-panel mx-auto"></div>
-      <p class="mt-4 text-gray-600">Cargando...</p>
+      <p class="mt-4 text-gray-600">{{ $t('common.loading') }}</p>
     </div>
 
     <template v-else>
@@ -661,14 +669,14 @@ const checkSlugAvailability = async (slug) => {
         <form @submit.prevent="handleSubmit" class="p-3 sm:p-6 space-y-4 sm:space-y-6">
           <!-- Title Input -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
-            <input v-model="post.title" required placeholder="Escribe el título del post"
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('common.title') }}</label>
+            <input v-model="post.title" required :placeholder="$t('posts.form.titlePlaceholder')"
               class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200">
           </div>
 
           <!-- Category Select -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría (opcional)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('posts.form.categoryLabel') }}</label>
             <select v-model="post.categoryId"
               class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200">
               <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -679,35 +687,35 @@ const checkSlugAvailability = async (slug) => {
 
           <!-- Series Select -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Serie (opcional)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('posts.form.seriesLabel') }}</label>
             <div class="flex gap-2">
               <select v-model="post.seriesId"
                 class="flex-grow px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200">
-                <option :value="null">Sin serie</option>
+                <option :value="null">{{ $t('posts.form.noSeries') }}</option>
                 <option v-for="item in series" :key="item.id" :value="item.id">
                   {{ item.title }}
                 </option>
               </select>
               <button v-if="series.length > 0" type="button" @click="router.push('/cms/series/new')"
                 class="px-3 py-2 bg-panel rounded border border-gray-300 hover:bg-gray-200 text-gray-700"
-                title="Crear nueva serie">
+                :title="$t('series.newSeries')">
                 <Library class="w-4 h-4" />
               </button>
             </div>
 
             <!-- Sequence Number Input (solo visible si se selecciona una serie) -->
             <div v-if="post.seriesId" class="mt-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Número de secuencia en la serie</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('posts.form.sequenceNumberLabel') }}</label>
               <input v-model="post.sequenceNumber" type="number" min="1"
-                placeholder="Posición en la serie (ej: 1, 2, 3...)"
+                :placeholder="$t('posts.form.sequenceNumberPlaceholder')"
                 class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200">
-              <p class="mt-1 text-xs text-gray-500">Define el orden de este post dentro de la serie.</p>
+              <p class="mt-1 text-xs text-gray-500">{{ $t('posts.form.sequenceNumberHelp') }}</p>
             </div>
           </div>
 
           <!-- Tags Input -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Tags (opcional)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('posts.form.tagsLabel') }}</label>
             <TagInput
               v-model="selectedTags"
               :existing-tags="tags"
@@ -715,52 +723,51 @@ const checkSlugAvailability = async (slug) => {
           </div>
 
           <!-- Slug Input usando el componente SlugField -->
-          <SlugField v-model="post.slug" :source-text="post.title" prefix="/blog/" label="Slug"
-            placeholder="mi-post-url" hint="URL amigable para el post. Se genera automáticamente a partir del título."
+          <SlugField v-model="post.slug" :source-text="post.title" prefix="/blog/" :label="$t('posts.slug')"
+            placeholder="mi-post-url" :hint="$t('posts.form.slugHelp')"
             @check-availability="checkSlugAvailability" />
 
           <!-- Espacio reservado para otros campos futuros -->
 
           <!-- Content Editor -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Contenido</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('posts.content') }}</label>
             <TipTapEditor v-model="post.content"
               class="min-h-[200px] border border-gray-300 rounded focus:ring-2 focus:ring-gray-300 overflow-hidden transition-all duration-200" />
           </div>
 
           <!-- Excerpt Input -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Resumen (máx. 160 caracteres)</label>
-            <textarea v-model="post.excerpt" maxlength="160" placeholder="Breve descripción del post"
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('posts.form.excerptLabel') }}</label>
+            <textarea v-model="post.excerpt" maxlength="160" :placeholder="$t('posts.form.excerptPlaceholder')"
               class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-300 transition-all duration-200"
               rows="3"></textarea>
-            <p class="text-xs text-gray-500 mt-1">{{ post.excerpt?.length || 0 }}/160 caracteres</p>
+            <p class="text-xs text-gray-500 mt-1">{{ $t('posts.form.excerptCounter', { count: post.excerpt?.length || 0 }) }}</p>
           </div>
 
           <!-- Featured Image Upload -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen destacada (JPG/PNG/WebP, min.
-              800×600px)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('posts.form.featuredImageLabel') }}</label>
 
             <!-- Mostrar imagen existente o preview de nueva imagen -->
             <div v-if="(post.existingImage && !post.removeImage) || post.imagePreview" class="mt-2 mb-3">
               <div class="relative w-64 h-40 overflow-hidden rounded border border-panel">
                 <img
                   :src="post.imagePreview || getFullImageUrl(post.existingImage)"
-                  alt="Imagen destacada"
+                  :alt="$t('posts.featuredImage')"
                   class="object-cover w-full h-full"
-                  @error="(e) => { console.error('Error cargando imagen:', e); e.target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect fill=\'%23ddd\' width=\'200\' height=\'200\'/%3E%3Ctext fill=\'%23999\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\'%3EError%3C/text%3E%3C/svg%3E' }"
+                  @error="handleImageError"
                 >
                 <button @click="removeImage" type="button"
                   class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
-                  title="Eliminar imagen">
+                  :title="$t('posts.removeImage')">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
                 <div v-if="post.imagePreview" class="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                  Nueva imagen
+                  {{ $t('posts.form.newImage') }}
                 </div>
               </div>
             </div>
@@ -774,7 +781,7 @@ const checkSlugAvailability = async (slug) => {
                 class="flex items-center gap-2 px-4 py-2 rounded-md bg-panel text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
               >
                 <Library class="w-4 h-4" />
-                Seleccionar de biblioteca
+                {{ $t('media.selectFromLibrary') }}
               </button>
 
               <!-- Botón de subir nueva -->
@@ -785,7 +792,7 @@ const checkSlugAvailability = async (slug) => {
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                Subir nueva imagen
+                {{ $t('media.uploadNewImage') }}
               </label>
 
               <span class="text-sm text-gray-500" v-if="post.featuredImage">
@@ -795,9 +802,9 @@ const checkSlugAvailability = async (slug) => {
 
             <!-- Mensaje si la imagen ha sido marcada para eliminación -->
             <div v-if="post.removeImage && !post.featuredImage" class="mt-2 text-sm text-yellow-600">
-              La imagen será eliminada al guardar
+              {{ $t('posts.form.imageWillBeDeleted') }}
               <button @click="post.removeImage = false; post.imagePreview = null" type="button" class="ml-2 text-blue-600 hover:underline">
-                Cancelar
+                {{ $t('common.cancel') }}
               </button>
             </div>
           </div>
@@ -817,7 +824,7 @@ const checkSlugAvailability = async (slug) => {
                 'text-green-600': post.status === 'published',
                 'text-yellow-600': post.status === 'draft'
               }">
-                {{ post.status === 'published' ? 'Publicado' : 'Borrador' }}
+                {{ post.status === 'published' ? $t('posts.published') : $t('posts.draft') }}
               </span>
             </div>
 
@@ -832,11 +839,11 @@ const checkSlugAvailability = async (slug) => {
               >
                 <span class="flex items-center whitespace-nowrap">
                   <Eye class="w-4 h-4 mr-2" />
-                  Ver en el frontend
+                  {{ $t('posts.viewInFrontend') }}
                 </span>
               </BaseButton>
               <BaseButton type="button" variant="secondary" @click="router.push('/cms/posts')" :disabled="isSaving">
-                Cancelar
+                {{ $t('common.cancel') }}
               </BaseButton>
               <BaseButton type="submit" variant="primary" :disabled="isSaving">
                 <span class="flex items-center whitespace-nowrap">
@@ -848,7 +855,7 @@ const checkSlugAvailability = async (slug) => {
                     </path>
                   </svg>
                   <Save v-else class="w-4 h-4 mr-2" />
-                  {{ isSaving ? 'Guardando...' : 'Guardar Post' }}
+                  {{ isSaving ? $t('common.saving') : $t('posts.form.savePost') }}
                 </span>
               </BaseButton>
             </div>

@@ -1,28 +1,24 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import api from '@/utils/api'
 import { Plus, Library, Edit, Trash2, Eye } from 'lucide-vue-next'
 
+const { t, locale } = useI18n()
 const router = useRouter()
 const series = ref([])
 const isLoading = ref(false)
 const activeBlog = ref(null)
 
-// Función para formatear fechas
 const formatDate = (dateString) => {
-  if (!dateString) return 'Fecha no disponible'
-  
+  if (!dateString) return t('posts.dateUnavailable')
   const date = new Date(dateString)
-  
-  // Verificar si la fecha es válida
-  if (isNaN(date.getTime())) return 'Fecha inválida'
-  
-  // Formatear la fecha en formato local
-  return new Intl.DateTimeFormat('es-ES', {
+  if (isNaN(date.getTime())) return t('posts.invalidDate')
+  return new Intl.DateTimeFormat(locale.value, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -31,7 +27,6 @@ const formatDate = (dateString) => {
   }).format(date)
 }
 
-// Obtener el blog activo del localStorage
 const getActiveBlog = async () => {
   try {
     const blogUuid = localStorage.getItem('activeBlog')
@@ -49,7 +44,6 @@ const fetchSeries = async () => {
   try {
     const response = await api.get('/api/series')
     series.value = response.data
-    console.log('Series cargadas:', series.value)
   } catch (error) {
     console.error('Error fetching series:', error)
   } finally {
@@ -57,13 +51,11 @@ const fetchSeries = async () => {
   }
 }
 
-// Función para ver la serie en el frontend
 const viewSeries = (item) => {
   if (!item.slug) {
-    alert('Esta serie no tiene un slug válido')
+    alert(t('series.invalidSlug'))
     return
   }
-
   const blogSubdomain = activeBlog.value?.subdomain || 'demo'
   const blogDomain = activeBlog.value?.domain || 'taita.blog'
   const url = `https://${blogSubdomain}.${blogDomain}/series/${item.slug}`
@@ -71,7 +63,7 @@ const viewSeries = (item) => {
 }
 
 const handleDelete = async (uuid) => {
-  if (!confirm('¿Estás seguro de que deseas eliminar esta serie? Los posts asociados se desasociarán de la serie.')) return
+  if (!confirm(t('series.deleteConfirm'))) return
 
   try {
     await api.delete(`/api/series/uuid/${uuid}`)
@@ -89,13 +81,13 @@ onMounted(async () => {
 
 <template>
   <ViewLayout>
-    <template #title>Series</template>
-    <template #subtitle>Gestiona tus series de contenido</template>
+    <template #title>{{ $t('series.title') }}</template>
+    <template #subtitle>{{ $t('series.subtitle') }}</template>
     
     <div class="flex justify-between items-center mb-6">
       <div>
         <p v-if="series.length" class="text-gray-500 text-sm">
-          {{ series.length }} {{ series.length === 1 ? 'serie' : 'series' }} encontradas
+          {{ $t('series.seriesFound', { count: series.length }) }}
         </p>
       </div>
       
@@ -105,7 +97,7 @@ onMounted(async () => {
       >
         <span class="flex items-center whitespace-nowrap">
           <Plus class="w-4 h-4 mr-2" />
-          Añadir Serie
+          {{ $t('series.addSeries') }}
         </span>
       </BaseButton>
     </div>
@@ -114,24 +106,24 @@ onMounted(async () => {
       <div class="animate-pulse flex justify-center">
         <div class="h-4 w-24 bg-gray-200 rounded"></div>
       </div>
-      <p class="mt-2 text-sm">Cargando series...</p>
+      <p class="mt-2 text-sm">{{ $t('series.loading') }}</p>
     </div>
     
     <div v-else-if="!series.length" class="py-12 text-center">
       <div class="text-gray-400 mb-3">
         <Library class="w-10 h-10 mx-auto" />
       </div>
-      <h3 class="text-lg font-medium text-gray-700 mb-1">No se encontraron series</h3>
-      <p class="text-gray-500 text-sm">Crea tu primera serie para comenzar</p>
+      <h3 class="text-lg font-medium text-gray-700 mb-1">{{ $t('series.noSeriesFound') }}</h3>
+      <p class="text-gray-500 text-sm">{{ $t('series.createFirst') }}</p>
     </div>
     
     <BaseTable v-else class="text-sm">
       <template #header>
-        <th>Título</th>
-        <th>Autor</th>
-        <th>Posts</th>
-        <th>Última edición</th>
-        <th>Acciones</th>
+        <th>{{ $t('common.title') }}</th>
+        <th>{{ $t('common.author') }}</th>
+        <th>{{ $t('posts.title') }}</th>
+        <th>{{ $t('posts.lastEdited') }}</th>
+        <th>{{ $t('common.actions') }}</th>
       </template>
       
       <template #body>
@@ -148,12 +140,12 @@ onMounted(async () => {
             </div>
           </td>
           <td>
-            <div class="text-sm text-gray-900">{{ item.author?.name || 'Sin autor' }}</div>
+            <div class="text-sm text-gray-900">{{ item.author?.name || $t('posts.noAuthor') }}</div>
             <div class="text-xs text-gray-500">{{ item.author?.email }}</div>
           </td>
           <td>
             <div class="text-sm text-gray-900">
-              {{ item.posts?.length || 0 }} posts
+              {{ $t('series.postCount', { count: item.posts?.length || 0 }) }}
             </div>
           </td>
           <td>
@@ -166,21 +158,21 @@ onMounted(async () => {
               <button
                 @click="() => viewSeries(item)"
                 class="p-1 rounded hover:bg-blue-50 text-blue-600 transition-colors"
-                title="Ver en el frontend"
+                :title="$t('posts.viewInFrontend')"
               >
                 <Eye class="w-4 h-4" />
               </button>
               <button
                 @click="router.push(`/cms/series/${item.uuid}`)"
                 class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-                title="Editar serie"
+                :title="$t('series.editSeries')"
               >
                 <Edit class="w-4 h-4" />
               </button>
               <button
                 @click="handleDelete(item.uuid)"
                 class="p-1 rounded hover:bg-red-50 text-red-600 transition-colors"
-                title="Eliminar serie"
+                :title="$t('series.deleteSeries')"
               >
                 <Trash2 class="w-4 h-4" />
               </button>

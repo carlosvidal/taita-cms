@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import ViewLayout from '@/views/ViewLayout.vue'
 import CategoryList from '@/components/CategoryList.vue'
 import CategoryModal from '@/components/CategoryModal.vue'
@@ -7,6 +8,7 @@ import BaseButton from '@/components/BaseButton.vue'
 import api from '@/utils/api'
 import { Plus, Tag } from 'lucide-vue-next'
 
+const { t } = useI18n()
 const categories = ref([])
 const showModal = ref(false)
 const currentCategory = ref(null)
@@ -17,49 +19,23 @@ const fetchCategories = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    // Obtener el blog activo del localStorage
     const activeBlogUuid = localStorage.getItem('activeBlog');
     if (!activeBlogUuid) {
-      console.warn('No hay un blog activo seleccionado');
+      console.warn(t('posts.noBlogSelected'));
       categories.value = [];
       return;
     }
 
-    // Buscar el blog para obtener el ID
     const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
     const blogId = blogResponse.data.id;
 
-    console.log('[CategoriesView] Fetching categories for blogId:', blogId);
-
-    // Obtener categorías del blog activo
     const response = await api.get('/api/categories', {
       params: { blogId }
     });
 
-    console.log('[CategoriesView] Response data length:', response.data.length);
-    console.log('[CategoriesView] Category IDs:', response.data.map(c => ({ id: c.id, name: c.name, slug: c.slug })));
-
-    // Verificar si hay duplicados
-    const ids = response.data.map(c => c.id);
-    const uniqueIds = [...new Set(ids)];
-    if (ids.length !== uniqueIds.length) {
-      console.error('[CategoriesView] DUPLICATE IDs DETECTED!');
-      console.log('[CategoriesView] All IDs:', ids);
-      console.log('[CategoriesView] Unique IDs:', uniqueIds);
-    }
-
-    const names = response.data.map(c => c.name);
-    const uniqueNames = [...new Set(names)];
-    if (names.length !== uniqueNames.length) {
-      console.error('[CategoriesView] DUPLICATE NAMES DETECTED!');
-      console.log('[CategoriesView] All names:', names);
-      console.log('[CategoriesView] Unique names:', uniqueNames);
-    }
-
     categories.value = response.data;
   } catch (err) {
-    error.value = err.response?.data?.message ||
-                 'Failed to connect to server. Please check your connection and try again.';
+    error.value = err.response?.data?.message || t('errors.serverConnection');
     console.error('API Error:', {
       url: err.config?.url,
       status: err.response?.status,
@@ -82,55 +58,45 @@ const handleCreate = () => {
 
 const handleSave = async (categoryData) => {
   try {
-    // Obtener el blog activo del localStorage
     const activeBlogUuid = localStorage.getItem('activeBlog');
     if (!activeBlogUuid) {
-      throw new Error('No hay un blog seleccionado');
+      throw new Error(t('posts.noBlogSelected'));
     }
 
-    // Buscar el blog para obtener el ID
     const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
     const blogId = blogResponse.data.id;
 
-    // Validar que tengamos un blogId válido
     if (!blogId) {
-      throw new Error('No se pudo obtener el ID del blog');
+      throw new Error(t('posts.blogIdError'));
     }
 
-    // Preparar los datos con el blogId
     const categoryWithBlog = {
       ...categoryData,
       blogId: blogId
     };
 
-    console.log('Guardando categoría con datos:', categoryWithBlog);
-
     if (categoryData.id) {
-      // Actualizar categoría existente
-      const response = await api.patch(`/api/categories/${categoryData.id}`, categoryWithBlog);
-      console.log('Categoría actualizada:', response.data);
+      await api.patch(`/api/categories/${categoryData.id}`, categoryWithBlog);
     } else {
-      // Crear nueva categoría
-      const response = await api.post('/api/categories', categoryWithBlog);
-      console.log('Nueva categoría creada:', response.data);
+      await api.post('/api/categories', categoryWithBlog);
     }
     
     await fetchCategories();
     showModal.value = false;
   } catch (err) {
-    error.value = err.response?.data?.error || err.message || 'Error al guardar la categoría';
+    error.value = err.response?.data?.error || err.message || t('categories.saveError');
     console.error('Save Error:', err.response?.data || err);
   }
 };
 
 const handleDelete = async (id) => {
-  if (!confirm('¿Estás seguro de que quieres eliminar esta categoría?')) return;
+  if (!confirm(t('categories.deleteConfirm'))) return;
   
   try {
     await api.delete(`/api/categories/${id}`);
     await fetchCategories();
   } catch (err) {
-    error.value = err.response?.data?.message || 'Error deleting category';
+    error.value = err.response?.data?.message || t('categories.deleteError');
     console.error('Delete Error:', err.response?.data);
   }
 }
@@ -140,17 +106,16 @@ onMounted(fetchCategories)
 
 <template>
   <ViewLayout>
-    <template #title>Categorías</template>
-    <template #subtitle>Gestiona las categorías de tu blog</template>
+    <template #title>{{ $t('categories.title') }}</template>
+    <template #subtitle>{{ $t('categories.subtitle') }}</template>
     
     <div class="space-y-6">
-      <!-- Error message -->
       <div v-if="error" class="p-4 bg-red-50 rounded-lg border border-red-200">
         <p class="text-red-600 font-medium">{{ error }}</p>
       </div>
       
       <div class="flex justify-between items-center">
-        <h2 class="text-lg font-medium text-gray-900">Lista de categorías</h2>
+        <h2 class="text-lg font-medium text-gray-900">{{ $t('categories.listTitle') }}</h2>
         <BaseButton 
           variant="primary" 
           size="sm" 
@@ -159,32 +124,29 @@ onMounted(fetchCategories)
           <template #icon>
             <Plus class="w-4 h-4" />
           </template>
-          Nueva categoría
+          {{ $t('categories.newCategory') }}
         </BaseButton>
       </div>
       
-      <!-- Loading state -->
       <div v-if="isLoading" class="text-center py-8">
         <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-800 mx-auto"></div>
-        <p class="mt-2 text-gray-600 text-sm">Cargando categorías...</p>
+        <p class="mt-2 text-gray-600 text-sm">{{ $t('categories.loading') }}</p>
       </div>
       
-      <!-- Empty state -->
       <div v-else-if="!categories.length" class="text-center py-12 bg-white rounded-lg border border-gray-200">
         <div class="text-gray-400 mb-3">
           <Tag class="w-10 h-10" />
         </div>
-        <h3 class="text-lg font-medium text-gray-700 mb-1">No hay categorías</h3>
-        <p class="text-gray-500 text-sm mb-4">Comienza creando tu primera categoría</p>
+        <h3 class="text-lg font-medium text-gray-700 mb-1">{{ $t('categories.noCategoriesFound') }}</h3>
+        <p class="text-gray-500 text-sm mb-4">{{ $t('categories.createFirst') }}</p>
         <BaseButton variant="primary" size="sm" @click="handleCreate">
           <template #icon>
             <Plus class="w-4 h-4" />
           </template>
-          Crear categoría
+          {{ $t('categories.create') }}
         </BaseButton>
       </div>
       
-      <!-- Categories list -->
       <CategoryList 
         v-else
         :categories="categories"
@@ -193,7 +155,6 @@ onMounted(fetchCategories)
       />
     </div>
     
-    <!-- Category modal -->
     <CategoryModal
       v-if="showModal"
       :category="currentCategory"

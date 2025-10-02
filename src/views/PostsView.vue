@@ -1,12 +1,14 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import api from '@/utils/api'
 import { Plus, FileText, Edit, Trash2, Eye } from 'lucide-vue-next'
 
+const { t, locale } = useI18n()
 const router = useRouter()
 const posts = ref([])
 const isLoading = ref(false)
@@ -15,12 +17,12 @@ const activeBlog = ref(null)
 // Función para ver el post en el frontend
 const viewPost = (post) => {
   if (post.status?.toUpperCase() !== 'PUBLISHED') {
-    alert('Solo los posts publicados pueden ser visualizados en el frontend')
+    alert(t('posts.viewPostOnlyPublishedWarning'))
     return
   }
   
   if (!post.slug) {
-    alert('Este post no tiene un slug válido')
+    alert(t('posts.viewPostInvalidSlugWarning'))
     return
   }
   
@@ -45,15 +47,15 @@ const getActiveBlog = async () => {
 
 // Función para formatear fechas
 const formatDate = (dateString) => {
-  if (!dateString) return 'Fecha no disponible'
+  if (!dateString) return t('posts.dateUnavailable')
   
   const date = new Date(dateString)
   
   // Verificar si la fecha es válida
-  if (isNaN(date.getTime())) return 'Fecha inválida'
+  if (isNaN(date.getTime())) return t('posts.invalidDate')
   
   // Formatear la fecha en formato local
-  return new Intl.DateTimeFormat('es-ES', {
+  return new Intl.DateTimeFormat(locale.value, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -131,13 +133,13 @@ onMounted(() => {
 
 <template>
   <ViewLayout>
-    <template #title>Posts</template>
-    <template #subtitle>Manage your blog posts</template>
+    <template #title>{{ $t('posts.title') }}</template>
+    <template #subtitle>{{ $t('posts.subtitle') }}</template>
     
     <div class="flex justify-between items-center mb-6">
       <div>
         <p v-if="posts.length" class="text-gray-500 text-sm">
-          {{ posts.length }} {{ posts.length === 1 ? 'post' : 'posts' }} found
+          {{ $t('posts.postsFound', { count: posts.length }) }}
         </p>
       </div>
       
@@ -147,7 +149,7 @@ onMounted(() => {
       >
         <span class="flex items-center whitespace-nowrap">
           <Plus class="w-4 h-4 mr-2" />
-          Add Post
+          {{ $t('posts.addPost') }}
         </span>
       </BaseButton>
     </div>
@@ -156,25 +158,25 @@ onMounted(() => {
       <div class="animate-pulse flex justify-center">
         <div class="h-4 w-24 bg-gray-200 rounded"></div>
       </div>
-      <p class="mt-2 text-sm">Loading posts...</p>
+      <p class="mt-2 text-sm">{{ $t('posts.loadingPosts') }}</p>
     </div>
     
     <div v-else-if="!posts.length" class="py-12 text-center">
       <div class="text-gray-400 mb-3">
         <FileText class="w-10 h-10" />
       </div>
-      <h3 class="text-lg font-medium text-gray-700 mb-1">No posts found</h3>
-      <p class="text-gray-500 text-sm">Create your first post to get started</p>
+      <h3 class="text-lg font-medium text-gray-700 mb-1">{{ $t('posts.noPostsFound') }}</h3>
+      <p class="text-gray-500 text-sm">{{ $t('posts.createFirstPost') }}</p>
     </div>
     
     <BaseTable v-else class="text-sm">
       <template #header>
-        <th>Título</th>
-        <th>Autor</th>
-        <th>Categoría</th>
-        <th>Estado</th>
-        <th>Última edición</th>
-        <th>Acciones</th>
+        <th>{{ $t('common.title') }}</th>
+        <th>{{ $t('common.author') }}</th>
+        <th>{{ $t('posts.category') }}</th>
+        <th>{{ $t('common.status') }}</th>
+        <th>{{ $t('posts.lastEdited') }}</th>
+        <th>{{ $t('common.actions') }}</th>
       </template>
       
       <template #body>
@@ -191,13 +193,13 @@ onMounted(() => {
             </div>
           </td>
           <td>
-            <div class="text-sm text-gray-900">{{ post.author?.name || 'Sin autor' }}</div>
+            <div class="text-sm text-gray-900">{{ post.author?.name || $t('posts.noAuthor') }}</div>
             <div class="text-xs text-gray-500">{{ post.author?.email }}</div>
           </td>
           <td>
             <!-- Categoría sin estilo pill -->
             <div class="text-sm text-gray-900">
-              {{ post.category?.name || 'Sin categoría' }}
+              {{ post.category?.name || $t('posts.noCategory') }}
             </div>
           </td>
           <td>
@@ -209,7 +211,7 @@ onMounted(() => {
                 'bg-yellow-100 text-yellow-800': post.status?.toUpperCase() === 'DRAFT'
               }"
             >
-              {{ post.status?.toUpperCase() === 'PUBLISHED' ? 'Publicado' : 'Borrador' }}
+              {{ post.status?.toUpperCase() === 'PUBLISHED' ? $t('posts.published') : $t('posts.draft') }}
             </span>
           </td>
           <td>
@@ -223,21 +225,21 @@ onMounted(() => {
                 v-if="post.status?.toUpperCase() === 'PUBLISHED'"
                 @click="() => viewPost(post)" 
                 class="p-1 rounded hover:bg-blue-50 text-blue-600 transition-colors"
-                title="Ver en el frontend"
+                :title="$t('posts.viewInFrontend')"
               >
                 <Eye class="w-4 h-4" />
               </button>
               <button 
                 @click="() => router.push(`/cms/posts/${post.uuid}/edit`)" 
                 class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-                title="Editar"
+                :title="$t('common.edit')"
               >
                 <Edit class="w-4 h-4" />
               </button>
               <button 
                 @click="() => handleDelete(post.uuid)" 
                 class="p-1 rounded hover:bg-red-50 text-red-600 transition-colors"
-                title="Eliminar"
+                :title="$t('common.delete')"
               >
                 <Trash2 class="w-4 h-4" />
               </button>

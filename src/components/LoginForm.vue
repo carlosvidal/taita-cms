@@ -3,7 +3,7 @@
     <div class="login-card">
       <div class="login-header">
         <h1 class="login-title">CMS</h1>
-        <p class="login-subtitle">Inicia sesión para acceder al panel de administración</p>
+        <p class="login-subtitle">{{ $t('login.subtitle') }}</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="login-form">
@@ -12,37 +12,35 @@
         </div>
 
         <div class="form-group">
-          <label for="email" class="form-label">Email</label>
-          <input id="email" v-model="email" type="email" placeholder="tu@email.com" class="form-input" required
+          <label for="email" class="form-label">{{ $t('common.email') }}</label>
+          <input id="email" v-model="email" type="email" :placeholder="$t('login.emailPlaceholder')" class="form-input" required
             :disabled="isLoading">
         </div>
 
         <div class="form-group">
-          <label for="password" class="form-label">Contraseña</label>
+          <label for="password" class="form-label">{{ $t('common.password') }}</label>
           <input id="password" v-model="password" type="password" placeholder="••••••••" class="form-input" required
             :disabled="isLoading">
         </div>
 
         <button type="submit" class="login-button" :disabled="isLoading">
           <span v-if="isLoading" class="loading-spinner"></span>
-          <span v-else>Iniciar sesión</span>
+          <span v-else>{{ $t('login.login') }}</span>
         </button>
 
         <div class="forgot-link mt-2 text-center">
-          <router-link to="/forgot-password" class="text-blue-600 hover:underline">¿Olvidaste tu
-            contraseña?</router-link>
+          <router-link to="/forgot-password" class="text-blue-600 hover:underline">{{ $t('login.forgotPassword') }}</router-link>
         </div>
 
-        <!-- Credenciales de prueba -->
         <div class="test-credentials">
-          <p>Credenciales de prueba:</p>
-          <code>Email: admin@example.com</code>
-          <code>Contraseña: securepassword</code>
+          <p>{{ $t('login.testCredentials') }}</p>
+          <code>{{ $t('login.testEmail') }}</code>
+          <code>{{ $t('login.testPassword') }}</code>
         </div>
       </form>
       <div class="signup-link mt-4 text-center">
-        <span>¿No tienes cuenta?</span>
-        <router-link to="/signup" class="text-blue-600 hover:underline ml-1">Regístrate</router-link>
+        <span>{{ $t('login.noAccount') }}</span>
+        <router-link to="/signup" class="text-blue-600 hover:underline ml-1">{{ $t('login.signUp') }}</router-link>
       </div>
     </div>
   </div>
@@ -51,10 +49,12 @@
 <script>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 
 export default {
   setup() {
+    const { t } = useI18n()
     const router = useRouter()
     const email = ref('')
     const password = ref('')
@@ -66,14 +66,10 @@ export default {
       isLoading.value = true
 
       try {
-        console.log('Iniciando proceso de login...', { email: email.value });
-        
-        // Validar campos requeridos
         if (!email.value || !password.value) {
-          throw new Error('Por favor ingresa tu correo y contraseña');
+          throw new Error(t('login.enterCredentials'));
         }
         
-        // Usar la instancia de api configurada en api.js
         const response = await api.post('/api/auth/login', {
           email: email.value.trim(),
           password: password.value
@@ -81,44 +77,36 @@ export default {
           headers: {
             'Content-Type': 'application/json',
           },
-          withCredentials: false  // Deshabilitar el envío automático de credenciales
+          withCredentials: false
         }).catch(err => {
-          console.error('Error en la petición de login:', err);
-          
-          // Manejar errores de red
           if (err.code === 'ECONNABORTED') {
-            throw new Error('El servidor está tardando demasiado en responder. Por favor, verifica tu conexión.');
+            throw new Error(t('errors.serverTimeout'));
           }
           
-          // Manejar errores de respuesta HTTP
           if (err.response) {
-            console.error('Respuesta del servidor:', err.response.data);
-            
             if (err.response.status === 401) {
-              throw new Error('Correo o contraseña incorrectos');
+              throw new Error(t('login.invalidCredentials'));
             } else if (err.response.status >= 500) {
-              throw new Error('Error en el servidor. Por favor, inténtalo más tarde.');
+              throw new Error(t('errors.serverError'));
             } else if (err.response.data && err.response.data.error) {
               throw new Error(err.response.data.error);
             }
           }
           
-          throw new Error('Error de conexión. Por favor, verifica tu conexión a internet.');
+          throw new Error(t('errors.networkError'));
         });
 
         const data = response.data;
-        console.log('Respuesta del servidor:', { success: data.success, user: data.user?.email });
 
         if (!data.success) {
-          throw new Error(data.error || 'Error en la autenticación. Por favor, verifica tus credenciales.');
+          throw new Error(data.error || t('login.authError'));
         }
 
         if (!data.token || !data.user) {
-          throw new Error('Respuesta del servidor incompleta. Por favor, intenta nuevamente.');
+          throw new Error(t('errors.incompleteResponse'));
         }
 
         try {
-          // Guardar el token JWT y los datos del usuario por separado
           const userData = {
             id: data.user.id,
             uuid: data.user.uuid,
@@ -130,28 +118,20 @@ export default {
           localStorage.setItem('authToken', data.token);
           localStorage.setItem('authUser', JSON.stringify(userData));
 
-          console.log('Usuario autenticado exitosamente:', userData);
-          
-          // Redirigir según el rol
           const redirectRoute = userData.role === 'SUPER_ADMIN' 
             ? { name: 'super-admin-blogs' } 
             : { name: 'dashboard' };
             
-          console.log('Redirigiendo a:', redirectRoute);
           router.push(redirectRoute);
           
         } catch (storageError) {
-          console.error('Error al guardar los datos de sesión:', storageError);
-          throw new Error('Error al iniciar sesión. Por favor, verifica la configuración de tu navegador.');
+          console.error(t('login.sessionError'), storageError);
+          throw new Error(t('login.browserError'));
         }
 
       } catch (err) {
-        console.error('Error en handleLogin:', {
-          message: err.message,
-          name: err.name,
-          stack: err.stack
-        });
-        error.value = err.message || 'Error inesperado al iniciar sesión. Por favor, inténtalo de nuevo.';
+        console.error('Error in handleLogin:', err);
+        error.value = err.message || t('login.unexpectedError');
       } finally {
         isLoading.value = false;
       }

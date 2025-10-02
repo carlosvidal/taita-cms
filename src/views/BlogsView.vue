@@ -1,8 +1,7 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import BaseTable from '@/components/BaseTable.vue'
-
-import { ref, onMounted } from 'vue'
 import ViewLayout from './ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BlogModal from '@/components/BlogModal.vue'
@@ -10,12 +9,12 @@ import api from '@/utils/api'
 import { Plus, LayoutDashboard, Eye, LogIn, Settings } from 'lucide-vue-next'
 import router from '@/router'
 
+const { t } = useI18n()
 const blogs = ref([])
 const showModal = ref(false)
 const currentBlog = ref(null)
 
 function viewBlog(blog) {
-  // Abrir blog en nueva pestaña
   const url = blog.domain ? `https://${blog.subdomain}.${blog.domain}` : `https://${blog.subdomain}.taita.blog`;
   window.open(url, '_blank');
 }
@@ -25,7 +24,6 @@ function openSettings(blog) {
   showModal.value = true;
 }
 
-// selectBlog ya está implementado, solo actualiza activeBlog y redirige
 const isLoading = ref(false)
 const error = ref('')
 
@@ -36,8 +34,7 @@ const fetchBlogs = async () => {
     const response = await api.get('/api/blogs');
     blogs.value = response.data;
   } catch (err) {
-    error.value = err.response?.data?.message ||
-      'No se pudo conectar al servidor. Intenta nuevamente.';
+    error.value = err.response?.data?.message || t('errors.serverConnection');
     console.error('API Error:', err);
   } finally {
     isLoading.value = false;
@@ -61,36 +58,18 @@ const handleSave = async (blogData) => {
     await fetchBlogs()
     showModal.value = false
   } catch (err) {
-    error.value = err.response?.data?.message || err.response?.data?.error || 'Error al guardar blog'
+    error.value = err.response?.data?.message || err.response?.data?.error || t('blogs.saveError')
     console.error('Save Error:', err)
   }
 }
 
-// Función simplificada para seleccionar un blog
 const selectBlog = async (blog) => {
-  console.log('Intentando seleccionar blog:', blog);
-  
   try {
-    // Guardar el UUID directamente sin verificar
-    console.log('Guardando UUID en localStorage:', blog.uuid);
     localStorage.setItem('activeBlog', blog.uuid);
-    
-    // Redirige al dashboard del CMS usando Vue Router
-    console.log('Redirigiendo al dashboard...');
     router.push({ name: 'dashboard' });
   } catch (error) {
     console.error('Error al seleccionar blog:', error);
-    console.log('Detalles del error:', {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message
-    });
-    
-    alert(`No se pudo seleccionar el blog. Error: ${error.response?.status || error.message}. Por favor, inténtalo de nuevo o selecciona otro blog.`);
-    
-    // Recargar la lista de blogs para asegurarse de que están actualizados
-    console.log('Recargando lista de blogs...');
+    alert(t('blogs.selectError', { error: error.response?.status || error.message }));
     fetchBlogs();
   }
 }
@@ -104,22 +83,18 @@ const user = computed(() => {
 });
 const isSuperAdmin = computed(() => user.value.role === 'SUPER_ADMIN');
 
-// Función para limpiar el blog activo de localStorage
 const resetActiveBlog = () => {
   localStorage.removeItem('activeBlog');
-  alert('Se ha reiniciado la selección de blog. Ahora puedes seleccionar un blog válido.');
-  fetchBlogs(); // Recargar la lista de blogs
+  alert(t('blogs.selectionReset'));
+  fetchBlogs();
 };
 
 onMounted(() => {
-  // Limpiar automáticamente el localStorage al cargar la página
-  // Esto forzará al usuario a seleccionar un blog válido
   const oldActiveBlog = localStorage.getItem('activeBlog');
   localStorage.removeItem('activeBlog');
   console.log('Se ha limpiado la selección de blog automáticamente. Valor anterior:', oldActiveBlog);
   
   if (user.value && user.value.id) {
-    console.log('Usuario autenticado:', user.value);
     fetchBlogs();
   } else {
     console.log('No hay usuario autenticado o falta ID');
@@ -129,40 +104,30 @@ onMounted(() => {
 
 <template>
   <div class="blogs-select-container" >
-    <div class="blogs-header flex items-center justify-between mb-6" style="
-      margin-bottom: 2rem;
-    ">
+    <div class="blogs-header flex items-center justify-between mb-6" style="margin-bottom: 2rem;">
       <div class="flex items-center">
-        <h1 class="blogs-title" style="
-          font-size: 1.45rem;
-          font-weight: 700;
-          color: #222;
-          margin: 0;
-        ">Selecciona un blog</h1>
+        <h1 class="blogs-title" style="font-size: 1.45rem; font-weight: 700; color: #222; margin: 0;">{{ $t('blogs.selectBlog') }}</h1>
         <button 
           @click="resetActiveBlog" 
           class="ml-4 px-3 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-800 rounded-md transition-colors"
-          title="Usar si tienes problemas al seleccionar blogs"
+          :title="$t('blogs.resetSelectionTooltip')"
         >
-          Reiniciar selección
+          {{ $t('blogs.resetSelection') }}
         </button>
       </div>
-      <BaseButton v-if="isAdmin" @click="handleCreate" color="primary" class="new-blog-btn" style="
-        margin-left: auto;
-        margin-bottom: 0;
-      ">
-        <Plus class="icon" /> Nuevo Blog
+      <BaseButton v-if="isSuperAdmin" @click="handleCreate" color="primary" class="new-blog-btn" style="margin-left: auto; margin-bottom: 0;">
+        <Plus class="icon" /> {{ $t('blogs.newBlog') }}
       </BaseButton>
     </div>
     <div v-if="error" class="error mb-4">{{ error }}</div>
-    <div v-if="isLoading" class="py-8 text-center text-gray-500">Cargando blogs...</div>
+    <div v-if="isLoading" class="py-8 text-center text-gray-500">{{ $t('blogs.loading') }}</div>
     <BaseTable v-else :empty="blogs.length === 0" :col-span="4">
       <template #header>
-        <th>Nombre</th>
-        <th>Subdominio</th>
-        <th>Dominio</th>
-        <th>Plan</th>
-        <th class="text-right">Acciones</th>
+        <th>{{ $t('common.name') }}</th>
+        <th>{{ $t('blogs.subdomain') }}</th>
+        <th>{{ $t('settings.domain') }}</th>
+        <th>{{ $t('settings.plan') }}</th>
+        <th class="text-right">{{ $t('common.actions') }}</th>
       </template>
       <template #body>
         <tr v-for="blog in blogs" :key="blog.id" class="blog-row">
@@ -171,20 +136,20 @@ onMounted(() => {
           <td>{{ blog.domain || '-' }}</td>
           <td>{{ blog.plan || '-' }}</td>
           <td class="flex gap-2 justify-end">
-            <button @click.stop="viewBlog(blog)" class="action-btn" title="Ver blog">
+            <button @click.stop="viewBlog(blog)" class="action-btn" :title="$t('blogs.viewBlog')">
               <Eye class="w-5 h-5" />
             </button>
-            <button @click.stop="selectBlog(blog)" class="action-btn" title="Entrar al CMS">
+            <button @click.stop="selectBlog(blog)" class="action-btn" :title="$t('blogs.enterCms')">
               <LogIn class="w-5 h-5" />
             </button>
-            <button v-if="isSuperAdmin" @click.stop="openSettings(blog)" class="action-btn" title="Configuraciones">
+            <button v-if="isSuperAdmin" @click.stop="openSettings(blog)" class="action-btn" :title="$t('settings.title')">
               <Settings class="w-5 h-5" />
             </button>
           </td>
         </tr>
       </template>
       <template #empty>
-        No hay blogs registrados.
+        {{ $t('blogs.noBlogs') }}
       </template>
     </BaseTable>
     <BlogModal v-if="showModal" :blog="currentBlog" @save="handleSave" @close="showModal = false" />

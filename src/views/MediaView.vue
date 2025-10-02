@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import api from '@/utils/api'
 import { Plus, Trash2, Download, ExternalLink } from 'lucide-vue-next'
 
+const { t, locale } = useI18n()
 const mediaItems = ref([])
 const isLoading = ref(false)
 const error = ref(null)
@@ -13,83 +15,52 @@ const uploadFile = ref(null)
 const isUploading = ref(false)
 const uploadError = ref(null)
 
-// URL base para las imágenes
 const apiBaseUrl = computed(() => {
   return import.meta.env.VITE_API_URL || 'http://localhost:3000'
 })
 
-// Función para obtener la URL completa de una imagen
 const getFullImageUrl = (path) => {
   if (!path) return ''
-  
-  // Si la URL ya es completa (Cloudinary), devolverla tal como está
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path
   }
-  
-  // Si es una ruta local, agregar la base URL del API
   return `${apiBaseUrl.value}${path.startsWith('/') ? '' : '/'}${path}`
 }
 
-// Obtener todas las imágenes
 const fetchMedia = async () => {
   isLoading.value = true
   error.value = null
   try {
     const response = await api.get('/api/media')
-    console.log('Full response from API:', response.data)
-    
-    // La API devuelve {success: true, data: [...]} así que usamos response.data.data
     const mediaData = response.data.data || response.data || []
-    console.log('Media data to process:', mediaData)
-    
-    // Procesar las URLs para asegurarnos de que sean correctas
-    mediaItems.value = mediaData.map(item => {
-      console.log('Processing item:', item)
-      
-      // La nueva API devuelve { url, variants } en lugar de { urls }
-      // Convertir al formato que espera el CMS
-      const processedItem = {
-        ...item,
-        // Crear urls desde el nuevo formato si no existe
-        urls: item.urls || {
-          original: item.url || item.cloudinaryUrl || item.path,
-          small: item.variants?.small || item.url || item.cloudinaryUrl || item.path,
-          medium: item.variants?.medium || item.url || item.cloudinaryUrl || item.path,
-          large: item.variants?.large || item.url || item.cloudinaryUrl || item.path
-        }
+    mediaItems.value = mediaData.map(item => ({
+      ...item,
+      urls: item.urls || {
+        original: item.url || item.cloudinaryUrl || item.path,
+        small: item.variants?.small || item.url || item.cloudinaryUrl || item.path,
+        medium: item.variants?.medium || item.url || item.cloudinaryUrl || item.path,
+        large: item.variants?.large || item.url || item.cloudinaryUrl || item.path
       }
-      
-      console.log('Processed item:', processedItem)
-      return processedItem
-    })
-    
-    console.log('Media items loaded:', mediaItems.value)
+    }))
   } catch (err) {
     console.error('Error loading media:', err)
-    error.value = err.response?.data?.message || 
-                 err.response?.data?.error || 
-                 err.message || 
-                 'Error al cargar las imágenes'
+    error.value = err.response?.data?.message || err.response?.data?.error || err.message || t('media.loadError')
   } finally {
     isLoading.value = false
   }
 }
 
-// Manejar la selección de archivo
 const handleFileSelect = (event) => {
   const file = event.target.files[0]
   if (!file) return
   
-  // Validar tipo de archivo
   if (!file.type.match('image/(jpeg|jpg|png|webp)')) {
-    uploadError.value = 'Solo se permiten imágenes JPG, PNG o WebP'
+    uploadError.value = t('media.invalidImageFormat')
     return
   }
   
-  // Validar tamaño del archivo (máximo 5MB)
   if (file.size > 5 * 1024 * 1024) {
-    uploadError.value = 'La imagen no debe superar los 5MB'
+    uploadError.value = t('media.imageTooLarge')
     return
   }
   
@@ -97,10 +68,9 @@ const handleFileSelect = (event) => {
   uploadError.value = null
 }
 
-// Subir imagen
 const uploadImage = async () => {
   if (!uploadFile.value) {
-    uploadError.value = 'Selecciona una imagen para subir'
+    uploadError.value = t('media.selectAFileToUpload')
     return
   }
   
@@ -112,51 +82,34 @@ const uploadImage = async () => {
     formData.append('image', uploadFile.value)
     formData.append('entityType', 'general')
     
-    console.log('Subiendo imagen:', {
-      nombre: uploadFile.value.name,
-      tipo: uploadFile.value.type,
-      tamaño: uploadFile.value.size
-    })
-    
-    // Usar fetch nativo con autenticación
     const token = localStorage.getItem('authToken')
     if (!token) {
-      throw new Error('Token de autenticación no encontrado')
+      throw new Error(t('errors.authTokenNotFound'))
     }
     
     const response = await fetch(`${apiBaseUrl.value}/api/media/upload`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
+      headers: { 'Authorization': `Bearer ${token}` },
       body: formData
     })
     
     const responseData = await response.json()
-    console.log('Respuesta de carga de imagen:', response.status, responseData)
-    
     if (!response.ok) {
       throw new Error(`Error ${response.status}: ${JSON.stringify(responseData)}`)
     }
     
-    console.log('Imagen subida exitosamente:', responseData)
-    
-    // Actualizar la lista de imágenes
     await fetchMedia()
-    
-    // Cerrar modal
     closeUploadModal()
   } catch (err) {
     console.error('Error al subir imagen:', err)
-    uploadError.value = err.message || 'Error al subir la imagen'
+    uploadError.value = err.message || t('media.uploadError')
   } finally {
     isUploading.value = false
   }
 }
 
-// Eliminar imagen
 const deleteImage = async (id) => {
-  if (!confirm('¿Estás seguro de que deseas eliminar esta imagen? Esta acción no se puede deshacer.')) {
+  if (!confirm(t('media.deleteConfirm'))) {
     return
   }
   
@@ -165,17 +118,13 @@ const deleteImage = async (id) => {
     await fetchMedia()
   } catch (err) {
     console.error('Error deleting image:', err)
-    error.value = err.response?.data?.message || 
-                 err.response?.data?.error || 
-                 err.message || 
-                 'Error al eliminar la imagen'
+    error.value = err.response?.data?.message || err.response?.data?.error || err.message || t('media.deleteError')
   }
 }
 
-// Formatear fecha
 const formatDate = (dateString) => {
   const date = new Date(dateString)
-  return new Intl.DateTimeFormat('es', { 
+  return new Intl.DateTimeFormat(locale.value, { 
     year: 'numeric', 
     month: 'short', 
     day: 'numeric',
@@ -184,37 +133,31 @@ const formatDate = (dateString) => {
   }).format(date)
 }
 
-// Formatear tamaño de archivo
 const formatFileSize = (bytes) => {
   if (bytes < 1024) return bytes + ' B'
   else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB'
   else return (bytes / 1048576).toFixed(1) + ' MB'
 }
 
-// Abrir modal de subida
 const openUploadModal = () => {
   showUploadModal.value = true
   uploadFile.value = null
   uploadError.value = null
 }
 
-// Cerrar modal de subida
 const closeUploadModal = () => {
   showUploadModal.value = false
   uploadFile.value = null
   uploadError.value = null
 }
 
-// Copiar URL al portapapeles
 const copyToClipboard = (url) => {
-  console.log('Copiando URL al portapapeles:', url)
-  
   navigator.clipboard.writeText(url)
     .then(() => {
-      alert('URL copiada al portapapeles')
+      alert(t('media.urlCopied'))
     })
     .catch(err => {
-      console.error('Error al copiar URL:', err)
+      console.error(t('media.copyUrlError'), err)
     })
 }
 
@@ -225,13 +168,13 @@ onMounted(() => {
 
 <template>
   <ViewLayout>
-    <template #title>Biblioteca de Medios</template>
-    <template #subtitle>Gestiona las imágenes de tu sitio</template>
+    <template #title>{{ $t('media.title') }}</template>
+    <template #subtitle>{{ $t('media.subtitle') }}</template>
 
     <div class="flex justify-between items-center mb-6">
       <div>
         <p v-if="mediaItems.length" class="text-gray-500 text-sm">
-          {{ mediaItems.length }} {{ mediaItems.length === 1 ? 'imagen' : 'imágenes' }} encontradas
+          {{ $t('media.mediaFound', { count: mediaItems.length }) }}
         </p>
       </div>
 
@@ -239,7 +182,7 @@ onMounted(() => {
         <template #icon>
           <Plus class="w-4 h-4" />
         </template>
-        Subir Imagen
+        {{ $t('media.uploadImage') }}
       </BaseButton>
     </div>
 
@@ -247,7 +190,7 @@ onMounted(() => {
       <div class="animate-pulse flex justify-center">
         <div class="h-4 w-24 bg-panel rounded"></div>
       </div>
-      <p class="mt-2 text-sm">Cargando imágenes...</p>
+      <p class="mt-2 text-sm">{{ $t('media.loadingImages') }}</p>
     </div>
 
     <div v-else-if="!mediaItems.length" class="py-12 text-center">
@@ -256,8 +199,8 @@ onMounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       </div>
-      <h3 class="text-lg font-medium text-gray-700 mb-1">No se encontraron imágenes</h3>
-      <p class="text-gray-500 text-sm">Sube tu primera imagen para comenzar</p>
+      <h3 class="text-lg font-medium text-gray-700 mb-1">{{ $t('media.noMediaFound') }}</h3>
+      <p class="text-gray-500 text-sm">{{ $t('media.uploadFirstImage') }}</p>
     </div>
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -265,7 +208,7 @@ onMounted(() => {
         <div class="relative h-48 overflow-hidden bg-panel">
           <img v-if="item.urls?.original" :src="getFullImageUrl(item.urls.original)" :alt="item.originalName" class="w-full h-full object-cover">
           <div v-else class="flex items-center justify-center h-full bg-panel">
-            <span class="text-gray-500">Sin imagen</span>
+            <span class="text-gray-500">{{ $t('media.noImage') }}</span>
           </div>
           <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 hover:opacity-100">
             <div class="flex space-x-2">
@@ -290,14 +233,14 @@ onMounted(() => {
               {{ item.entityType || 'general' }}
             </span>
             <button v-if="item.urls?.original" @click="copyToClipboard(getFullImageUrl(item.urls.original))" class="text-xs text-blue-600 hover:text-blue-800">
-              Copiar URL
+              {{ $t('media.copyUrl') }}
             </button>
-            <span v-else class="text-xs text-gray-400">Sin URL</span>
+            <span v-else class="text-xs text-gray-400">{{ $t('media.noUrl') }}</span>
           </div>
           <div class="mt-2 text-xs text-gray-500">
-            <p class="truncate"><span class="font-medium">Tipo:</span> {{ item.entityType || 'general' }}</p>
-            <p class="truncate"><span class="font-medium">Fecha:</span> {{ formatDate(item.createdAt) }}</p>
-            <p class="truncate"><span class="font-medium">ID:</span> {{ item.id }}</p>
+            <p class="truncate"><span class="font-medium">{{ $t('media.type') }}:</span> {{ item.entityType || 'general' }}</p>
+            <p class="truncate"><span class="font-medium">{{ $t('common.date') }}:</span> {{ formatDate(item.createdAt) }}</p>
+            <p class="truncate"><span class="font-medium">{{ $t('media.id') }}:</span> {{ item.id }}</p>
           </div>
         </div>
       </div>
@@ -306,7 +249,7 @@ onMounted(() => {
     <!-- Upload Modal -->
     <div v-if="showUploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-panel rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Subir nueva imagen</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('media.uploadNewImage') }}</h3>
         
         <div v-if="uploadError" class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
           {{ uploadError }}
@@ -314,7 +257,7 @@ onMounted(() => {
         
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            Selecciona una imagen (JPG, PNG o WebP, máx. 5MB)
+            {{ $t('media.selectImagePrompt') }}
           </label>
           <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
             <div class="space-y-1 text-center">
@@ -323,18 +266,18 @@ onMounted(() => {
               </svg>
               <div class="flex text-sm text-gray-600">
                 <label for="file-upload" class="relative cursor-pointer bg-panel rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                  <span>Subir un archivo</span>
+                  <span>{{ $t('media.uploadFile') }}</span>
                   <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/jpeg,image/png,image/webp" @change="handleFileSelect">
                 </label>
-                <p class="pl-1">o arrastra y suelta</p>
+                <p class="pl-1">{{ $t('media.dragAndDrop') }}</p>
               </div>
               <p class="text-xs text-gray-500">
-                JPG, PNG, WebP hasta 5MB
+                {{ $t('media.fileTypesAndSize') }}
               </p>
             </div>
           </div>
           <div v-if="uploadFile" class="mt-2 text-sm text-gray-600">
-            Archivo seleccionado: {{ uploadFile.name }} ({{ formatFileSize(uploadFile.size) }})
+            {{ $t('media.fileSelected', { name: uploadFile.name, size: formatFileSize(uploadFile.size) }) }}
           </div>
         </div>
         
@@ -344,7 +287,7 @@ onMounted(() => {
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-panel border border-gray-300 rounded-md shadow-sm hover:bg-panel"
             :disabled="isUploading"
           >
-            Cancelar
+            {{ $t('common.cancel') }}
           </button>
           <button 
             @click="uploadImage" 
@@ -356,9 +299,9 @@ onMounted(() => {
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Subiendo...
+              {{ $t('media.uploading') }}
             </span>
-            <span v-else>Subir imagen</span>
+            <span v-else>{{ $t('media.uploadImage') }}</span>
           </button>
         </div>
       </div>

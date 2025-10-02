@@ -1,12 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import api from '@/utils/api'
 import { Plus, FileText, Edit, Trash2, Eye } from 'lucide-vue-next'
 
+const { t, locale } = useI18n()
 const router = useRouter()
 const pages = ref([])
 const isLoading = ref(false)
@@ -14,15 +16,15 @@ const activeBlog = ref(null)
 
 // Función para formatear fechas
 const formatDate = (dateString) => {
-  if (!dateString) return 'Fecha no disponible'
+  if (!dateString) return t('posts.dateUnavailable')
   
   const date = new Date(dateString)
   
   // Verificar si la fecha es válida
-  if (isNaN(date.getTime())) return 'Fecha inválida'
+  if (isNaN(date.getTime())) return t('posts.invalidDate')
   
   // Formatear la fecha en formato local
-  return new Intl.DateTimeFormat('es-ES', {
+  return new Intl.DateTimeFormat(locale.value, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -54,12 +56,12 @@ const fetchPages = async () => {
 // Función para ver la página en el frontend
 const viewPage = (page) => {
   if (page.status?.toUpperCase() !== 'PUBLISHED') {
-    alert('Solo las páginas publicadas pueden ser visualizadas en el frontend')
+    alert(t('pages.viewPageOnlyPublishedWarning'))
     return
   }
 
   if (!page.slug) {
-    alert('Esta página no tiene un slug válido')
+    alert(t('pages.viewPageInvalidSlugWarning'))
     return
   }
 
@@ -70,7 +72,7 @@ const viewPage = (page) => {
 }
 
 const handleDelete = async (uuid) => {
-  if (!confirm('¿Estás seguro de que deseas eliminar esta página?')) return
+  if (!confirm(t('pages.deleteConfirm'))) return
   
   try {
     await api.delete(`/api/pages/uuid/${uuid}`)
@@ -85,13 +87,13 @@ onMounted(fetchPages)
 
 <template>
   <ViewLayout>
-    <template #title>Pages</template>
-    <template #subtitle>Manage your website pages</template>
+    <template #title>{{ $t('pages.title') }}</template>
+    <template #subtitle>{{ $t('pages.subtitle') }}</template>
     
     <div class="flex justify-between items-center mb-6">
       <div>
         <p v-if="pages.length" class="text-gray-500 text-sm">
-          {{ pages.length }} {{ pages.length === 1 ? 'page' : 'pages' }} found
+          {{ $t('pages.pagesFound', { count: pages.length }) }}
         </p>
       </div>
       
@@ -102,7 +104,7 @@ onMounted(fetchPages)
         <template #icon>
           <Plus class="w-4 h-4" />
         </template>
-        Add Page
+        {{ $t('pages.addPage') }}
       </BaseButton>
     </div>
     
@@ -110,24 +112,24 @@ onMounted(fetchPages)
       <div class="animate-pulse flex justify-center">
         <div class="h-4 w-24 bg-gray-200 rounded"></div>
       </div>
-      <p class="mt-2 text-sm">Loading pages...</p>
+      <p class="mt-2 text-sm">{{ $t('pages.loadingPages') }}</p>
     </div>
     
     <div v-else-if="!pages.length" class="py-12 text-center">
       <div class="text-gray-400 mb-3">
         <FileText class="w-10 h-10" />
       </div>
-      <h3 class="text-lg font-medium text-gray-700 mb-1">No pages found</h3>
-      <p class="text-gray-500 text-sm">Create your first page to get started</p>
+      <h3 class="text-lg font-medium text-gray-700 mb-1">{{ $t('pages.noPagesFound') }}</h3>
+      <p class="text-gray-500 text-sm">{{ $t('pages.createFirstPage') }}</p>
     </div>
     
     <BaseTable v-else class="text-sm">
       <template #header>
-        <th>Título</th>
-        <th>Autor</th>
-        <th>Estado</th>
-        <th>Última edición</th>
-        <th>Acciones</th>
+        <th>{{ $t('common.title') }}</th>
+        <th>{{ $t('common.author') }}</th>
+        <th>{{ $t('common.status') }}</th>
+        <th>{{ $t('posts.lastEdited') }}</th>
+        <th>{{ $t('common.actions') }}</th>
       </template>
       
       <template #body>
@@ -144,7 +146,7 @@ onMounted(fetchPages)
             </div>
           </td>
           <td>
-            <div class="text-sm text-gray-900">{{ page.author?.name || 'Sin autor' }}</div>
+            <div class="text-sm text-gray-900">{{ page.author?.name || $t('posts.noAuthor') }}</div>
             <div class="text-xs text-gray-500">{{ page.author?.email }}</div>
           </td>
           <td>
@@ -155,7 +157,7 @@ onMounted(fetchPages)
                 'bg-yellow-100 text-yellow-800': page.status === 'DRAFT'
               }"
             >
-              {{ page.status === 'PUBLISHED' ? 'Publicado' : 'Borrador' }}
+              {{ page.status === 'PUBLISHED' ? $t('posts.published') : $t('posts.draft') }}
             </span>
           </td>
           <td>
@@ -169,21 +171,21 @@ onMounted(fetchPages)
                 v-if="page.status === 'PUBLISHED'"
                 @click="() => viewPage(page)"
                 class="p-1 rounded hover:bg-blue-50 text-blue-600 transition-colors"
-                title="Ver en el frontend"
+                :title="$t('posts.viewInFrontend')"
               >
                 <Eye class="w-4 h-4" />
               </button>
               <button
                 @click="() => router.push(`/cms/pages/${page.uuid}/edit`)"
                 class="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-                title="Editar"
+                :title="$t('common.edit')"
               >
                 <Edit class="w-4 h-4" />
               </button>
               <button
                 @click="() => handleDelete(page.uuid)"
                 class="p-1 rounded hover:bg-red-50 text-red-600 transition-colors"
-                title="Eliminar"
+                :title="$t('common.delete')"
               >
                 <Trash2 class="w-4 h-4" />
               </button>

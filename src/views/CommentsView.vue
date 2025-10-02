@@ -1,33 +1,33 @@
 <template>
   <ViewLayout>
-    <template #title>Comentarios</template>
-    <template #subtitle>Modera los comentarios de tus posts</template>
+    <template #title>{{ $t('comments.title') }}</template>
+    <template #subtitle>{{ $t('comments.subtitle') }}</template>
 
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
       <div class="flex items-center gap-2">
-        <label class="text-panel-text font-medium">Estado:</label>
+        <label class="text-panel-text font-medium">{{ $t('common.status') }}:</label>
         <select v-model="filterStatus" class="border-panel rounded px-2 py-1 bg-panel text-panel-text">
-          <option value="">Todos</option>
-          <option value="PENDING">Pendiente</option>
-          <option value="APPROVED">Aprobado</option>
-          <option value="REJECTED">Rechazado</option>
-          <option value="SPAM">Spam</option>
+          <option value="">{{ $t('comments.all') }}</option>
+          <option value="PENDING">{{ $t('comments.pending') }}</option>
+          <option value="APPROVED">{{ $t('comments.approved') }}</option>
+          <option value="REJECTED">{{ $t('comments.rejected') }}</option>
+          <option value="SPAM">{{ $t('comments.spam') }}</option>
         </select>
       </div>
-      <BaseButton @click="fetchComments" variant="primary" size="sm">Actualizar</BaseButton>
+      <BaseButton @click="fetchComments" variant="primary" size="sm">{{ $t('common.update') }}</BaseButton>
     </div>
 
     <div class="overflow-x-auto bg-panel border border-panel rounded-lg shadow-sm">
       <table class="min-w-full divide-y border-panel">
         <thead class="bg-panel">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Autor</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Email</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Comentario</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Post</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Fecha</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Estado</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">Acciones</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">{{ $t('common.author') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">{{ $t('common.email') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">{{ $t('comments.comment') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">{{ $t('comments.post') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">{{ $t('common.date') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">{{ $t('common.status') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-panel-muted uppercase tracking-wider">{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody class="bg-panel divide-y border-panel">
@@ -35,7 +35,6 @@
             <td class="px-6 py-4 whitespace-nowrap">{{ comment.authorName }}</td>
             <td class="px-6 py-4 whitespace-nowrap">{{ comment.authorEmail }}</td>
             <td class="px-6 py-4">{{ comment.content }}</td>
-            <!-- Si comment.post es un objeto, mostrar el título; si es un ID/UUID o no viene, mostrar placeholder -->
             <td class="px-6 py-4">
               <span v-if="typeof comment.post === 'object' && comment.post && comment.post.title">{{ comment.post.title }}</span>
               <span v-else-if="comment.post">({{ comment.post }})</span>
@@ -49,21 +48,21 @@
               <button v-if="comment.status === 'PENDING' || comment.status === 'REJECTED'"
                 @click="approveComment(comment)"
                 class="icon-action"
-                title="Aprobar"
+                :title="$t('comments.approve')"
               >
                 <Check class="w-5 h-5" />
               </button>
               <button v-if="comment.status === 'PENDING' || comment.status === 'APPROVED'"
                 @click="rejectComment(comment)"
                 class="icon-action"
-                title="Rechazar"
+                :title="$t('comments.reject')"
               >
                 <X class="w-5 h-5" />
               </button>
               <button v-if="comment.status !== 'SPAM'"
                 @click="spamComment(comment)"
                 class="icon-action"
-                title="Marcar como spam"
+                :title="$t('comments.markAsSpam')"
               >
                 <ShieldOff class="w-5 h-5" />
               </button>
@@ -73,19 +72,21 @@
       </table>
     </div>
 
-    <div v-if="loading" class="text-panel-muted text-center py-6">Cargando comentarios...</div>
+    <div v-if="loading" class="text-panel-muted text-center py-6">{{ $t('comments.loading') }}</div>
     <div v-if="error" class="text-red-600 text-center py-6">{{ error }}</div>
-    <div v-if="!loading && filteredComments.length === 0" class="text-panel-muted text-center py-6">No hay comentarios.</div>
+    <div v-if="!loading && filteredComments.length === 0" class="text-panel-muted text-center py-6">{{ $t('comments.noComments') }}</div>
   </ViewLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import ViewLayout from './ViewLayout.vue';
 import BaseButton from '@/components/BaseButton.vue';
 import { Check, X, ShieldOff } from 'lucide-vue-next';
 import api from '@/utils/api';
 
+const { t } = useI18n();
 const comments = ref([]);
 const loading = ref(false);
 const error = ref('');
@@ -97,10 +98,10 @@ function formatDate(dateStr) {
 
 function statusLabel(status) {
   switch (status) {
-    case 'PENDING': return 'Pendiente';
-    case 'APPROVED': return 'Aprobado';
-    case 'REJECTED': return 'Rechazado';
-    case 'SPAM': return 'Spam';
+    case 'PENDING': return t('comments.pending');
+    case 'APPROVED': return t('comments.approved');
+    case 'REJECTED': return t('comments.rejected');
+    case 'SPAM': return t('comments.spam');
     default: return status;
   }
 }
@@ -122,49 +123,49 @@ async function fetchComments() {
     comments.value = response.data;
   } catch (err) {
     console.error('Error al cargar comentarios:', err);
-    error.value = err.response?.data?.error || 'Error al cargar los comentarios';
+    error.value = err.response?.data?.error || t('comments.loadError');
   } finally {
     loading.value = false;
   }
 }
 
 async function approveComment(comment) {
-  if (!confirm('¿Aprobar este comentario?')) return;
+  if (!confirm(t('comments.approveConfirm'))) return;
   loading.value = true;
   try {
     await api.patch(`/api/comments/${comment.uuid}/approve`);
     comment.status = 'APPROVED';
   } catch (err) {
     console.error('Error al aprobar comentario:', err);
-    error.value = err.response?.data?.error || 'No se pudo aprobar el comentario';
+    error.value = err.response?.data?.error || t('comments.approveError');
   } finally {
     loading.value = false;
   }
 }
 
 async function rejectComment(comment) {
-  if (!confirm('¿Rechazar este comentario?')) return;
+  if (!confirm(t('comments.rejectConfirm'))) return;
   loading.value = true;
   try {
     await api.patch(`/api/comments/${comment.uuid}/reject`);
     comment.status = 'REJECTED';
   } catch (err) {
     console.error('Error al rechazar comentario:', err);
-    error.value = err.response?.data?.error || 'No se pudo rechazar el comentario';
+    error.value = err.response?.data?.error || t('comments.rejectError');
   } finally {
     loading.value = false;
   }
 }
 
 async function spamComment(comment) {
-  if (!confirm('¿Marcar este comentario como spam?')) return;
+  if (!confirm(t('comments.spamConfirm'))) return;
   loading.value = true;
   try {
     await api.patch(`/api/comments/${comment.uuid}/spam`);
     comment.status = 'SPAM';
   } catch (err) {
     console.error('Error al marcar como spam:', err);
-    error.value = err.response?.data?.error || 'No se pudo marcar como spam';
+    error.value = err.response?.data?.error || t('comments.spamError');
   } finally {
     loading.value = false;
   }
