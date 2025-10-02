@@ -244,6 +244,10 @@
   "settings": {
     "title": "Configuración",
     "subtitle": "Personaliza las configuraciones de tu blog",
+    "cmsLanguage": "Idioma del CMS",
+    "cmsLanguageHelp": "Idioma de la interfaz de administración",
+    "blogContentLanguage": "Idioma del Contenido del Blog",
+    "blogContentLanguageHelp": "Idioma principal del contenido de tu blog",
     "blogTitle": "Título del Blog",
     "blogTitlePlaceholder": "Mi Blog",
     "blogTitleHelp": "El título principal de tu blog",
@@ -253,6 +257,11 @@
     "language": "Idioma",
     "timezone": "Zona Horaria",
     "timezoneHelp": "Zona horaria para mostrar fechas en el blog",
+    "timezones": {
+      "newYork": "Nueva York (America/New_York)",
+      "mexicoCity": "Ciudad de México (America/Mexico_City)",
+      "london": "Londres (Europe/London)"
+    },
     "template": "Plantilla",
     "domain": "Dominio",
     "domainPlaceholder": "ejemplo.com",
@@ -277,6 +286,8 @@
     "upgradeToProTitle": "Actualizar a Plan Pro",
     "monthly": "Mensual",
     "yearly": "Anual",
+    "monthlyShort": "/mes",
+    "yearlyShort": "/año",
     "upgrade": "Actualizar"
   },
   "blogs": {
