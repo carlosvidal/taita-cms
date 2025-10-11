@@ -263,7 +263,14 @@
     "saveSuccess": "Tag saved successfully",
     "noTags": "No tags available",
     "enterTags": "Type and press Enter or comma...",
-    "separateByComma": "Separate tags with commas or Enter. They will be created automatically if they don't exist."
+    "separateByComma": "Separate tags with commas or Enter. They will be created automatically if they don't exist.",
+    "listTitle": "List of tags",
+    "loading": "Loading tags...",
+    "noTagsFound": "No tags found",
+    "createFirst": "Start by creating your first tag",
+    "create": "Create tag",
+    "saveError": "Error saving tag",
+    "deleteError": "Error deleting tag"
   },
   "series": {
     "title": "Series",

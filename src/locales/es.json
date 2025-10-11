@@ -263,7 +263,14 @@
     "saveSuccess": "Tag guardado correctamente",
     "noTags": "No hay tags disponibles",
     "enterTags": "Escribe y presiona Enter o coma...",
-    "separateByComma": "Separa los tags con comas o Enter. Se crearán automáticamente si no existen."
+    "separateByComma": "Separa los tags con comas o Enter. Se crearán automáticamente si no existen.",
+    "listTitle": "Lista de tags",
+    "loading": "Cargando tags...",
+    "noTagsFound": "No hay tags",
+    "createFirst": "Comienza creando tu primer tag",
+    "create": "Crear tag",
+    "saveError": "Error al guardar el tag",
+    "deleteError": "Error al eliminar el tag"
   },
   "series": {
     "title": "Series",
