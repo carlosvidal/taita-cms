@@ -30,6 +30,7 @@ Estás continuando la implementación de internacionalización (i18n) en un CMS 
 13. ✅ **SeriesFormView.vue** - Formulario de series (verificada)
 14. ✅ **CommentsView.vue** - Gestión de comentarios (verificada)
 15. ✅ **MenuView.vue** - Gestión de menú (verificada)
+16. ✅ **UsersView.vue** - Lista de usuarios (verificada)
 
 ### Patrón de implementación usado:
 
@@ -74,7 +75,7 @@ const actions = computed(() => [
 11. ~~**MenuView.vue**~~ - ✅ Completada
 
 ### Prioridad BAJA (gestión de usuarios y blogs):
-12. **UsersView.vue** - Lista de usuarios
+12. ~~**UsersView.vue**~~ - ✅ Completada
 13. **BlogsView.vue** - Gestión de blogs
 14. **LoginView.vue** - Página de login
 15. **SignupView.vue** - Página de registro
@@ -174,11 +175,11 @@ Continúa con la internacionalización del CMS. Comienza con PostFormView.vue si
 ## Progreso actual:
 
 - ✅ Infraestructura i18n configurada
-- ✅ 15 vistas principales completadas (ALTA ✅ + MEDIA ✅)
-- ⏳ 8 vistas pendientes de traducir
-- 📊 Progreso aproximado: 65% completado (15 de 23 vistas)
+- ✅ 16 vistas principales completadas (ALTA ✅ + MEDIA ✅)
+- ⏳ 7 vistas pendientes de traducir
+- 📊 Progreso aproximado: 70% completado (16 de 23 vistas)
 
 ---
 
 **Última actualización**: 2025-10-11
-**Estado**: ¡Todas las vistas de PRIORIDAD ALTA y MEDIA completadas! MenuView.vue verificada. Próxima vista: UsersView.vue (BAJA prioridad)
+**Estado**: UsersView.vue verificada. Próxima vista: BlogsView.vue
