@@ -121,6 +121,7 @@
     "blogInfoErrorRedirect": "No se pudo obtener la información del blog. Serás redirigido a la página de selección de blogs.",
     "blogNotFoundRedirect": "El blog seleccionado no existe. Serás redirigido a la página de selección de blogs.",
     "blogInfoError": "Error al obtener información del blog. Por favor, inténtalo de nuevo.",
+    "blogIdError": "No se pudo obtener el ID del blog",
     "numericIdError": "No se pudo obtener el ID numérico del post",
     "saveError": "Error al guardar el post",
     "slugInUse": "El slug \"{slug}\" ya está en uso. Por favor, elige otro.",

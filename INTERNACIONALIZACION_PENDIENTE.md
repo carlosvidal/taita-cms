@@ -24,6 +24,7 @@ Estás continuando la implementación de internacionalización (i18n) en un CMS 
 7. ✅ **PageFormView.vue** - Formulario de páginas (verificada)
 8. ✅ **PagesView.vue** - Lista de páginas (verificada)
 9. ✅ **MediaView.vue** - Biblioteca de medios (verificada, corregido dragDrop)
+10. ✅ **CategoriesView.vue** - Gestión de categorías (agregada traducción blogIdError)
 
 ### Patrón de implementación usado:
 
@@ -60,7 +61,7 @@ const actions = computed(() => [
 5. ~~**MediaView.vue**~~ - ✅ Completada
 
 ### Prioridad MEDIA (gestión de contenido):
-6. **CategoriesView.vue** - Gestión de categorías
+6. ~~**CategoriesView.vue**~~ - ✅ Completada
 7. **TagsView.vue** - Gestión de tags
 8. **SeriesView.vue** - Gestión de series
 9. **SeriesFormView.vue** - Formulario de series
@@ -168,11 +169,11 @@ Continúa con la internacionalización del CMS. Comienza con PostFormView.vue si
 ## Progreso actual:
 
 - ✅ Infraestructura i18n configurada
-- ✅ 9 vistas principales completadas (todas las de prioridad ALTA ✅)
-- ⏳ 14 vistas pendientes de traducir
-- 📊 Progreso aproximado: 39% completado (9 de 23 vistas)
+- ✅ 10 vistas principales completadas (todas las de prioridad ALTA ✅)
+- ⏳ 13 vistas pendientes de traducir
+- 📊 Progreso aproximado: 43% completado (10 de 23 vistas)
 
 ---
 
 **Última actualización**: 2025-10-11
-**Estado**: ¡Todas las vistas de PRIORIDAD ALTA completadas! MediaView.vue verificada (corregido dragDrop). Próxima vista: CategoriesView.vue
+**Estado**: CategoriesView.vue verificada (agregada traducción blogIdError). Próxima vista: TagsView.vue
