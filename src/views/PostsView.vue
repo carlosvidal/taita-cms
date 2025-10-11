@@ -125,6 +125,18 @@ const fetchPosts = async () => {
   }
 }
 
+const handleDelete = async (uuid) => {
+  if (!confirm(t('posts.deleteConfirm'))) return
+
+  try {
+    await api.delete(`/api/posts/uuid/${uuid}`)
+    await fetchPosts()
+  } catch (error) {
+    console.error('Error deleting post:', error)
+    alert(t('posts.saveError'))
+  }
+}
+
 onMounted(() => {
   getActiveBlog()
   fetchPosts()
