@@ -83,11 +83,11 @@ const actions = computed(() => [
 14. ~~**LoginView.vue**~~ - ✅ Completada
 15. ~~**SignupView.vue**~~ - ✅ Completada
 
-### Vistas especiales (revisar si necesitan traducción):
-16. **LandingView.vue** - Página de aterrizaje
-17. **HomeView.vue** - Página de inicio
-18. **AboutView.vue** - Página acerca de
-19. **ProfilePictureTestView.vue** - Vista de prueba (probablemente no necesita traducción)
+### Vistas especiales (NO traducidas - decisión del usuario):
+16. **LandingView.vue** - Página de aterrizaje (sin traducir)
+17. **HomeView.vue** - Página de inicio (sin revisar)
+18. **AboutView.vue** - Página acerca de (sin revisar)
+19. **ProfilePictureTestView.vue** - Vista de prueba (sin revisar)
 
 ## Tareas a realizar:
 
@@ -179,10 +179,10 @@ Continúa con la internacionalización del CMS. Comienza con PostFormView.vue si
 
 - ✅ Infraestructura i18n configurada
 - ✅ 19 vistas principales completadas (ALTA ✅ + MEDIA ✅ + BAJA ✅)
-- ⏳ 4 vistas especiales pendientes de revisar
-- 📊 Progreso aproximado: 83% completado (19 de 23 vistas)
+- ❌ 4 vistas especiales NO traducidas (por decisión del usuario)
+- 📊 Progreso: 100% de vistas prioritarias completadas (19 de 19)
 
 ---
 
 **Última actualización**: 2025-10-11
-**Estado**: ¡Todas las vistas de PRIORIDAD ALTA, MEDIA y BAJA completadas! SignupView.vue verificada (SignupForm traducido). Quedan 4 vistas especiales.
+**Estado**: ✅ PROYECTO COMPLETADO - Todas las vistas de PRIORIDAD ALTA, MEDIA y BAJA están traducidas. Las 4 vistas especiales (Landing, Home, About, ProfilePictureTest) quedan sin traducir por decisión del usuario.
