@@ -269,7 +269,7 @@ onMounted(() => {
                   <span>{{ $t('media.uploadFile') }}</span>
                   <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/jpeg,image/png,image/webp" @change="handleFileSelect">
                 </label>
-                <p class="pl-1">{{ $t('media.dragAndDrop') }}</p>
+                <p class="pl-1">{{ $t('media.dragDrop') }}</p>
               </div>
               <p class="text-xs text-gray-500">
                 {{ $t('media.fileTypesAndSize') }}
