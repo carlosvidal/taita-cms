@@ -178,23 +178,28 @@ function handleLogout() {
   gap: 8px;
   background: none;
   border: none;
-  color: #fff;
+  color: #1f2937;
   cursor: pointer;
   padding: 10px;
   width: 100%;
   text-align: left;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   text-decoration: none;
   margin-bottom: 5px;
+  border-radius: 0.375rem;
 }
 
 .view-blog-button:hover,
 .logout-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #e5e7eb;
 }
 
 .view-blog-button {
-  color: #4ade80; /* Color verde para destacar */
+  color: #10b981;
+}
+
+.logout-button {
+  color: #dc2626;
 }
 
 /* Estilo para el botón de super administrador */
