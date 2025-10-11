@@ -22,6 +22,7 @@ Estás continuando la implementación de internacionalización (i18n) en un CMS 
 5. ✅ **PostFormView.vue** - Formulario de creación/edición de posts
 6. ✅ **PostsView.vue** - Lista de posts (verificada y función handleDelete agregada)
 7. ✅ **PageFormView.vue** - Formulario de páginas (verificada)
+8. ✅ **PagesView.vue** - Lista de páginas (verificada)
 
 ### Patrón de implementación usado:
 
@@ -54,7 +55,7 @@ const actions = computed(() => [
 1. ~~**PostFormView.vue**~~ - ✅ Completada
 2. ~~**PostsView.vue**~~ - ✅ Completada
 3. ~~**PageFormView.vue**~~ - ✅ Completada
-4. **PagesView.vue** - Lista de páginas
+4. ~~**PagesView.vue**~~ - ✅ Completada
 5. **MediaView.vue** - Biblioteca de medios
 
 ### Prioridad MEDIA (gestión de contenido):
@@ -166,11 +167,11 @@ Continúa con la internacionalización del CMS. Comienza con PostFormView.vue si
 ## Progreso actual:
 
 - ✅ Infraestructura i18n configurada
-- ✅ 7 vistas principales completadas
-- ⏳ 16 vistas pendientes de traducir
-- 📊 Progreso aproximado: 30% completado (7 de 23 vistas)
+- ✅ 8 vistas principales completadas
+- ⏳ 15 vistas pendientes de traducir
+- 📊 Progreso aproximado: 35% completado (8 de 23 vistas)
 
 ---
 
 **Última actualización**: 2025-10-11
-**Estado**: PageFormView.vue verificada y completada. Próxima vista: PagesView.vue
+**Estado**: PagesView.vue verificada y completada. Próxima vista: MediaView.vue
