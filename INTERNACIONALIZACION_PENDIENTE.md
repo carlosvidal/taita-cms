@@ -28,6 +28,7 @@ Estás continuando la implementación de internacionalización (i18n) en un CMS 
 11. ✅ **TagsView.vue** - Gestión de tags (agregadas 7 traducciones faltantes)
 12. ✅ **SeriesView.vue** - Gestión de series (verificada)
 13. ✅ **SeriesFormView.vue** - Formulario de series (verificada)
+14. ✅ **CommentsView.vue** - Gestión de comentarios (verificada)
 
 ### Patrón de implementación usado:
 
@@ -68,7 +69,7 @@ const actions = computed(() => [
 7. ~~**TagsView.vue**~~ - ✅ Completada
 8. ~~**SeriesView.vue**~~ - ✅ Completada
 9. ~~**SeriesFormView.vue**~~ - ✅ Completada
-10. **CommentsView.vue** - Gestión de comentarios
+10. ~~**CommentsView.vue**~~ - ✅ Completada
 11. **MenuView.vue** - Gestión de menú de navegación
 
 ### Prioridad BAJA (gestión de usuarios y blogs):
@@ -172,11 +173,11 @@ Continúa con la internacionalización del CMS. Comienza con PostFormView.vue si
 ## Progreso actual:
 
 - ✅ Infraestructura i18n configurada
-- ✅ 13 vistas principales completadas (todas las de prioridad ALTA ✅)
-- ⏳ 10 vistas pendientes de traducir
-- 📊 Progreso aproximado: 57% completado (13 de 23 vistas)
+- ✅ 14 vistas principales completadas (todas las de prioridad ALTA ✅)
+- ⏳ 9 vistas pendientes de traducir
+- 📊 Progreso aproximado: 61% completado (14 de 23 vistas)
 
 ---
 
 **Última actualización**: 2025-10-11
-**Estado**: SeriesFormView.vue verificada. Próxima vista: CommentsView.vue
+**Estado**: CommentsView.vue verificada. Próxima vista: MenuView.vue
