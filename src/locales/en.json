@@ -222,7 +222,6 @@
     "type": "Type",
     "id": "ID",
     "loadError": "Error loading images",
-    "dragAndDrop": "or drag and drop",
     "selectImagePrompt": "Select an image (JPG, PNG or WebP, max. 5MB)",
     "uploadFile": "Upload a file",
     "fileTypesAndSize": "JPG, PNG, WebP up to 5MB",
