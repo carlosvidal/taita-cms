@@ -3,11 +3,8 @@
     <!-- Header -->
     <header class="sticky top-0 z-30 w-full bg-white/80 backdrop-blur border-b border-slate-200">
       <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3 sm:px-8">
-        <router-link to="/"
-          class="flex items-center gap-2 text-blue-700 font-extrabold text-xl sm:text-2xl tracking-tight hover:underline">
-          <span
-            class="inline-block w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">T</span>
-          <span class="hidden sm:inline">Taita Blog</span>
+        <router-link to="/" class="flex items-center">
+          <img src="@/assets/taita-logo.svg" alt="Taita" class="h-8 w-auto" />
         </router-link>
         <!-- Nav: hidden on mobile, flex on md+ -->
         <nav class="hidden md:flex gap-6 text-slate-700 text-base font-medium">
