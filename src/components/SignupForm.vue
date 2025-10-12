@@ -9,30 +9,16 @@
     <form v-if="step === 1" @submit.prevent="handleRequestOtp" class="space-y-4">
       <div>
         <label class="block mb-2 font-semibold">{{ $t('common.email') }}</label>
-        <input
-          v-model="email"
-          type="email"
-          class="input"
-          required
-          :disabled="loading"
-        />
+        <input v-model="email" type="email" class="input" required :disabled="loading" />
       </div>
 
       <!-- hCaptcha Widget -->
       <div class="captcha-wrapper">
-        <VueHcaptcha
-          :sitekey="hcaptchaSiteKey"
-          @verify="onCaptchaVerify"
-          @error="onCaptchaError"
-          @expired="onCaptchaExpired"
-        />
+        <VueHcaptcha :sitekey="hcaptchaSiteKey" @verify="onCaptchaVerify" @error="onCaptchaError"
+          @expired="onCaptchaExpired" />
       </div>
 
-      <button
-        type="submit"
-        class="btn w-full"
-        :disabled="loading || !captchaToken"
-      >
+      <button type="submit" class="btn w-full" :disabled="loading || !captchaToken">
         <span v-if="loading">{{ $t('common.loading') }}...</span>
         <span v-else>{{ $t('signup.requestOtp') }}</span>
       </button>
@@ -44,14 +30,7 @@
     <form v-else-if="step === 2" @submit.prevent="handleVerifyOtp" class="space-y-4">
       <div>
         <label class="block mb-2 font-semibold">{{ $t('signup.otpLabel') }}</label>
-        <input
-          v-model="otp"
-          type="text"
-          class="input"
-          required
-          :disabled="loading"
-          placeholder="123456"
-        />
+        <input v-model="otp" type="text" class="input" required :disabled="loading" placeholder="123456" />
       </div>
 
       <button type="submit" class="btn w-full" :disabled="loading">
@@ -66,49 +45,23 @@
     <form v-else-if="step === 3" @submit.prevent="handleSignup" class="space-y-4">
       <div>
         <label class="block mb-2 font-semibold">{{ $t('common.name') }}</label>
-        <input
-          v-model="name"
-          type="text"
-          class="input"
-          required
-          :disabled="loading"
-        />
+        <input v-model="name" type="text" class="input" required :disabled="loading" />
       </div>
 
       <div>
         <label class="block mb-2 font-semibold">{{ $t('common.password') }}</label>
-        <input
-          v-model="password"
-          type="password"
-          class="input"
-          required
-          minlength="6"
-          :disabled="loading"
-        />
+        <input v-model="password" type="password" class="input" required minlength="6" :disabled="loading" />
       </div>
 
       <div>
         <label class="block mb-2 font-semibold">{{ $t('signup.blogName') }}</label>
-        <input
-          v-model="blogName"
-          type="text"
-          class="input"
-          required
-          :disabled="loading"
-        />
+        <input v-model="blogName" type="text" class="input" required :disabled="loading" />
       </div>
 
       <div>
         <label class="block mb-2 font-semibold">{{ $t('blogs.subdomain') }}</label>
-        <input
-          v-model="subdomain"
-          type="text"
-          class="input"
-          required
-          :disabled="loading"
-          pattern="[a-z0-9-]+"
-          placeholder="mi-blog"
-        />
+        <input v-model="subdomain" type="text" class="input" required :disabled="loading" pattern="[a-z0-9-]+"
+          placeholder="mi-blog" />
         <p class="text-xs text-gray-500 mt-1">Solo letras minúsculas, números y guiones</p>
       </div>
 
@@ -141,7 +94,7 @@ import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
 const { t } = useI18n()
 
 // hCaptcha site key - using test key for now (replace with your real key)
-const hcaptchaSiteKey = '10000000-ffff-ffff-ffff-000000000001'
+const hcaptchaSiteKey = '4e246330-29ba-4fc8-88ac-f1aa46889238'
 
 // Form state
 const step = ref(1)
