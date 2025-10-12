@@ -10,7 +10,6 @@
         <nav class="hidden md:flex gap-6 text-slate-700 text-base font-medium">
           <router-link to="/login" class="hover:text-blue-700 transition">Iniciar sesión</router-link>
           <router-link to="/signup" class="hover:text-blue-700 transition">Registrarse</router-link>
-          <router-link to="/about" class="hover:text-blue-700 transition">Acerca</router-link>
         </nav>
         <!-- Hamburger menu: visible on mobile -->
         <div class="md:hidden">
@@ -29,8 +28,6 @@
             @click="showMenu = false">Iniciar sesión</router-link>
           <router-link to="/signup" class="block py-2 text-slate-700 hover:text-blue-700"
             @click="showMenu = false">Registrarse</router-link>
-          <router-link to="/about" class="block py-2 text-slate-700 hover:text-blue-700"
-            @click="showMenu = false">Acerca</router-link>
         </nav>
       </transition>
     </header>

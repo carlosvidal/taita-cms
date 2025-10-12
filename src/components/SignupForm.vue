@@ -8,7 +8,7 @@
       <label class="block mb-2 font-semibold">{{ $t('common.email') }}</label>
       <input v-model="email" type="email" class="input mb-4" required />
       <div class="mb-4">
-        <component is="cap-widget" id="cap" ref="capWidget" :data-cap-api-endpoint="getApiEndpoint()"
+        <component is="cap-widget" id="cap" ref="capWidget" :data-api-endpoint="getApiEndpoint()"
           @solve="onCapSolve" />
       </div>
       <button class="btn w-full" :disabled="loading || !capValidated">{{ $t('signup.requestOtp') }}</button>
@@ -76,17 +76,18 @@ const getApiEndpoint = () => {
 }
 
 const onRequestOtp = async () => {
-  captchaError.value = ''
-  if (!validate(captchaAnswer.value)) {
-    captchaError.value = t('signup.captchaError')
-    generate()
+  if (!capValidated.value) {
+    error.value = t('signup.captchaError')
     return
   }
   loading.value = true
   error.value = ''
   try {
     const apiUrl = getApiEndpoint().replace('/api/', '');
-    await axios.post(`${apiUrl}/api/auth/request-otp`, { email: email.value })
+    await axios.post(`${apiUrl}/api/auth/request-otp`, {
+      email: email.value,
+      captchaToken: capToken.value
+    })
     step.value = 2
   } catch (e) {
     error.value = e.response?.data?.error || t('signup.otpRequestError')
