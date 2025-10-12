@@ -8,8 +8,7 @@
       <label class="block mb-2 font-semibold">{{ $t('common.email') }}</label>
       <input v-model="email" type="email" class="input mb-4" required />
       <div class="mb-4">
-        <cap-widget v-if="apiEndpoint" id="cap" ref="capWidget" :data-api-endpoint="apiEndpoint"
-          @solve="onCapSolve"></cap-widget>
+        <cap-widget id="cap" ref="capWidget" @solve="onCapSolve"></cap-widget>
       </div>
       <button class="btn w-full" :disabled="loading || !capValidated">{{ $t('signup.requestOtp') }}</button>
       <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
@@ -40,7 +39,7 @@
 
 <script setup>
 defineOptions({ inheritAttrs: false })
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -67,8 +66,6 @@ const error = ref('')
 const success = ref(false)
 const router = useRouter()
 
-const apiEndpoint = ref('')
-
 const getApiEndpoint = () => {
   if (typeof window === 'undefined') return ''
   const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
@@ -78,8 +75,13 @@ const getApiEndpoint = () => {
   return `${apiUrl}/api/`;
 }
 
-onMounted(() => {
-  apiEndpoint.value = getApiEndpoint()
+onMounted(async () => {
+  await nextTick()
+  // Set the attribute directly on the DOM element
+  const widgetEl = document.getElementById('cap')
+  if (widgetEl) {
+    widgetEl.setAttribute('data-api-endpoint', getApiEndpoint())
+  }
 })
 
 const onRequestOtp = async () => {
