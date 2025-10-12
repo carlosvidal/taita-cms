@@ -55,17 +55,20 @@
 
       <div>
         <label class="block mb-2 font-semibold">{{ $t('signup.blogName') }}</label>
-        <input v-model="blogName" type="text" class="input" required :disabled="loading" />
+        <input v-model="blogName" type="text" class="input" required :disabled="loading" @input="handleBlogNameChange" />
       </div>
 
       <div>
         <label class="block mb-2 font-semibold">{{ $t('blogs.subdomain') }}</label>
-        <input v-model="subdomain" type="text" class="input" required :disabled="loading" pattern="[a-z0-9-]+"
-          placeholder="mi-blog" />
-        <p class="text-xs text-gray-500 mt-1">Solo letras minúsculas, números y guiones</p>
+        <input v-model="subdomain" type="text" class="input" required :disabled="loading || checkingSubdomain" pattern="[a-z0-9-]+"
+          placeholder="mi-blog" @blur="checkSubdomainAvailability" />
+        <p v-if="checkingSubdomain" class="text-xs text-blue-500 mt-1">Verificando disponibilidad...</p>
+        <p v-else-if="subdomainAvailable === true" class="text-xs text-green-600 mt-1">✓ Subdominio disponible</p>
+        <p v-else-if="subdomainAvailable === false" class="text-xs text-red-500 mt-1">✗ Subdominio no disponible</p>
+        <p v-else class="text-xs text-gray-500 mt-1">Solo letras minúsculas, números y guiones</p>
       </div>
 
-      <button type="submit" class="btn w-full" :disabled="loading">
+      <button type="submit" class="btn w-full" :disabled="loading || subdomainAvailable === false">
         <span v-if="loading">{{ $t('common.loading') }}...</span>
         <span v-else>{{ $t('signup.createAccount') }}</span>
       </button>
@@ -107,6 +110,8 @@ const subdomain = ref('')
 const loading = ref(false)
 const error = ref('')
 const captchaToken = ref(null)
+const checkingSubdomain = ref(false)
+const subdomainAvailable = ref(null)
 
 // Get API endpoint
 function getApiEndpoint() {
@@ -138,6 +143,46 @@ function onCaptchaError(err) {
 function onCaptchaExpired() {
   console.log('[hCaptcha] Expired')
   captchaToken.value = null
+}
+
+// Convert blog name to URL-friendly subdomain
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')        // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')    // Remove all non-word chars
+    .replace(/\-\-+/g, '-')      // Replace multiple - with single -
+    .replace(/^-+/, '')          // Trim - from start of text
+    .replace(/-+$/, '')          // Trim - from end of text
+}
+
+// Auto-populate subdomain from blog name
+function handleBlogNameChange() {
+  if (blogName.value && !subdomain.value) {
+    subdomain.value = slugify(blogName.value)
+    subdomainAvailable.value = null
+  }
+}
+
+// Check subdomain availability
+async function checkSubdomainAvailability() {
+  if (!subdomain.value) return
+
+  checkingSubdomain.value = true
+  subdomainAvailable.value = null
+
+  try {
+    const apiUrl = getApiEndpoint()
+    const response = await axios.get(`${apiUrl}auth/check-subdomain/${subdomain.value}`)
+    subdomainAvailable.value = response.data.available
+  } catch (err) {
+    console.error('[Signup] Check subdomain error:', err)
+    subdomainAvailable.value = null
+  } finally {
+    checkingSubdomain.value = false
+  }
 }
 
 // Handle request OTP
