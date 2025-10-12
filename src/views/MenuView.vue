@@ -56,27 +56,41 @@ const editingItem = ref(null)
 const isLoading = ref(false)
 const error = ref(null)
 
-const getCurrentBlogId = () => {
+const getCurrentBlogId = async () => {
+  // Intentar obtener el blog activo del localStorage (UUID)
+  const activeBlogUuid = localStorage.getItem('activeBlog');
+
+  if (activeBlogUuid) {
+    try {
+      // Obtener el blog por UUID para conseguir el ID numérico
+      const response = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
+      const blogId = response.data.id;
+      console.log('[MenuView.getCurrentBlogId] Using active blog ID:', blogId, 'from UUID:', activeBlogUuid);
+      return blogId;
+    } catch (error) {
+      console.error('[MenuView.getCurrentBlogId] Error fetching blog by UUID:', error);
+    }
+  }
+
+  // Fallback: intentar desde la URL
   const pathParts = window.location.pathname.split('/');
   const blogIdIndex = pathParts.findIndex(part => part === 'blog') + 1;
   const blogId = pathParts[blogIdIndex];
-  
+
   if (blogId && !isNaN(blogId)) {
+    console.log('[MenuView.getCurrentBlogId] Using blog ID from URL:', blogId);
     return parseInt(blogId);
   }
-  
-  const storedBlogId = localStorage.getItem('currentBlogId');
-  if (storedBlogId) {
-    return parseInt(storedBlogId);
-  }
-  
+
+  // Último fallback
+  console.warn('[MenuView.getCurrentBlogId] No blog ID found, defaulting to 1');
   return 1;
 };
 
 const fetchMenuItems = async () => {
   isLoading.value = true;
   error.value = null;
-  const blogId = getCurrentBlogId();
+  const blogId = await getCurrentBlogId();
 
   console.log('[MenuView] Fetching menu items for blogId:', blogId);
 
@@ -114,7 +128,7 @@ const handleSave = async (itemData) => {
       throw new Error(t('validation.urlFormat'));
     }
 
-    const blogId = getCurrentBlogId();
+    const blogId = await getCurrentBlogId();
     
     const payload = {
       label: itemData.label.trim(),
@@ -145,8 +159,8 @@ const handleSave = async (itemData) => {
 
 const handleReorder = async (items) => {
   try {
-    const blogId = getCurrentBlogId();
-    await api.patch('/api/menu/reorder', { 
+    const blogId = await getCurrentBlogId();
+    await api.patch('/api/menu/reorder', {
       items,
       blogId
     });
@@ -157,17 +171,18 @@ const handleReorder = async (items) => {
   }
 }
 
-const handleEdit = (item) => {
-  editingItem.value = { 
+const handleEdit = async (item) => {
+  const blogId = await getCurrentBlogId();
+  editingItem.value = {
     ...item,
-    blogId: item.blogId || getCurrentBlogId()
+    blogId: item.blogId || blogId
   };
 }
 
 const handleDelete = async (id) => {
   if (confirm(t('menu.deleteConfirm'))) {
     try {
-      const blogId = getCurrentBlogId();
+      const blogId = await getCurrentBlogId();
       await api.delete(`/api/menu/${id}?blogId=${blogId}`);
       await fetchMenuItems();
     } catch (error) {
