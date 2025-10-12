@@ -77,10 +77,17 @@ const fetchMenuItems = async () => {
   isLoading.value = true;
   error.value = null;
   const blogId = getCurrentBlogId();
-  
+
+  console.log('[MenuView] Fetching menu items for blogId:', blogId);
+
   try {
     const response = await api.get(`/api/menu?blogId=${blogId}`);
     menuItems.value = response.data;
+    console.log('[MenuView] Menu items fetched:', {
+      count: menuItems.value.length,
+      items: menuItems.value,
+      blogId: blogId
+    });
   } catch (err) {
     error.value = err.response?.data?.message || t('menu.loadError');
     console.error('Menu API Error:', {
