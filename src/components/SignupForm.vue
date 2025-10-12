@@ -8,7 +8,7 @@
       <label class="block mb-2 font-semibold">{{ $t('common.email') }}</label>
       <input v-model="email" type="email" class="input mb-4" required />
       <div class="mb-4">
-        <cap-widget id="cap" ref="capWidget" v-bind="{ 'data-api-endpoint': getApiEndpoint() }"
+        <cap-widget v-if="apiEndpoint" id="cap" ref="capWidget" :data-api-endpoint="apiEndpoint"
           @solve="onCapSolve"></cap-widget>
       </div>
       <button class="btn w-full" :disabled="loading || !capValidated">{{ $t('signup.requestOtp') }}</button>
@@ -40,7 +40,7 @@
 
 <script setup>
 defineOptions({ inheritAttrs: false })
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -67,13 +67,20 @@ const error = ref('')
 const success = ref(false)
 const router = useRouter()
 
+const apiEndpoint = ref('')
+
 const getApiEndpoint = () => {
+  if (typeof window === 'undefined') return ''
   const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
-  let apiUrl = isProduction 
-    ? 'https://taita-api.onrender.com' 
+  let apiUrl = isProduction
+    ? 'https://taita-api.onrender.com'
     : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
   return `${apiUrl}/api/`;
 }
+
+onMounted(() => {
+  apiEndpoint.value = getApiEndpoint()
+})
 
 const onRequestOtp = async () => {
   if (!capValidated.value) {
