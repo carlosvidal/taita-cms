@@ -18,8 +18,15 @@
         />
       </div>
 
-      <!-- Captcha Widget -->
-      <div id="captcha-container"></div>
+      <!-- hCaptcha Widget -->
+      <div class="captcha-wrapper">
+        <VueHcaptcha
+          :sitekey="hcaptchaSiteKey"
+          @verify="onCaptchaVerify"
+          @error="onCaptchaError"
+          @expired="onCaptchaExpired"
+        />
+      </div>
 
       <button
         type="submit"
@@ -126,11 +133,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
+import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
 
 const { t } = useI18n()
+
+// hCaptcha site key - using test key for now (replace with your real key)
+const hcaptchaSiteKey = '10000000-ffff-ffff-ffff-000000000001'
 
 // Form state
 const step = ref(1)
@@ -158,36 +169,22 @@ function getApiEndpoint() {
   return `${apiUrl}/api/`
 }
 
-// Initialize captcha widget
-let captchaInitialized = false
+// hCaptcha event handlers
+function onCaptchaVerify(token) {
+  console.log('[hCaptcha] Verified:', token)
+  captchaToken.value = token
+  error.value = ''
+}
 
-function initCaptcha() {
-  if (captchaInitialized) return
-  if (typeof window === 'undefined') return
+function onCaptchaError(err) {
+  console.error('[hCaptcha] Error:', err)
+  error.value = t('signup.captchaError')
+  captchaToken.value = null
+}
 
-  const container = document.getElementById('captcha-container')
-  if (!container) return
-
-  // Create the widget element
-  const widget = document.createElement('cap-widget')
-  widget.id = 'signup-captcha'
-
-  // Set the API endpoint as an attribute
-  const apiEndpoint = getApiEndpoint()
-  widget.setAttribute('data-api-endpoint', apiEndpoint)
-
-  // Add event listener for solve event
-  widget.addEventListener('solve', (event) => {
-    console.log('[Captcha] Solved:', event.detail)
-    captchaToken.value = event.detail.token
-    error.value = ''
-  })
-
-  // Add to container
-  container.appendChild(widget)
-  captchaInitialized = true
-
-  console.log('[Captcha] Initialized with endpoint:', apiEndpoint)
+function onCaptchaExpired() {
+  console.log('[hCaptcha] Expired')
+  captchaToken.value = null
 }
 
 // Handle request OTP
@@ -264,18 +261,7 @@ async function handleSignup() {
   }
 }
 
-// Lifecycle
-onMounted(() => {
-  // Wait for next tick to ensure DOM is ready
-  setTimeout(() => {
-    initCaptcha()
-  }, 100)
-})
-
-onUnmounted(() => {
-  // Cleanup
-  captchaInitialized = false
-})
+// No lifecycle hooks needed - hCaptcha component handles everything
 </script>
 
 <style scoped>
@@ -341,8 +327,7 @@ onUnmounted(() => {
   cursor: not-allowed;
 }
 
-#captcha-container {
-  min-height: 60px;
+.captcha-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
