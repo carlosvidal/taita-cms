@@ -1,147 +1,293 @@
 <template>
-  <div class="bg-white px-8 py-10 rounded-2xl shadow-xl max-w-md w-full">
+  <div class="signup-form-container">
     <div class="signup-logo">
       <img src="@/assets/taita-logo.svg" alt="Taita" />
     </div>
     <h2 class="text-2xl font-bold mb-4 text-center">{{ $t('signup.title') }}</h2>
-    <form v-if="step === 1" @submit.prevent="onRequestOtp">
-      <label class="block mb-2 font-semibold">{{ $t('common.email') }}</label>
-      <input v-model="email" type="email" class="input mb-4" required />
-      <div class="mb-4">
-        <cap-widget id="cap" ref="capWidget" @solve="onCapSolve"></cap-widget>
+
+    <!-- Step 1: Email + Captcha -->
+    <form v-if="step === 1" @submit.prevent="handleRequestOtp" class="space-y-4">
+      <div>
+        <label class="block mb-2 font-semibold">{{ $t('common.email') }}</label>
+        <input
+          v-model="email"
+          type="email"
+          class="input"
+          required
+          :disabled="loading"
+        />
       </div>
-      <button class="btn w-full" :disabled="loading || !capValidated">{{ $t('signup.requestOtp') }}</button>
-      <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
+
+      <!-- Captcha Widget -->
+      <div id="captcha-container"></div>
+
+      <button
+        type="submit"
+        class="btn w-full"
+        :disabled="loading || !captchaToken"
+      >
+        <span v-if="loading">{{ $t('common.loading') }}...</span>
+        <span v-else>{{ $t('signup.requestOtp') }}</span>
+      </button>
+
+      <p v-if="error" class="text-red-500 text-sm mt-2">{{ error }}</p>
     </form>
-    <form v-else-if="step === 2" @submit.prevent="verifyOtp">
-      <label class="block mb-2 font-semibold">{{ $t('signup.otpLabel') }}</label>
-      <input v-model="otp" type="text" class="input mb-4" required />
-      <button class="btn w-full" :disabled="loading">{{ $t('signup.verifyOtp') }}</button>
-      <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
+
+    <!-- Step 2: Verify OTP -->
+    <form v-else-if="step === 2" @submit.prevent="handleVerifyOtp" class="space-y-4">
+      <div>
+        <label class="block mb-2 font-semibold">{{ $t('signup.otpLabel') }}</label>
+        <input
+          v-model="otp"
+          type="text"
+          class="input"
+          required
+          :disabled="loading"
+          placeholder="123456"
+        />
+      </div>
+
+      <button type="submit" class="btn w-full" :disabled="loading">
+        <span v-if="loading">{{ $t('common.loading') }}...</span>
+        <span v-else>{{ $t('signup.verifyOtp') }}</span>
+      </button>
+
+      <p v-if="error" class="text-red-500 text-sm mt-2">{{ error }}</p>
     </form>
-    <form v-else-if="step === 3" @submit.prevent="signup">
-      <label class="block mb-2 font-semibold">{{ $t('common.name') }}</label>
-      <input v-model="name" type="text" class="input mb-4" required />
-      <label class="block mb-2 font-semibold">{{ $t('common.password') }}</label>
-      <input v-model="password" type="password" class="input mb-4" required />
-      <label class="block mb-2 font-semibold">{{ $t('signup.blogName') }}</label>
-      <input v-model="blogName" type="text" class="input mb-4" required />
-      <label class="block mb-2 font-semibold">{{ $t('blogs.subdomain') }}</label>
-      <input v-model="subdomain" type="text" class="input mb-4" required />
-      <button class="btn w-full" :disabled="loading">{{ $t('signup.createAccount') }}</button>
-      <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
+
+    <!-- Step 3: Complete signup -->
+    <form v-else-if="step === 3" @submit.prevent="handleSignup" class="space-y-4">
+      <div>
+        <label class="block mb-2 font-semibold">{{ $t('common.name') }}</label>
+        <input
+          v-model="name"
+          type="text"
+          class="input"
+          required
+          :disabled="loading"
+        />
+      </div>
+
+      <div>
+        <label class="block mb-2 font-semibold">{{ $t('common.password') }}</label>
+        <input
+          v-model="password"
+          type="password"
+          class="input"
+          required
+          minlength="6"
+          :disabled="loading"
+        />
+      </div>
+
+      <div>
+        <label class="block mb-2 font-semibold">{{ $t('signup.blogName') }}</label>
+        <input
+          v-model="blogName"
+          type="text"
+          class="input"
+          required
+          :disabled="loading"
+        />
+      </div>
+
+      <div>
+        <label class="block mb-2 font-semibold">{{ $t('blogs.subdomain') }}</label>
+        <input
+          v-model="subdomain"
+          type="text"
+          class="input"
+          required
+          :disabled="loading"
+          pattern="[a-z0-9-]+"
+          placeholder="mi-blog"
+        />
+        <p class="text-xs text-gray-500 mt-1">Solo letras minúsculas, números y guiones</p>
+      </div>
+
+      <button type="submit" class="btn w-full" :disabled="loading">
+        <span v-if="loading">{{ $t('common.loading') }}...</span>
+        <span v-else>{{ $t('signup.createAccount') }}</span>
+      </button>
+
+      <p v-if="error" class="text-red-500 text-sm mt-2">{{ error }}</p>
     </form>
-    <div v-else-if="success" class="text-green-600 text-center font-semibold">
-      {{ $t('signup.success') }}
+
+    <!-- Step 4: Success -->
+    <div v-else-if="step === 4" class="text-center py-8">
+      <div class="text-green-600 text-5xl mb-4">✓</div>
+      <h3 class="text-xl font-bold mb-2">{{ $t('signup.success') }}</h3>
+      <p class="text-gray-600 mb-4">Tu cuenta ha sido creada exitosamente</p>
+      <router-link to="/login" class="btn inline-block">
+        {{ $t('login.login') }}
+      </router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-defineOptions({ inheritAttrs: false })
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
-const capWidget = ref(null)
-const capValidated = ref(false)
-const capToken = ref(null)
 
-function onCapSolve(e) {
-  capValidated.value = true
-  capToken.value = e.detail.token
-}
-
+// Form state
+const step = ref(1)
 const email = ref('')
 const otp = ref('')
 const name = ref('')
 const password = ref('')
 const blogName = ref('')
 const subdomain = ref('')
-const step = ref(1)
 const loading = ref(false)
 const error = ref('')
-const success = ref(false)
-const router = useRouter()
+const captchaToken = ref(null)
 
-const getApiEndpoint = () => {
-  if (typeof window === 'undefined') return ''
-  const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
-  let apiUrl = isProduction
+// Get API endpoint
+function getApiEndpoint() {
+  if (typeof window === 'undefined') return 'http://localhost:3000/api/'
+
+  const hostname = window.location.hostname
+  const isProduction = hostname !== 'localhost' && !hostname.includes('127.0.0.1')
+
+  const apiUrl = isProduction
     ? 'https://taita-api.onrender.com'
-    : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
-  return `${apiUrl}/api/`;
+    : (import.meta.env.VITE_API_URL || 'http://localhost:3000')
+
+  return `${apiUrl}/api/`
 }
 
-onMounted(async () => {
-  await nextTick()
-  // Set the attribute directly on the DOM element
-  const widgetEl = document.getElementById('cap')
-  if (widgetEl) {
-    widgetEl.setAttribute('data-api-endpoint', getApiEndpoint())
-  }
-})
+// Initialize captcha widget
+let captchaInitialized = false
 
-const onRequestOtp = async () => {
-  if (!capValidated.value) {
+function initCaptcha() {
+  if (captchaInitialized) return
+  if (typeof window === 'undefined') return
+
+  const container = document.getElementById('captcha-container')
+  if (!container) return
+
+  // Create the widget element
+  const widget = document.createElement('cap-widget')
+  widget.id = 'signup-captcha'
+
+  // Set the API endpoint as an attribute
+  const apiEndpoint = getApiEndpoint()
+  widget.setAttribute('data-api-endpoint', apiEndpoint)
+
+  // Add event listener for solve event
+  widget.addEventListener('solve', (event) => {
+    console.log('[Captcha] Solved:', event.detail)
+    captchaToken.value = event.detail.token
+    error.value = ''
+  })
+
+  // Add to container
+  container.appendChild(widget)
+  captchaInitialized = true
+
+  console.log('[Captcha] Initialized with endpoint:', apiEndpoint)
+}
+
+// Handle request OTP
+async function handleRequestOtp() {
+  if (!captchaToken.value) {
     error.value = t('signup.captchaError')
     return
   }
+
   loading.value = true
   error.value = ''
+
   try {
-    const apiUrl = getApiEndpoint().replace('/api/', '');
-    await axios.post(`${apiUrl}/api/auth/request-otp`, {
+    const apiUrl = getApiEndpoint()
+    await axios.post(`${apiUrl}auth/request-otp`, {
       email: email.value,
-      captchaToken: capToken.value
+      captchaToken: captchaToken.value
     })
+
     step.value = 2
-  } catch (e) {
-    error.value = e.response?.data?.error || t('signup.otpRequestError')
+    console.log('[Signup] OTP sent to:', email.value)
+  } catch (err) {
+    console.error('[Signup] Request OTP error:', err)
+    error.value = err.response?.data?.error || t('signup.otpRequestError')
   } finally {
     loading.value = false
   }
 }
 
-const verifyOtp = async () => {
+// Handle verify OTP
+async function handleVerifyOtp() {
   loading.value = true
   error.value = ''
+
   try {
-    const apiUrl = getApiEndpoint().replace('/api/', '');
-    await axios.post(`${apiUrl}/api/auth/verify-otp`, { email: email.value, code: otp.value })
+    const apiUrl = getApiEndpoint()
+    await axios.post(`${apiUrl}auth/verify-otp`, {
+      email: email.value,
+      code: otp.value
+    })
+
     step.value = 3
-  } catch (e) {
-    error.value = e.response?.data?.error || t('signup.otpError')
+    console.log('[Signup] OTP verified')
+  } catch (err) {
+    console.error('[Signup] Verify OTP error:', err)
+    error.value = err.response?.data?.error || t('signup.otpError')
   } finally {
     loading.value = false
   }
 }
 
-const signup = async () => {
+// Handle signup
+async function handleSignup() {
   loading.value = true
   error.value = ''
+
   try {
-    const apiUrl = getApiEndpoint().replace('/api/', '');
-    await axios.post(`${apiUrl}/api/auth/signup`, {
+    const apiUrl = getApiEndpoint()
+    await axios.post(`${apiUrl}auth/signup`, {
       email: email.value,
       password: password.value,
       name: name.value,
       blogName: blogName.value,
-      subdomain: subdomain.value,
+      subdomain: subdomain.value
     })
-    success.value = true
+
     step.value = 4
-  } catch (e) {
-    error.value = e.response?.data?.error || t('signup.signupError')
+    console.log('[Signup] Account created successfully')
+  } catch (err) {
+    console.error('[Signup] Signup error:', err)
+    error.value = err.response?.data?.error || t('signup.signupError')
   } finally {
     loading.value = false
   }
 }
+
+// Lifecycle
+onMounted(() => {
+  // Wait for next tick to ensure DOM is ready
+  setTimeout(() => {
+    initCaptcha()
+  }, 100)
+})
+
+onUnmounted(() => {
+  // Cleanup
+  captchaInitialized = false
+})
 </script>
 
 <style scoped>
+.signup-form-container {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+}
+
 .signup-logo {
   display: flex;
   justify-content: center;
@@ -155,10 +301,50 @@ const signup = async () => {
 }
 
 .input {
-  @apply border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
 }
 
 .btn {
-  @apply bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition;
+  width: 100%;
+  background-color: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.btn:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+#captcha-container {
+  min-height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
