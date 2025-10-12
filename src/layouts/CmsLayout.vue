@@ -24,7 +24,7 @@
           </li>
           <li>
             <RouterLink to="/cms/categories" class="nav-link">
-              <Tag class="icon" />
+              <Component class="icon" />
               <span>{{ $t('nav.categories') }}</span>
             </RouterLink>
           </li>
@@ -100,7 +100,7 @@
 import { RouterLink } from 'vue-router';
 import { ref, onMounted, computed } from 'vue';
 import router from '@/router';
-import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database, Eye } from 'lucide-vue-next';
+import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database, Eye, Component } from 'lucide-vue-next';
 import api from '@/utils/api';
 
 const userRole = ref('');
