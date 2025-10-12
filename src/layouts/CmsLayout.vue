@@ -13,15 +13,21 @@
             </RouterLink>
           </li>
           <li>
+            <RouterLink to="/cms/comments" class="nav-link">
+              <MessageSquare class="icon" />
+              <span>{{ $t('nav.comments') }}</span>
+            </RouterLink>
+          </li>
+          <li>
             <RouterLink to="/cms/posts" class="nav-link">
               <FileText class="icon" />
               <span>{{ $t('nav.posts') }}</span>
             </RouterLink>
           </li>
           <li>
-            <RouterLink to="/cms/comments" class="nav-link">
-              <MessageSquare class="icon" />
-              <span>{{ $t('nav.comments') }}</span>
+            <RouterLink to="/cms/pages" class="nav-link">
+              <File class="icon" />
+              <span>{{ $t('nav.pages') }}</span>
             </RouterLink>
           </li>
           <li>
@@ -31,21 +37,15 @@
             </RouterLink>
           </li>
           <li>
-            <RouterLink to="/cms/tags" class="nav-link">
-              <Tag class="icon" />
-              <span>{{ $t('nav.tags') }}</span>
-            </RouterLink>
-          </li>
-          <li>
             <RouterLink to="/cms/series" class="nav-link">
               <Library class="icon" />
               <span>{{ $t('nav.series') }}</span>
             </RouterLink>
           </li>
           <li>
-            <RouterLink to="/cms/pages" class="nav-link">
-              <File class="icon" />
-              <span>{{ $t('nav.pages') }}</span>
+            <RouterLink to="/cms/tags" class="nav-link">
+              <Tag class="icon" />
+              <span>{{ $t('nav.tags') }}</span>
             </RouterLink>
           </li>
           <li>
@@ -86,7 +86,12 @@
             <span>{{ $t('blogs.viewBlog') }}</span>
           </a>
           <button @click="handleLogout" class="logout-button">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
             <span>{{ $t('nav.logout') }}</span>
           </button>
         </div>
@@ -112,17 +117,17 @@ const activeBlog = ref(null);
 // URL del blog activo
 const activeBlogUrl = computed(() => {
   if (!activeBlog.value) return null;
-  
+
   // Si el blog tiene un dominio personalizado, usarlo
   if (activeBlog.value.domain) {
     return `https://${activeBlog.value.domain}`;
   }
-  
+
   // Si no tiene dominio personalizado, usar el subdominio en taita.blog
   if (activeBlog.value.subdomain) {
     return `https://${activeBlog.value.subdomain}.taita.blog`;
   }
-  
+
   // Si no tiene ni dominio ni subdominio, usar la URL principal
   return 'https://www.taita.blog';
 });
@@ -132,10 +137,10 @@ onMounted(async () => {
     const user = JSON.parse(localStorage.getItem('authUser'));
     userRole.value = user?.role || '';
     userUuid.value = user?.uuid || '';
-    
+
     // Obtener el UUID del blog activo
     const activeBlogUuid = localStorage.getItem('activeBlog');
-    
+
     if (activeBlogUuid) {
       try {
         // Obtener la información del blog activo
@@ -175,13 +180,14 @@ function handleLogout() {
 
 .brand {
   padding: 0.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .brand-logo {
   width: 100%;
   height: auto;
-  max-width: 180px;
+  max-width: 100px;
+  margin: 0 auto;
 }
 
 .view-blog-button,
