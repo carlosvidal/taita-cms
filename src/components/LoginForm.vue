@@ -2,7 +2,9 @@
   <div class="login-form-container">
     <div class="login-card">
       <div class="login-header">
-        <h1 class="login-title">CMS</h1>
+        <div class="login-logo">
+          <img src="@/assets/taita-logo.svg" alt="Taita" />
+        </div>
         <p class="login-subtitle">{{ $t('login.subtitle') }}</p>
       </div>
 
@@ -168,12 +170,16 @@ export default {
   margin-bottom: 2rem;
 }
 
-.login-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 0.5rem;
-  transition: color 0.2s;
+.login-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.login-logo img {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
 }
 
 .login-subtitle {

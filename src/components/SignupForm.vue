@@ -1,5 +1,8 @@
 <template>
   <div class="bg-white px-8 py-10 rounded-2xl shadow-xl max-w-md w-full">
+    <div class="signup-logo">
+      <img src="@/assets/taita-logo.svg" alt="Taita" />
+    </div>
     <h2 class="text-2xl font-bold mb-4 text-center">{{ $t('signup.title') }}</h2>
     <form v-if="step === 1" @submit.prevent="onRequestOtp">
       <label class="block mb-2 font-semibold">{{ $t('common.email') }}</label>
@@ -129,6 +132,18 @@ const signup = async () => {
 </script>
 
 <style scoped>
+.signup-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.signup-logo img {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+}
+
 .input {
   @apply border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500;
 }

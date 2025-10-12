@@ -2,6 +2,9 @@
 <template>
     <div class="reset-container">
         <form @submit.prevent="submit">
+            <div class="reset-logo">
+                <img src="@/assets/taita-logo.svg" alt="Taita" />
+            </div>
             <h2>Elige una nueva contraseña</h2>
             <input v-model="password" type="password" placeholder="Nueva contraseña" required minlength="6" />
             <button type="submit" :disabled="loading">Cambiar contraseña</button>
@@ -33,3 +36,17 @@ async function submit() {
     loading.value = false
 }
 </script>
+
+<style scoped>
+.reset-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.reset-logo img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+}
+</style>

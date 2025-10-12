@@ -2,6 +2,9 @@
 <template>
     <div class="forgot-container">
         <form @submit.prevent="submit">
+            <div class="forgot-logo">
+                <img src="@/assets/taita-logo.svg" alt="Taita" />
+            </div>
             <h2>Recuperar contraseña</h2>
             <input v-model="email" type="email" placeholder="Tu email" required />
             <button type="submit" :disabled="loading">Enviar enlace</button>
@@ -30,3 +33,17 @@ async function submit() {
     loading.value = false
 }
 </script>
+
+<style scoped>
+.forgot-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.forgot-logo img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+}
+</style>

@@ -2,7 +2,9 @@
   <div class="cms-layout">
     <aside class="sidebar">
       <nav class="main-nav">
-        <h1 class="brand">CMS</h1>
+        <div class="brand">
+          <img src="@/assets/taita-logo.svg" alt="Taita" class="brand-logo" />
+        </div>
         <ul>
           <li>
             <RouterLink to="/cms/dashboard" class="nav-link">
@@ -169,6 +171,17 @@ function handleLogout() {
   background: #f8fafc;
   padding: 2rem 0;
   transition: background-color 0.2s ease;
+}
+
+.brand {
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.brand-logo {
+  width: 100%;
+  height: auto;
+  max-width: 180px;
 }
 
 .view-blog-button,
