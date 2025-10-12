@@ -6,10 +6,12 @@ import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import api from '@/utils/api'
+import { useBlog } from '@/composables/useBlog'
 import { Plus, Library, Edit, Trash2, Eye } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
 const router = useRouter()
+const { getCurrentBlogId, getActiveBlog } = useBlog()
 const series = ref([])
 const isLoading = ref(false)
 const activeBlog = ref(null)
@@ -27,25 +29,29 @@ const formatDate = (dateString) => {
   }).format(date)
 }
 
-const getActiveBlog = async () => {
+const loadActiveBlog = async () => {
   try {
-    const blogUuid = localStorage.getItem('activeBlog')
-    if (blogUuid) {
-      const response = await api.get(`/api/blogs/uuid/${blogUuid}`)
-      activeBlog.value = response.data
+    const blog = await getActiveBlog()
+    if (blog) {
+      activeBlog.value = blog
     }
   } catch (error) {
-    console.error('Error al obtener el blog activo:', error)
+    console.error('[SeriesView] Error al obtener el blog activo:', error)
   }
 }
 
 const fetchSeries = async () => {
   isLoading.value = true
   try {
-    const response = await api.get('/api/series')
+    const blogId = await getCurrentBlogId()
+    console.log('[SeriesView] Fetching series for blogId:', blogId)
+    const response = await api.get('/api/series', {
+      params: { blogId }
+    })
     series.value = response.data
+    console.log('[SeriesView] Loaded', series.value.length, 'series for blog ID:', blogId)
   } catch (error) {
-    console.error('Error fetching series:', error)
+    console.error('[SeriesView] Error fetching series:', error)
   } finally {
     isLoading.value = false
   }
@@ -74,7 +80,7 @@ const handleDelete = async (uuid) => {
 }
 
 onMounted(async () => {
-  await getActiveBlog()
+  await loadActiveBlog()
   await fetchSeries()
 })
 </script>

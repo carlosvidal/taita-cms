@@ -6,9 +6,11 @@ import CategoryList from '@/components/CategoryList.vue'
 import CategoryModal from '@/components/CategoryModal.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import api from '@/utils/api'
+import { useBlog } from '@/composables/useBlog'
 import { Plus, Tag } from 'lucide-vue-next'
 
 const { t } = useI18n()
+const { getCurrentBlogId } = useBlog()
 const categories = ref([])
 const showModal = ref(false)
 const currentCategory = ref(null)
@@ -19,24 +21,18 @@ const fetchCategories = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    if (!activeBlogUuid) {
-      console.warn(t('posts.noBlogSelected'));
-      categories.value = [];
-      return;
-    }
-
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-    const blogId = blogResponse.data.id;
+    const blogId = await getCurrentBlogId();
+    console.log('[CategoriesView] Fetching categories for blogId:', blogId);
 
     const response = await api.get('/api/categories', {
       params: { blogId }
     });
 
     categories.value = response.data;
+    console.log('[CategoriesView] Loaded', categories.value.length, 'categories for blog ID:', blogId);
   } catch (err) {
     error.value = err.response?.data?.message || t('errors.serverConnection');
-    console.error('API Error:', {
+    console.error('[CategoriesView] API Error:', {
       url: err.config?.url,
       status: err.response?.status,
       data: err.response?.data
@@ -58,17 +54,8 @@ const handleCreate = () => {
 
 const handleSave = async (categoryData) => {
   try {
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    if (!activeBlogUuid) {
-      throw new Error(t('posts.noBlogSelected'));
-    }
-
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-    const blogId = blogResponse.data.id;
-
-    if (!blogId) {
-      throw new Error(t('posts.blogIdError'));
-    }
+    const blogId = await getCurrentBlogId();
+    console.log('[CategoriesView] Saving category for blogId:', blogId);
 
     const categoryWithBlog = {
       ...categoryData,
@@ -80,12 +67,12 @@ const handleSave = async (categoryData) => {
     } else {
       await api.post('/api/categories', categoryWithBlog);
     }
-    
+
     await fetchCategories();
     showModal.value = false;
   } catch (err) {
     error.value = err.response?.data?.error || err.message || t('categories.saveError');
-    console.error('Save Error:', err.response?.data || err);
+    console.error('[CategoriesView] Save Error:', err.response?.data || err);
   }
 };
 

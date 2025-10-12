@@ -6,10 +6,12 @@ import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import api from '@/utils/api'
+import { useBlog } from '@/composables/useBlog'
 import { Plus, FileText, Edit, Trash2, Eye } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
 const router = useRouter()
+const { getCurrentBlogId, getActiveBlog } = useBlog()
 const posts = ref([])
 const isLoading = ref(false)
 const activeBlog = ref(null)
@@ -33,15 +35,14 @@ const viewPost = (post) => {
 }
 
 // Obtener el blog activo del localStorage
-const getActiveBlog = async () => {
+const loadActiveBlog = async () => {
   try {
-    const blogUuid = localStorage.getItem('activeBlog')
-    if (blogUuid) {
-      const response = await api.get(`/api/blogs/uuid/${blogUuid}`)
-      activeBlog.value = response.data
+    const blog = await getActiveBlog()
+    if (blog) {
+      activeBlog.value = blog
     }
   } catch (error) {
-    console.error('Error al obtener el blog activo:', error)
+    console.error('[PostsView] Error al obtener el blog activo:', error)
   }
 }
 
@@ -67,29 +68,9 @@ const formatDate = (dateString) => {
 const fetchPosts = async () => {
   isLoading.value = true;
   try {
-    console.log('Starting fetchPosts...');
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    console.log('Active blog UUID from localStorage:', activeBlogUuid);
-    
-    if (!activeBlogUuid) {
-      console.error('No hay un blog activo seleccionado');
-      return;
-    }
+    const blogId = await getCurrentBlogId();
+    console.log('[PostsView] Fetching posts for blogId:', blogId);
 
-    console.log('Fetching blog details for UUID:', activeBlogUuid);
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-    console.log('Blog response:', blogResponse.data);
-    
-    const blogId = blogResponse.data?.id;
-    console.log('Extracted blog ID:', blogId);
-    
-    if (!blogId) {
-      console.error('No se pudo obtener el ID del blog activo');
-      return;
-    }
-
-    console.log('Fetching posts with blogId:', blogId);
-    
     // Make a direct fetch call to bypass any axios interceptors
     const token = localStorage.getItem('authToken');
     const response = await fetch(`https://taita-api.onrender.com/api/posts?blogId=${blogId}&includeDrafts=true`, {
@@ -98,24 +79,22 @@ const fetchPosts = async () => {
         'Content-Type': 'application/json'
       }
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
-    console.log('Raw API response data:', data);
-    
+
     // Make sure we have an array
     const postsData = Array.isArray(data) ? data : (data.data || []);
-    console.log('Processed posts data:', postsData);
-    
+
     // Update the ref
     posts.value = postsData;
-    console.log('Updated posts ref with', posts.value.length, 'posts');
-    
+    console.log('[PostsView] Loaded', posts.value.length, 'posts for blog ID:', blogId);
+
   } catch (error) {
-    console.error('Error in fetchPosts:', {
+    console.error('[PostsView] Error in fetchPosts:', {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data
@@ -138,7 +117,7 @@ const handleDelete = async (uuid) => {
 }
 
 onMounted(() => {
-  getActiveBlog()
+  loadActiveBlog()
   fetchPosts()
 })
 </script>

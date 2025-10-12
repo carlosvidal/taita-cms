@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '@/utils/api'
+import { useBlog } from '@/composables/useBlog'
 import TipTapEditor from '@/components/TipTapEditor.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import SlugField from '@/components/SlugField.vue'
@@ -13,6 +14,7 @@ import { ArrowLeft, Save, Library, Upload } from 'lucide-vue-next'
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { getCurrentBlogId } = useBlog()
 const isLoading = ref(false)
 const isSaving = ref(false)
 const error = ref('')
@@ -89,23 +91,12 @@ const handleSubmit = async () => {
     const authUser = JSON.parse(localStorage.getItem('authUser'));
     let authorId = authUser?.id || 1;
 
-    let blogId = null;
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    if (!activeBlogUuid) {
-      alert(t('posts.noBlogSelectedRedirect'));
-      router.push('/blogs');
-      return;
-    }
+    let blogId;
     try {
-      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-      const blogData = blogResponse.data;
-      if (!blogData || !blogData.id) {
-        alert(t('posts.blogInfoErrorRedirect'));
-        router.push('/blogs');
-        return;
-      }
-      blogId = blogData.id;
+      blogId = await getCurrentBlogId();
+      console.log('[PageFormView] Saving page for blogId:', blogId);
     } catch (error) {
+      console.error('[PageFormView] Error getting blog ID:', error);
       alert(t('posts.blogInfoError'));
       router.push('/blogs');
       return;

@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '@/utils/api'
+import { useBlog } from '@/composables/useBlog'
 import TipTapEditor from '@/components/TipTapEditor.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import SlugField from '@/components/SlugField.vue'
@@ -13,6 +14,7 @@ import { ArrowLeft, Save, Library, Upload } from 'lucide-vue-next'
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { getCurrentBlogId } = useBlog()
 const isLoading = ref(false)
 const isSaving = ref(false)
 const error = ref('')
@@ -92,13 +94,8 @@ const handleSubmit = async () => {
     }
     const authorId = authUser.id;
 
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    if (!activeBlogUuid) {
-      throw new Error(t('posts.noBlogSelected'));
-    }
-
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-    const blogId = blogResponse.data.id;
+    const blogId = await getCurrentBlogId();
+    console.log('[SeriesFormView] Saving series for blogId:', blogId);
 
     const seriesData = {
       title: series.value.title.trim(),

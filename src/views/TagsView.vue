@@ -6,9 +6,11 @@ import TagList from '@/components/TagList.vue'
 import TagModal from '@/components/TagModal.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import api from '@/utils/api'
+import { useBlog } from '@/composables/useBlog'
 import { Plus, Tag } from 'lucide-vue-next'
 
 const { t } = useI18n()
+const { getCurrentBlogId } = useBlog()
 const tags = ref([])
 const showModal = ref(false)
 const currentTag = ref(null)
@@ -19,23 +21,17 @@ const fetchTags = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    if (!activeBlogUuid) {
-      console.warn(t('posts.noBlogSelected'));
-      tags.value = [];
-      return;
-    }
-
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-    const blogId = blogResponse.data.id;
+    const blogId = await getCurrentBlogId();
+    console.log('[TagsView] Fetching tags for blogId:', blogId);
 
     const response = await api.get('/api/tags', {
       params: { blogId }
     });
     tags.value = response.data;
+    console.log('[TagsView] Loaded', tags.value.length, 'tags for blog ID:', blogId);
   } catch (err) {
     error.value = err.response?.data?.message || t('errors.serverConnection');
-    console.error('API Error:', {
+    console.error('[TagsView] API Error:', {
       url: err.config?.url,
       status: err.response?.status,
       data: err.response?.data
@@ -57,17 +53,8 @@ const handleCreate = () => {
 
 const handleSave = async (tagData) => {
   try {
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    if (!activeBlogUuid) {
-      throw new Error(t('posts.noBlogSelected'));
-    }
-
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-    const blogId = blogResponse.data.id;
-
-    if (!blogId) {
-      throw new Error(t('posts.blogIdError'));
-    }
+    const blogId = await getCurrentBlogId();
+    console.log('[TagsView] Saving tag for blogId:', blogId);
 
     const tagWithBlog = {
       ...tagData,
@@ -84,7 +71,7 @@ const handleSave = async (tagData) => {
     showModal.value = false;
   } catch (err) {
     error.value = err.response?.data?.error || err.message || t('tags.saveError');
-    console.error('Save Error:', err.response?.data || err);
+    console.error('[TagsView] Save Error:', err.response?.data || err);
   }
 };
 

@@ -6,10 +6,12 @@ import ViewLayout from '@/views/ViewLayout.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import api from '@/utils/api'
+import { useBlog } from '@/composables/useBlog'
 import { Plus, FileText, Edit, Trash2, Eye } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
 const router = useRouter()
+const { getCurrentBlogId, getActiveBlog } = useBlog()
 const pages = ref([])
 const isLoading = ref(false)
 const activeBlog = ref(null)
@@ -36,18 +38,22 @@ const formatDate = (dateString) => {
 const fetchPages = async () => {
   isLoading.value = true
   try {
-    const response = await api.get('/api/pages')
+    const blogId = await getCurrentBlogId()
+    console.log('[PagesView] Fetching pages for blogId:', blogId)
+
+    const response = await api.get('/api/pages', {
+      params: { blogId }
+    })
     pages.value = response.data
-    console.log('Páginas cargadas:', pages.value)
+    console.log('[PagesView] Loaded', pages.value.length, 'pages for blog ID:', blogId)
 
     // Obtener información del blog activo
-    const activeBlogUuid = localStorage.getItem('activeBlog')
-    if (activeBlogUuid) {
-      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`)
-      activeBlog.value = blogResponse.data
+    const blog = await getActiveBlog()
+    if (blog) {
+      activeBlog.value = blog
     }
   } catch (error) {
-    console.error('Error fetching pages:', error)
+    console.error('[PagesView] Error fetching pages:', error)
   } finally {
     isLoading.value = false
   }

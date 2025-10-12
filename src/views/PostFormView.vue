@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '@/utils/api'
+import { useBlog } from '@/composables/useBlog'
 import TipTapEditor from '@/components/TipTapEditor.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import SlugField from '@/components/SlugField.vue'
@@ -14,6 +15,7 @@ import { Save, Library, Eye } from 'lucide-vue-next'
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { getCurrentBlogId, getActiveBlog } = useBlog()
 const isLoading = ref(false)
 const isSaving = ref(false)
 const showMediaLibrary = ref(false)
@@ -98,15 +100,14 @@ const viewPost = () => {
 }
 
 // Obtener el blog activo del localStorage
-const getActiveBlog = async () => {
+const loadActiveBlog = async () => {
   try {
-    const blogUuid = localStorage.getItem('activeBlog')
-    if (blogUuid) {
-      const response = await api.get(`/api/blogs/uuid/${blogUuid}`)
-      activeBlog.value = response.data
+    const blog = await getActiveBlog()
+    if (blog) {
+      activeBlog.value = blog
     }
   } catch (error) {
-    console.error('Error al obtener el blog activo:', error)
+    console.error('[PostFormView] Error al obtener el blog activo:', error)
   }
 }
 
@@ -219,44 +220,17 @@ const handleSubmit = async () => {
     // Si estamos en modo edición y el post ya tiene un blogId, usamos ese
     let blogId;
     if (isEditMode.value && post.value.blogId) {
-      console.log('Usando blogId del post en edición:', post.value.blogId);
+      console.log('[PostFormView] Usando blogId del post en edición:', post.value.blogId);
       blogId = post.value.blogId;
     } else {
-      // Verificar que hay un blog seleccionado
-      const activeBlogUuid = localStorage.getItem('activeBlog');
-      if (!activeBlogUuid) {
-        alert(t('posts.noBlogSelectedRedirect'));
-        router.push('/blogs');
-        return; // Detener la ejecución
-      }
-      
-      console.log('Obteniendo información del blog activo...');
-      
-      // Primero necesitamos obtener el ID numérico del blog a partir del UUID
       try {
-        const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-        const blogData = blogResponse.data;
-        console.log('Información del blog obtenida:', blogData);
-        
-        if (!blogData || !blogData.id) {
-          alert(t('posts.blogInfoErrorRedirect'));
-          router.push('/blogs');
-          return; // Detener la ejecución
-        }
-        
-        blogId = blogData.id;
+        blogId = await getCurrentBlogId();
+        console.log('[PostFormView] Obteniendo blogId del blog activo:', blogId);
       } catch (error) {
-        // Si el blog no existe (error 404), limpiar localStorage y redirigir
-        if (error.response && error.response.status === 404) {
-          console.error('El blog seleccionado no existe:', activeBlogUuid);
-          localStorage.removeItem('activeBlog'); // Eliminar el UUID inválido
-          alert(t('posts.blogNotFoundRedirect'));
-          router.push('/blogs');
-          return; // Detener la ejecución
-        }
-        console.error('Error al obtener información del blog:', error);
+        console.error('[PostFormView] Error al obtener blog ID:', error);
         alert(t('posts.blogInfoError'));
-        return; // Detener la ejecución
+        router.push('/blogs');
+        return;
       }
     }
     
@@ -492,21 +466,16 @@ onMounted(async () => {
 
   // Load categories
   try {
-    // Obtener el blog activo del localStorage
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    let blogId = null;
-
-    if (activeBlogUuid) {
-      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-      blogId = blogResponse.data.id;
-    }
+    // Obtener el blog activo
+    const blogId = await getCurrentBlogId();
+    console.log('[PostFormView] Loading categories for blogId:', blogId);
 
     // Cargar categorías del blog activo
     const response = await api.get('/api/categories', {
-      params: blogId ? { blogId } : {}
+      params: { blogId }
     });
     categories.value = response.data
-    console.log('Categorías cargadas:', categories.value)
+    console.log('[PostFormView] Categorías cargadas:', categories.value.length)
 
     // Si es un nuevo post y no tiene categoría, asignar "Sin categoría" por defecto
     if (!isEditMode.value && !post.value.categoryId) {
@@ -523,32 +492,36 @@ onMounted(async () => {
 
   // Load series
   try {
-    const response = await api.get('/api/series')
+    const blogId = await getCurrentBlogId();
+    console.log('[PostFormView] Loading series for blogId:', blogId);
+
+    const response = await api.get('/api/series', {
+      params: { blogId }
+    })
     series.value = response.data
-    console.log('Series cargadas:', series.value)
+    console.log('[PostFormView] Series cargadas:', series.value.length)
   } catch (error) {
-    console.error('Error al cargar series:', error)
+    console.error('[PostFormView] Error al cargar series:', error)
     series.value = []
   }
 
   // Load tags
   try {
-    const activeBlogUuid = localStorage.getItem('activeBlog');
-    let blogId = null;
-    if (activeBlogUuid) {
-      const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`);
-      blogId = blogResponse.data.id;
-    }
+    const blogId = await getCurrentBlogId();
+    console.log('[PostFormView] Loading tags for blogId:', blogId);
 
     const response = await api.get('/api/tags', {
-      params: blogId ? { blogId } : {}
+      params: { blogId }
     });
     tags.value = response.data
-    console.log('Tags cargados:', tags.value)
+    console.log('[PostFormView] Tags cargados:', tags.value.length)
   } catch (error) {
-    console.error('Error al cargar tags:', error)
+    console.error('[PostFormView] Error al cargar tags:', error)
     tags.value = []
   }
+
+  // Load active blog info
+  await loadActiveBlog()
 
   // If in edit mode, fetch the post
   if (isEditMode.value) {
