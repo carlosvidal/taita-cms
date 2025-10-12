@@ -8,8 +8,8 @@
       <label class="block mb-2 font-semibold">{{ $t('common.email') }}</label>
       <input v-model="email" type="email" class="input mb-4" required />
       <div class="mb-4">
-        <component is="cap-widget" id="cap" ref="capWidget" :data-api-endpoint="getApiEndpoint()"
-          @solve="onCapSolve" />
+        <cap-widget id="cap" ref="capWidget" v-bind="{ 'data-api-endpoint': getApiEndpoint() }"
+          @solve="onCapSolve"></cap-widget>
       </div>
       <button class="btn w-full" :disabled="loading || !capValidated">{{ $t('signup.requestOtp') }}</button>
       <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
