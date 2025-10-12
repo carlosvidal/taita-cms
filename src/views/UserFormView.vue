@@ -293,6 +293,8 @@ const selectedFile = ref(null)
 
 // Datos del usuario
 const user = ref({
+  id: null,
+  uuid: null,
   name: '',
   email: '',
   bio: '',
@@ -353,6 +355,8 @@ const fetchUser = async () => {
 
     // Actualizar datos del usuario
     user.value = {
+      id: userData.id,
+      uuid: userData.uuid,
       name: userData.name || '',
       email: userData.email || '',
       bio: userData.bio || '',
@@ -452,28 +456,33 @@ const validatePasswords = () => {
 }
 
 // Subir imagen de perfil
-const uploadProfilePicture = async (uuid) => {
+const uploadProfilePicture = async (userId, userUuid) => {
   if (!selectedFile.value) return null
-
-  const formData = new FormData()
-  formData.append('picture', selectedFile.value)
 
   try {
     console.log('Subiendo imagen de perfil...')
 
+    // Crear FormData con la estructura que espera el endpoint de media
+    const formData = new FormData()
+    formData.append('image', selectedFile.value)
+    formData.append('entityType', 'user')
+    formData.append('entityId', userUuid)
+
     // Obtener el token de autenticación
     const token = localStorage.getItem('authToken')
+    if (!token) {
+      throw new Error(t('errors.authTokenNotFound'))
+    }
 
-    // Usar fetch nativo en lugar de axios
     const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-    const url = `${apiBaseUrl}/api/users/uuid/${uuid}/picture`
 
-    const response = await fetch(url, {
+    // Subir imagen a /api/media/upload
+    const response = await fetch(`${apiBaseUrl}/api/media/upload`, {
       method: 'POST',
-      body: formData,
       headers: {
         'Authorization': `Bearer ${token}`
-      }
+      },
+      body: formData
     })
 
     const responseData = await response.json()
@@ -483,8 +492,36 @@ const uploadProfilePicture = async (uuid) => {
       throw new Error(`Error ${response.status}: ${JSON.stringify(responseData)}`)
     }
 
-    console.log('Imagen de perfil subida exitosamente:', responseData)
-    return responseData
+    // Extraer datos de la imagen
+    const mediaData = responseData.media || responseData
+    console.log('Media data extraída:', mediaData)
+
+    // Actualizar el usuario con la URL de la imagen
+    const imageUpdateData = {
+      picture: mediaData.url || mediaData.path,
+      pictureId: mediaData.id
+    }
+
+    console.log('Actualizando usuario con imagen:', imageUpdateData)
+
+    // Actualizar usuario con la nueva imagen usando ID numérico
+    const updateResponse = await fetch(`${apiBaseUrl}/api/users/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(imageUpdateData)
+    })
+
+    const updateResponseData = await updateResponse.json()
+
+    if (!updateResponse.ok) {
+      throw new Error(`Error ${updateResponse.status}: ${JSON.stringify(updateResponseData)}`)
+    }
+
+    console.log('Usuario actualizado con imagen:', updateResponseData)
+    return updateResponseData
   } catch (error) {
     console.error('Error al subir imagen de perfil:', error)
     throw error
@@ -510,13 +547,13 @@ const handleProfileSubmit = async () => {
         bio: user.value.bio
       }
 
-      // Actualizar usuario
-      const response = await api.patch(`/api/users/uuid/${route.params.uuid}`, updateData)
+      // Actualizar usuario usando ID numérico
+      const response = await api.patch(`/api/users/${user.value.id}`, updateData)
       userData = response.data
 
       // Si se ha seleccionado una nueva imagen, subirla
       if (selectedFile.value) {
-        const imageResponse = await uploadProfilePicture(route.params.uuid)
+        const imageResponse = await uploadProfilePicture(user.value.id, user.value.uuid)
 
         // Recargar los datos del usuario para obtener la nueva URL de la imagen
         await fetchUser()
@@ -543,8 +580,8 @@ const handleProfileSubmit = async () => {
       userData = response.data
 
       // Si se ha seleccionado una imagen, subirla
-      if (selectedFile.value && userData.uuid) {
-        await uploadProfilePicture(userData.uuid)
+      if (selectedFile.value && userData.id && userData.uuid) {
+        await uploadProfilePicture(userData.id, userData.uuid)
       }
 
       successMessage.value = t('users.saveSuccess')
@@ -593,8 +630,8 @@ const handlePasswordSubmit = async () => {
       currentPassword: passwords.value.currentPassword
     }
 
-    // Actualizar contraseña
-    await api.patch(`/api/users/uuid/${route.params.uuid}`, updateData)
+    // Actualizar contraseña usando ID numérico
+    await api.patch(`/api/users/${user.value.id}`, updateData)
 
     // Resetear formulario de contraseña
     resetPasswordForm()
