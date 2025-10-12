@@ -66,7 +66,7 @@
               >
                 <option value="">Selecciona una serie</option>
                 <option v-for="series in seriesList" :key="series.id" :value="series.id">
-                  {{ series.name }}
+                  {{ series.title }}
                 </option>
               </select>
             </div>
@@ -135,6 +135,9 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import api from '@/utils/api'
+import { useBlog } from '@/composables/useBlog'
+
+const { getCurrentBlogId } = useBlog()
 
 const props = defineProps({
   item: Object
@@ -159,61 +162,53 @@ const pages = ref([])
 // Cargar datos para los selects
 const loadCategories = async () => {
   try {
-    const activeBlogUuid = localStorage.getItem('activeBlog')
-    if (!activeBlogUuid) return
-
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`)
-    const blogId = blogResponse.data.id
+    const blogId = await getCurrentBlogId()
+    console.log('[MenuModal] Loading categories for blogId:', blogId)
 
     const response = await api.get('/api/categories', { params: { blogId } })
     categories.value = response.data
+    console.log('[MenuModal] Loaded', categories.value.length, 'categories')
   } catch (error) {
-    console.error('Error al cargar categorías:', error)
+    console.error('[MenuModal] Error al cargar categorías:', error)
   }
 }
 
 const loadSeries = async () => {
   try {
-    const activeBlogUuid = localStorage.getItem('activeBlog')
-    if (!activeBlogUuid) return
-
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`)
-    const blogId = blogResponse.data.id
+    const blogId = await getCurrentBlogId()
+    console.log('[MenuModal] Loading series for blogId:', blogId)
 
     const response = await api.get('/api/series', { params: { blogId } })
     seriesList.value = response.data
+    console.log('[MenuModal] Loaded', seriesList.value.length, 'series')
   } catch (error) {
-    console.error('Error al cargar series:', error)
+    console.error('[MenuModal] Error al cargar series:', error)
   }
 }
 
 const loadTags = async () => {
   try {
-    const activeBlogUuid = localStorage.getItem('activeBlog')
-    if (!activeBlogUuid) return
-
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`)
-    const blogId = blogResponse.data.id
+    const blogId = await getCurrentBlogId()
+    console.log('[MenuModal] Loading tags for blogId:', blogId)
 
     const response = await api.get('/api/tags', { params: { blogId } })
     tags.value = response.data
+    console.log('[MenuModal] Loaded', tags.value.length, 'tags')
   } catch (error) {
-    console.error('Error al cargar tags:', error)
+    console.error('[MenuModal] Error al cargar tags:', error)
   }
 }
 
 const loadPages = async () => {
   try {
-    const activeBlogUuid = localStorage.getItem('activeBlog')
-    if (!activeBlogUuid) return
-
-    const blogResponse = await api.get(`/api/blogs/uuid/${activeBlogUuid}`)
-    const blogId = blogResponse.data.id
+    const blogId = await getCurrentBlogId()
+    console.log('[MenuModal] Loading pages for blogId:', blogId)
 
     const response = await api.get('/api/pages', { params: { blogId } })
     pages.value = response.data
+    console.log('[MenuModal] Loaded', pages.value.length, 'pages')
   } catch (error) {
-    console.error('Error al cargar páginas:', error)
+    console.error('[MenuModal] Error al cargar páginas:', error)
   }
 }
 
