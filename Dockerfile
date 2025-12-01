@@ -64,9 +64,9 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Exponer puerto
 EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+# Health check - aumentar start-period para dar tiempo a nginx
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://127.0.0.1:80/ || exit 1
 
 # Comando de inicio
 CMD ["nginx", "-g", "daemon off;"]
