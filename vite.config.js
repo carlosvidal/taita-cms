@@ -13,9 +13,10 @@ export default defineConfig({
   define: {
     'process.env': {
       VITE_API_URL:
-        process.env.NODE_ENV === 'production'
-          ? 'https://taita-api.onrender.com'
-          : 'http://localhost:3000',
+        process.env.VITE_API_URL ||
+        (process.env.NODE_ENV === 'production'
+          ? 'https://backend.taita.blog'
+          : 'http://localhost:3001'),
     },
   },
   server: {

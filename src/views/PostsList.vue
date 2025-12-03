@@ -53,7 +53,7 @@ export default {
   methods: {
     async togglePostStatus(post) {
       try {
-        const apiUrl = 'https://taita-api.onrender.com'; // URL completa de la API
+        const apiUrl = 'import.meta.env.VITE_API_URL || 'https://backend.taita.blog''; // URL completa de la API
         const newStatus = post.status === 'published' ? 'draft' : 'published';
         
         // Primero obtenemos el ID numérico del post a partir del UUID

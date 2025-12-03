@@ -1,12 +1,11 @@
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
-// Siempre usar la URL de la API en Render.com para producción
-// Esto asegura que no importa desde dónde se acceda, siempre se use la misma URL
+// Determinar la URL de la API basada en el entorno
 const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
 
-// Determinar la URL de la API basada en el entorno
-let apiUrl = 'https://taita-api.onrender.com'; // Forzar siempre a usar la URL de producción
+// Usar variable de entorno o fallback
+let apiUrl = import.meta.env.VITE_API_URL || (isProduction ? 'https://backend.taita.blog' : 'http://localhost:3001');
 
 console.log(`Ambiente: ${isProduction ? 'Producción' : 'Desarrollo'}, Usando API: ${apiUrl}`);
 console.log('Hostname actual:', window.location.hostname);
