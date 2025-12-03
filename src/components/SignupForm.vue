@@ -121,8 +121,8 @@ function getApiEndpoint() {
   const isProduction = hostname !== 'localhost' && !hostname.includes('127.0.0.1')
 
   const apiUrl = isProduction
-    ? 'import.meta.env.VITE_API_URL || 'https://backend.taita.blog''
-    : (import.meta.env.VITE_API_URL || 'http://localhost:3000')
+    ? (import.meta.env.VITE_API_URL || 'https://backend.taita.blog')
+    : (import.meta.env.VITE_API_URL || 'http://localhost:3001')
 
   return `${apiUrl}/api/`
 }

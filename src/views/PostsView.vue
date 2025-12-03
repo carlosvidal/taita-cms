@@ -73,7 +73,8 @@ const fetchPosts = async () => {
 
     // Make a direct fetch call to bypass any axios interceptors
     const token = localStorage.getItem('authToken');
-    const response = await fetch(`import.meta.env.VITE_API_URL || 'https://backend.taita.blog'/api/posts?blogId=${blogId}&includeDrafts=true`, {
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://backend.taita.blog';
+    const response = await fetch(`${apiUrl}/api/posts?blogId=${blogId}&includeDrafts=true`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
