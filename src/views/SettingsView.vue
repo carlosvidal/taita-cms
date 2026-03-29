@@ -287,7 +287,8 @@ const fetchSettings = async () => {
   isLoading.value = true
   errorMessage.value = ''
   try {
-    const response = await api.get('/api/settings')
+    const blogUuid = activeBlog.value.uuid
+    const response = await api.get('/api/settings', { params: blogUuid ? { blogUuid } : {} })
     const data = response.data || {}
 
     // Actualizar configuraciones
@@ -345,7 +346,8 @@ const saveSettings = async () => {
     }
 
     // Enviar al servidor
-    await api.put('/api/settings', dataToSend)
+    const blogUuid = activeBlog.value.uuid
+    await api.put('/api/settings', { ...dataToSend, blogUuid })
 
     // Mostrar mensaje de éxito
     showSuccess.value = true
@@ -394,7 +396,8 @@ const upgradePlan = async (interval) => {
 // Obtener estado de suscripción
 const fetchSubscriptionStatus = async () => {
   try {
-    const response = await api.get('/api/subscriptions/status');
+    const blogUuid = activeBlog.value.uuid
+    const response = await api.get('/api/subscriptions/status', { params: blogUuid ? { blogUuid } : {} });
     const data = response.data;
     currentPlan.value = data.plan || 'Free';
     subscriptionStatus.value = data.status || 'Inactivo';
