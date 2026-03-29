@@ -15,7 +15,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import api from '@/utils/api'
 
 const email = ref('')
 const message = ref('')
@@ -25,7 +25,7 @@ async function submit() {
     loading.value = true
     message.value = ''
     try {
-        await axios.post('/api/password/forgot', { email: email.value })
+        await api.post('/api/password/forgot', { email: email.value })
         message.value = "Si el email existe, recibirás un enlace para restablecer tu contraseña."
     } catch (e) {
         message.value = "Ocurrió un error. Intenta de nuevo."

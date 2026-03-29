@@ -16,7 +16,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import api from '@/utils/api'
 
 const password = ref('')
 const message = ref('')
@@ -28,7 +28,7 @@ async function submit() {
     loading.value = true
     message.value = ''
     try {
-        await axios.post('/api/password/reset', { token, password: password.value })
+        await api.post('/api/password/reset', { token, password: password.value })
         message.value = "¡Contraseña actualizada! Ya puedes iniciar sesión."
     } catch (e) {
         message.value = "El enlace es inválido o expiró."
