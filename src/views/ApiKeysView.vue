@@ -15,6 +15,7 @@ const isLoading = ref(false)
 const error = ref('')
 const showCreateForm = ref(false)
 const newKeyName = ref('')
+const newKeyScope = ref('blog')
 const createdKey = ref(null) // Full key shown only once after creation
 const copiedField = ref('')
 
@@ -37,10 +38,12 @@ const handleCreate = async () => {
   error.value = ''
   try {
     const response = await api.post('/api/api-keys', {
-      name: newKeyName.value.trim()
+      name: newKeyName.value.trim(),
+      scope: newKeyScope.value
     })
     createdKey.value = response.data
     newKeyName.value = ''
+    newKeyScope.value = 'blog'
     showCreateForm.value = false
     await fetchApiKeys()
   } catch (err) {
@@ -181,6 +184,22 @@ onMounted(fetchApiKeys)
           class="name-input"
           @keyup.enter="handleCreate"
         />
+        <div class="scope-selector">
+          <label class="scope-option">
+            <input type="radio" v-model="newKeyScope" value="blog" />
+            <div class="scope-label">
+              <strong>Blog actual</strong>
+              <span>Acceso solo al blog seleccionado actualmente</span>
+            </div>
+          </label>
+          <label class="scope-option">
+            <input type="radio" v-model="newKeyScope" value="all" />
+            <div class="scope-label">
+              <strong>Todos mis blogs</strong>
+              <span>Acceso a todos los blogs de tu cuenta, incluyendo los que crees en el futuro</span>
+            </div>
+          </label>
+        </div>
         <div class="form-actions">
           <BaseButton variant="primary" size="sm" @click="handleCreate" :disabled="!newKeyName.trim()">
             Create
@@ -212,6 +231,9 @@ onMounted(fetchApiKeys)
               <strong>{{ key.name }}</strong>
               <span v-if="!key.active" class="badge badge-inactive">Disabled</span>
               <span v-else class="badge badge-active">Active</span>
+              <span class="badge" :class="key.scope === 'all_blogs' ? 'badge-all' : 'badge-single'">
+                {{ key.scope === 'all_blogs' ? 'All blogs' : 'Single blog' }}
+              </span>
             </div>
             <div class="key-meta">
               <code class="key-masked">{{ key.key }}</code>
@@ -445,6 +467,49 @@ onMounted(fetchApiKeys)
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
+.scope-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.scope-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.scope-option:has(input:checked) {
+  border-color: #6366f1;
+  background: #f5f3ff;
+}
+
+.scope-option input[type="radio"] {
+  margin-top: 3px;
+}
+
+.scope-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scope-label strong {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.scope-label span {
+  font-size: 12px;
+  color: #6b7280;
+}
+
 .form-actions {
   display: flex;
   gap: 8px;
@@ -523,6 +588,16 @@ onMounted(fetchApiKeys)
 .badge-inactive {
   background: #f3f4f6;
   color: #6b7280;
+}
+
+.badge-all {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.badge-single {
+  background: #f0f9ff;
+  color: #0369a1;
 }
 
 .key-meta {
