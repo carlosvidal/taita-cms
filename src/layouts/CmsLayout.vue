@@ -67,6 +67,12 @@
             </RouterLink>
           </li>
           <li>
+            <RouterLink to="/cms/api-keys" class="nav-link">
+              <Key class="icon" />
+              <span>{{ $t('nav.apiKeys') }}</span>
+            </RouterLink>
+          </li>
+          <li>
             <RouterLink to="/cms/settings" class="nav-link">
               <Settings class="icon" />
               <span>{{ $t('nav.settings') }}</span>
@@ -107,7 +113,7 @@
 import { RouterLink } from 'vue-router';
 import { ref, onMounted, computed } from 'vue';
 import router from '@/router';
-import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database, Eye, Component } from 'lucide-vue-next';
+import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database, Eye, Component, Key } from 'lucide-vue-next';
 import api from '@/utils/api';
 
 const userRole = ref('');
