@@ -26,6 +26,7 @@ import SuperAdminLayout from '../layouts/SuperAdminLayout.vue'
 import CmsLayout from '../layouts/CmsLayout.vue'
 import BlogsView from '../views/BlogsView.vue'
 import LandingView from '../views/LandingView.vue'
+import PrivacyView from '../views/PrivacyView.vue'
 import ForgotPassword from '../views/ForgotPassword.vue'
 import ResetPassword from '../views/ResetPassword.vue'
 
@@ -52,6 +53,7 @@ const router = createRouter({
         { path: 'login', name: 'login', component: LoginView },
         { path: 'signup', name: 'signup', component: SignupView },
         { path: 'blogs', name: 'blogs', component: BlogsView },
+        { path: 'privacy', name: 'privacy', component: PrivacyView },
         { path: 'forgot-password', name: 'forgot-password', component: ForgotPassword },
         { path: 'reset-password', name: 'reset-password', component: ResetPassword },
       ],
@@ -107,7 +109,7 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const user = JSON.parse(localStorage.getItem('authUser'))
   let selectedBlog = localStorage.getItem('activeBlog')
-  const publicPages = ['login', 'signup', 'blogs']
+  const publicPages = ['login', 'signup', 'blogs', 'privacy', 'home']
 
   if (publicPages.includes(to.name)) {
     return next()

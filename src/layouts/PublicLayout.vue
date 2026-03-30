@@ -37,7 +37,13 @@
     </main>
     <!-- Footer -->
     <footer class="bg-white/80 border-t border-slate-200 text-center text-slate-500 py-4 text-sm mt-6">
-      {{ year }} Taita Blog. Todos los derechos reservados.
+      <div class="flex items-center justify-center gap-4 flex-wrap">
+        <span>&copy; {{ year }} Taita Blog</span>
+        <span class="text-slate-300">|</span>
+        <router-link to="/privacy" class="hover:text-slate-700 transition">Política de Privacidad</router-link>
+        <span class="text-slate-300">|</span>
+        <a href="mailto:contacto@taita.blog" class="hover:text-slate-700 transition">Contacto</a>
+      </div>
     </footer>
   </div>
 </template>
