@@ -19,6 +19,8 @@ import TagsView from '../views/TagsView.vue'
 import ProfilePictureTestView from '../views/ProfilePictureTestView.vue'
 import CommentsView from '../views/CommentsView.vue'
 import ApiKeysView from '../views/ApiKeysView.vue'
+import SubscribersView from '../views/SubscribersView.vue'
+import IntegrationsView from '../views/IntegrationsView.vue'
 import PublicLayout from '../layouts/PublicLayout.vue'
 import SuperAdminLayout from '../layouts/SuperAdminLayout.vue'
 import CmsLayout from '../layouts/CmsLayout.vue'
@@ -90,6 +92,8 @@ const router = createRouter({
           component: ProfilePictureTestView,
         },
         { path: 'api-keys', name: 'api-keys', component: ApiKeysView },
+        { path: 'subscribers', name: 'subscribers', component: SubscribersView },
+        { path: 'integrations', name: 'integrations', component: IntegrationsView },
         { path: 'settings', name: 'settings', component: SettingsView },
         { path: 'users', name: 'users', component: UsersView },
         { path: 'users/new', name: 'new-user', component: UserFormView },

@@ -51,7 +51,9 @@
     "apiKeys": "API Keys",
     "settings": "Settings",
     "blogs": "Blogs",
-    "logout": "Logout"
+    "logout": "Logout",
+    "subscribers": "Subscribers",
+    "integrations": "Integrations"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -90,6 +92,12 @@
     "allPosts": "All posts",
     "published": "Published",
     "draft": "Draft",
+    "visibility": {
+      "label": "Visibility",
+      "public": "Public",
+      "subscribers": "Subscribers only",
+      "premium": "Premium"
+    },
     "content": "Content",
     "excerpt": "Excerpt",
     "slug": "Slug",
@@ -532,6 +540,39 @@
     "authError": "Could not get authenticated user information",
     "serverTimeout": "The server is taking too long to respond. Please check your connection.",
     "incompleteResponse": "Incomplete server response. Please try again."
+  },
+  "subscribers": {
+    "title": "Subscribers",
+    "subtitle": "Manage your blog subscribers",
+    "email": "Email",
+    "name": "Name",
+    "tier": "Tier",
+    "free": "Free",
+    "premium": "Premium",
+    "confirmed": "Confirmed",
+    "unconfirmed": "Unconfirmed",
+    "patreonLinked": "Patreon linked",
+    "total": "Total",
+    "deleteConfirm": "Are you sure you want to delete this subscriber?",
+    "deleteSuccess": "Subscriber deleted successfully",
+    "noSubscribers": "No subscribers yet",
+    "search": "Search by email or name",
+    "filterAll": "All",
+    "subscribedAt": "Subscribed on"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Connect external services for monetization",
+    "patreon": {
+      "title": "Patreon",
+      "description": "Connect your Patreon account to verify premium subscribers.",
+      "clientId": "Client ID",
+      "clientSecret": "Client Secret",
+      "campaignId": "Campaign ID",
+      "testConnection": "Test connection",
+      "saveSuccess": "Patreon configuration saved successfully",
+      "help": "Create an OAuth application on Patreon and copy the credentials here."
+    }
   },
   "validation": {
     "required": "This field is required",

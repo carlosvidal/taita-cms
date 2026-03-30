@@ -67,6 +67,18 @@
             </RouterLink>
           </li>
           <li>
+            <RouterLink to="/cms/subscribers" class="nav-link">
+              <Users class="icon" />
+              <span>{{ $t('nav.subscribers') }}</span>
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/cms/integrations" class="nav-link">
+              <Link class="icon" />
+              <span>{{ $t('nav.integrations') }}</span>
+            </RouterLink>
+          </li>
+          <li>
             <RouterLink to="/cms/api-keys" class="nav-link">
               <Key class="icon" />
               <span>{{ $t('nav.apiKeys') }}</span>
@@ -113,7 +125,7 @@
 import { RouterLink } from 'vue-router';
 import { ref, onMounted, computed } from 'vue';
 import router from '@/router';
-import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database, Eye, Component, Key } from 'lucide-vue-next';
+import { LayoutDashboard, FileText, File, Tag, Menu as MenuIcon, Settings, UserCircle, Library, MessageSquare, Image, Database, Eye, Component, Key, Users, Link } from 'lucide-vue-next';
 import api from '@/utils/api';
 
 const userRole = ref('');

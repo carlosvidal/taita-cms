@@ -24,6 +24,7 @@ const post = ref({
   slug: '',
   content: '',
   status: 'draft',
+  visibility: 'PUBLIC',
   excerpt: '',
   featuredImage: null,
   existingImage: null,
@@ -131,6 +132,7 @@ const fetchPost = async () => {
       ...response.data,
       // Asegurarse de que el estado sea 'draft' o 'published'
       status: response.data.status?.toLowerCase() === 'published' ? 'published' : 'draft',
+      visibility: response.data.visibility || 'PUBLIC',
       // Manejar la imagen existente si hay una
       existingImage: response.data.image || null,
       imageId: response.data.imageId || null,
@@ -242,6 +244,7 @@ const handleSubmit = async () => {
       slug: post.value.slug?.trim() || null,
       // Convertir el status a mayúsculas para que coincida con el enum PublishStatus
       status: (post.value.status === 'published' ? 'PUBLISHED' : 'DRAFT'),
+      visibility: post.value.visibility || 'PUBLIC',
       authorId: authorId, // Usar el ID que determinamos anteriormente
       blogId: blogId // Usar el ID numérico del blog que obtuvimos
     };
@@ -799,6 +802,16 @@ const checkSlugAvailability = async (slug) => {
               }">
                 {{ post.status === 'published' ? $t('posts.published') : $t('posts.draft') }}
               </span>
+            </div>
+
+            <!-- Visibility Selector -->
+            <div class="flex items-center mb-4 sm:mb-0 sm:ml-4">
+              <select v-model="post.visibility"
+                class="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-panel focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="PUBLIC">{{ $t('posts.visibility.public') }}</option>
+                <option value="SUBSCRIBERS">{{ $t('posts.visibility.subscribers') }}</option>
+                <option value="PREMIUM">{{ $t('posts.visibility.premium') }}</option>
+              </select>
             </div>
 
             <!-- Buttons -->

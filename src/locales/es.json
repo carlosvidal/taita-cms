@@ -51,7 +51,9 @@
     "apiKeys": "API Keys",
     "settings": "Configuración",
     "blogs": "Blogs",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "subscribers": "Suscriptores",
+    "integrations": "Integraciones"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -90,6 +92,12 @@
     "allPosts": "Todos los posts",
     "published": "Publicado",
     "draft": "Borrador",
+    "visibility": {
+      "label": "Visibilidad",
+      "public": "Público",
+      "subscribers": "Solo suscriptores",
+      "premium": "Premium"
+    },
     "content": "Contenido",
     "excerpt": "Extracto",
     "slug": "Slug",
@@ -532,6 +540,39 @@
     "authError": "No se pudo obtener la información del usuario autenticado",
     "serverTimeout": "El servidor está tardando demasiado en responder. Por favor, verifica tu conexión.",
     "incompleteResponse": "Respuesta del servidor incompleta. Por favor, intenta nuevamente."
+  },
+  "subscribers": {
+    "title": "Suscriptores",
+    "subtitle": "Gestiona los suscriptores de tu blog",
+    "email": "Email",
+    "name": "Nombre",
+    "tier": "Nivel",
+    "free": "Gratis",
+    "premium": "Premium",
+    "confirmed": "Confirmado",
+    "unconfirmed": "Sin confirmar",
+    "patreonLinked": "Patreon vinculado",
+    "total": "Total",
+    "deleteConfirm": "¿Estás seguro de que deseas eliminar este suscriptor?",
+    "deleteSuccess": "Suscriptor eliminado correctamente",
+    "noSubscribers": "Aún no tienes suscriptores",
+    "search": "Buscar por email o nombre",
+    "filterAll": "Todos",
+    "subscribedAt": "Suscrito el"
+  },
+  "integrations": {
+    "title": "Integraciones",
+    "subtitle": "Conecta servicios externos para monetización",
+    "patreon": {
+      "title": "Patreon",
+      "description": "Conecta tu cuenta de Patreon para verificar suscriptores premium.",
+      "clientId": "Client ID",
+      "clientSecret": "Client Secret",
+      "campaignId": "Campaign ID",
+      "testConnection": "Probar conexión",
+      "saveSuccess": "Configuración de Patreon guardada correctamente",
+      "help": "Crea una aplicación OAuth en Patreon y copia las credenciales aquí."
+    }
   },
   "validation": {
     "required": "Este campo es requerido",
