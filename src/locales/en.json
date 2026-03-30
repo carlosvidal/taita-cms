@@ -439,6 +439,16 @@
     "saveChanges": "Save Changes",
     "saveSuccess": "Settings saved successfully",
     "saveError": "Error saving settings. Please try again.",
+    "ads": {
+      "title": "Advertising",
+      "description": "Configure ads on your blog. Free blogs show platform ads. PRO blogs can use their own AdSense.",
+      "platformAds": "Platform ads",
+      "platformAdsHelp": "Automatically displayed on free plan blogs.",
+      "freeOnly": "Included in free plan",
+      "adsenseId": "AdSense Publisher ID",
+      "adsensePlaceholder": "ca-pub-XXXXXXXXXXXXXXXX",
+      "adsenseHelp": "Your Google AdSense publisher ID to show your own ads (PRO plan only)."
+    },
     "upgradePlan": "Upgrade plan",
     "proOnly": "PRO plan only",
     "currentPlan": "Your current plan",

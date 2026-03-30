@@ -439,6 +439,16 @@
     "saveChanges": "Guardar Cambios",
     "saveSuccess": "Configuración guardada correctamente",
     "saveError": "Error al guardar configuraciones. Por favor, inténtalo de nuevo.",
+    "ads": {
+      "title": "Publicidad",
+      "description": "Configura los anuncios en tu blog. Los blogs gratuitos muestran anuncios de la plataforma. Los blogs PRO pueden usar su propio AdSense.",
+      "platformAds": "Anuncios de plataforma",
+      "platformAdsHelp": "Se muestran automáticamente en blogs con plan gratuito.",
+      "freeOnly": "Incluido en plan gratuito",
+      "adsenseId": "AdSense Publisher ID",
+      "adsensePlaceholder": "ca-pub-XXXXXXXXXXXXXXXX",
+      "adsenseHelp": "Tu ID de publisher de Google AdSense para mostrar tus propios anuncios (solo plan PRO)."
+    },
     "upgradePlan": "Mejorar plan",
     "proOnly": "Solo disponible en PRO",
     "currentPlan": "Tu plan actual",

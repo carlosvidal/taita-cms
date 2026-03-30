@@ -113,6 +113,36 @@
           </div>
         </div>
 
+        <!-- Advertising -->
+        <div class="space-y-4 border-t border-gray-200 pt-6">
+          <h3 class="text-sm font-medium text-gray-700">{{ $t('settings.ads.title') }}</h3>
+          <p class="text-xs text-gray-500">{{ $t('settings.ads.description') }}</p>
+
+          <!-- Ads toggle (only for FREE plan — platform ads) -->
+          <div v-if="!isProPlan" class="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+            <div>
+              <p class="text-sm font-medium text-gray-700">{{ $t('settings.ads.platformAds') }}</p>
+              <p class="text-xs text-gray-500">{{ $t('settings.ads.platformAdsHelp') }}</p>
+            </div>
+            <span class="text-xs text-gray-400 italic">{{ $t('settings.ads.freeOnly') }}</span>
+          </div>
+
+          <!-- Own AdSense ID (PRO plan only) -->
+          <div class="space-y-2">
+            <label for="adsensePublisherId" class="block text-sm font-medium text-gray-700">{{ $t('settings.ads.adsenseId') }}</label>
+            <input type="text" id="adsensePublisherId" v-model="settings.adsensePublisherId"
+              :placeholder="$t('settings.ads.adsensePlaceholder')"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              :disabled="!isProPlan" />
+            <p class="text-xs text-gray-500">{{ $t('settings.ads.adsenseHelp') }}</p>
+            <div v-if="!isProPlan" class="mt-1">
+              <button type="button" @click="showSubscriptionSection = true"
+                class="text-blue-600 underline text-xs font-medium hover:text-blue-800">{{ $t('settings.upgradePlan') }}</button>
+              <span class="text-xs text-gray-400 ml-2">({{ $t('settings.proOnly') }})</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Redes Sociales -->
         <div class="space-y-2">
           <h3 class="text-sm font-medium text-gray-700 mb-2">{{ $t('settings.socialNetworks') }}</h3>
@@ -263,6 +293,8 @@ const settings = reactive({
   template: 'default',
   domain: '',
   googleAnalyticsId: '',
+  adsEnabled: true,
+  adsensePublisherId: '',
   socialNetworks: {}
 })
 
@@ -299,6 +331,8 @@ const fetchSettings = async () => {
     settings.template = data.template || 'default'
     settings.domain = data.domain || ''
     settings.googleAnalyticsId = data.googleAnalyticsId || ''
+    settings.adsEnabled = data.adsEnabled !== undefined ? data.adsEnabled : true
+    settings.adsensePublisherId = data.adsensePublisherId || ''
 
     // Parsear redes sociales si existen
     if (data.socialNetworks) {
