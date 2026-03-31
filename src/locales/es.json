@@ -158,7 +158,7 @@
       "excerptLabel": "Resumen (máx. 160 caracteres)",
       "excerptPlaceholder": "Breve descripción del post",
       "excerptCounter": "{count}/160 caracteres",
-      "featuredImageLabel": "Imagen destacada (JPG/PNG/WebP, min. 800x600px)",
+      "featuredImageLabel": "Imagen destacada (JPG/PNG/WebP, min. 1500x786px)",
       "newImage": "Nueva imagen",
       "imageWillBeDeleted": "La imagen será eliminada al guardar",
       "savePost": "Guardar Post"
@@ -217,7 +217,7 @@
     "uploadDate": "Fecha de subida",
     "noMedia": "No hay archivos multimedia",
     "invalidImageFormat": "Solo se permiten imágenes JPG, PNG o WebP",
-    "imageTooSmall": "La imagen debe ser de al menos 800x600px (actual: {width}x{height}px)",
+    "imageTooSmall": "La imagen debe ser de al menos 1500x786px (actual: {width}x{height}px)",
     "imageLoadError": "Error al cargar la imagen",
     "selectFromLibrary": "Seleccionar de biblioteca",
     "uploadNewImage": "Subir nueva imagen",

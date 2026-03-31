@@ -545,7 +545,7 @@ const handleImageUpload = (event) => {
   // Validate image dimensions
   const img = new Image();
   img.onload = function () {
-    if (this.width < 800 || this.height < 600) {
+    if (this.width < 1500 || this.height < 786) {
       error.value = t('media.imageTooSmall', { width: this.width, height: this.height });
       return;
     }

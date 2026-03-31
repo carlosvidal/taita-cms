@@ -158,7 +158,7 @@
       "excerptLabel": "Excerpt (max. 160 characters)",
       "excerptPlaceholder": "Brief description of the post",
       "excerptCounter": "{count}/160 characters",
-      "featuredImageLabel": "Featured image (JPG/PNG/WebP, min. 800x600px)",
+      "featuredImageLabel": "Featured image (JPG/PNG/WebP, min. 1500x786px)",
       "newImage": "New image",
       "imageWillBeDeleted": "The image will be deleted upon saving",
       "savePost": "Save Post"
@@ -217,7 +217,7 @@
     "uploadDate": "Upload date",
     "noMedia": "No media files",
     "invalidImageFormat": "Only JPG, PNG, or WebP images are allowed",
-    "imageTooSmall": "The image must be at least 800x600px (current: {width}x{height}px)",
+    "imageTooSmall": "The image must be at least 1500x786px (current: {width}x{height}px)",
     "imageLoadError": "Error loading image",
     "selectFromLibrary": "Select from library",
     "uploadNewImage": "Upload new image",
