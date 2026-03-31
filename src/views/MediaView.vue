@@ -36,10 +36,10 @@ const fetchMedia = async () => {
     mediaItems.value = mediaData.map(item => ({
       ...item,
       urls: item.urls || {
-        original: item.url || item.cloudinaryUrl || item.path,
-        small: item.variants?.small || item.url || item.cloudinaryUrl || item.path,
-        medium: item.variants?.medium || item.url || item.cloudinaryUrl || item.path,
-        large: item.variants?.large || item.url || item.cloudinaryUrl || item.path
+        original: item.url || item.storageUrl || item.cloudinaryUrl || item.path,
+        small: item.variants?.thumb || item.variants?.small || item.url || item.storageUrl || item.cloudinaryUrl || item.path,
+        medium: item.variants?.og || item.variants?.medium || item.url || item.storageUrl || item.cloudinaryUrl || item.path,
+        large: item.variants?.original || item.variants?.large || item.url || item.storageUrl || item.cloudinaryUrl || item.path
       }
     }))
   } catch (err) {

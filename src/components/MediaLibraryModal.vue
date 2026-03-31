@@ -39,7 +39,10 @@ const getFullImageUrl = (path) => {
 const getVariantUrl = (mediaItem, variant = 'small') => {
   if (!mediaItem) return ''
 
-  // Si tiene cloudinaryUrl, usarla
+  // Si tiene storageUrl (R2) o cloudinaryUrl (legacy), usarla directamente
+  if (mediaItem.storageUrl) {
+    return mediaItem.storageUrl
+  }
   if (mediaItem.cloudinaryUrl) {
     return mediaItem.cloudinaryUrl
   }
