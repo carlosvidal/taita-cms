@@ -73,15 +73,54 @@
           <p class="text-xs text-gray-500 mt-1">{{ $t('settings.timezoneHelp') }}</p>
         </div>
 
-        <!-- Plantilla -->
-        <div class="space-y-2">
-          <label for="template" class="block text-sm font-medium text-gray-700">{{ $t('settings.template') }}</label>
-          <select id="template" v-model="settings.template"
-            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-            <option value="default">Default</option>
-            <option value="minimal">Minimal</option>
-            <option value="professional">Professional</option>
-          </select>
+        <!-- Tema del Blog -->
+        <div class="space-y-3">
+          <label class="block text-sm font-medium text-gray-700">{{ $t('settings.theme') }}</label>
+          <p class="text-xs text-gray-500">{{ $t('settings.themeHelp') }}</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button
+              v-for="theme in themeOptions"
+              :key="theme.value"
+              type="button"
+              @click="settings.template = theme.value"
+              :class="[
+                'relative rounded-lg border-2 p-3 text-left transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                settings.template === theme.value
+                  ? 'border-blue-500 bg-blue-50 shadow-sm'
+                  : 'border-gray-200 bg-white hover:border-gray-300'
+              ]"
+            >
+              <!-- Theme preview swatch -->
+              <div class="mb-2 rounded overflow-hidden border border-gray-100" style="height: 80px;">
+                <div class="h-full w-full flex flex-col" :style="theme.preview">
+                  <!-- Mini header -->
+                  <div class="px-2 py-1 border-b" :style="{ borderColor: theme.previewBorder }">
+                    <div class="h-1.5 rounded-full w-12" :style="{ backgroundColor: theme.previewHeading }"></div>
+                  </div>
+                  <!-- Mini content -->
+                  <div class="flex-1 px-2 py-1.5 space-y-1">
+                    <div class="h-2 rounded-full w-3/4" :style="{ backgroundColor: theme.previewHeading }"></div>
+                    <div class="h-1 rounded-full w-full" :style="{ backgroundColor: theme.previewText }"></div>
+                    <div class="h-1 rounded-full w-5/6" :style="{ backgroundColor: theme.previewText }"></div>
+                    <div class="h-1 rounded-full w-4/6" :style="{ backgroundColor: theme.previewText }"></div>
+                  </div>
+                  <!-- Mini accent -->
+                  <div class="px-2 pb-1.5">
+                    <div class="h-1.5 rounded-full w-10" :style="{ backgroundColor: theme.previewAccent }"></div>
+                  </div>
+                </div>
+              </div>
+              <!-- Theme name -->
+              <div class="text-xs font-medium text-gray-900">{{ theme.label }}</div>
+              <div class="text-[10px] text-gray-500 leading-tight mt-0.5">{{ theme.description }}</div>
+              <!-- Selected indicator -->
+              <div v-if="settings.template === theme.value" class="absolute top-1.5 right-1.5">
+                <svg class="h-4 w-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </button>
+          </div>
         </div>
 
         <!-- Dominio -->
@@ -290,13 +329,97 @@ const settings = reactive({
   description: 'Un blog personal',
   language: 'es', // Idioma del contenido del blog
   timezone: 'America/Lima',
-  template: 'default',
+  template: 'editorial',
   domain: '',
   googleAnalyticsId: '',
   adsEnabled: true,
   adsensePublisherId: '',
   socialNetworks: {}
 })
+
+// Theme options for the selector
+const themeOptions = [
+  {
+    value: 'editorial',
+    label: 'Editorial',
+    description: 'NYT / New Yorker',
+    preview: { backgroundColor: '#ffffff' },
+    previewHeading: '#1a1a1a',
+    previewText: '#d4d4d4',
+    previewAccent: '#c62828',
+    previewBorder: '#e5e5e5',
+  },
+  {
+    value: 'clean',
+    label: 'Clean',
+    description: 'Medium',
+    preview: { backgroundColor: '#ffffff' },
+    previewHeading: '#1a1a1a',
+    previewText: '#d4d4d4',
+    previewAccent: '#1a8917',
+    previewBorder: '#e5e5e5',
+  },
+  {
+    value: 'notion',
+    label: 'Notion',
+    description: 'Notion',
+    preview: { backgroundColor: '#ffffff' },
+    previewHeading: '#37352f',
+    previewText: '#d4d4d4',
+    previewAccent: '#2383e2',
+    previewBorder: '#e3e3e0',
+  },
+  {
+    value: 'starter',
+    label: 'Starter',
+    description: 'minimalio / Go',
+    preview: { backgroundColor: '#ffffff' },
+    previewHeading: '#111111',
+    previewText: '#d4d4d4',
+    previewAccent: '#111111',
+    previewBorder: '#e0e0e0',
+  },
+  {
+    value: 'dawn',
+    label: 'Dawn',
+    description: 'Ghost Dawn',
+    preview: { backgroundColor: '#ffffff' },
+    previewHeading: '#1a1a1a',
+    previewText: '#d4d4d4',
+    previewAccent: '#3eb0ef',
+    previewBorder: '#f0f0f0',
+  },
+  {
+    value: 'edge',
+    label: 'Edge',
+    description: 'Ghost Edge',
+    preview: { backgroundColor: '#ffffff' },
+    previewHeading: '#1a1a1a',
+    previewText: '#d4d4d4',
+    previewAccent: '#ff5500',
+    previewBorder: '#e5e5e5',
+  },
+  {
+    value: 'headline',
+    label: 'Headline',
+    description: 'Ghost Headline',
+    preview: { backgroundColor: '#ffffff' },
+    previewHeading: '#111111',
+    previewText: '#d4d4d4',
+    previewAccent: '#111111',
+    previewBorder: '#e5e5e5',
+  },
+  {
+    value: 'magazine',
+    label: 'Magazine',
+    description: 'Gillion / Bridge',
+    preview: { backgroundColor: '#ffffff' },
+    previewHeading: '#1a1a1a',
+    previewText: '#d4d4d4',
+    previewAccent: '#d4377b',
+    previewBorder: '#e5e5e5',
+  },
+]
 
 // Redes sociales (se guardarán como JSON en el campo socialNetworks)
 const socialNetworks = reactive({
@@ -328,7 +451,10 @@ const fetchSettings = async () => {
     settings.description = data.description || 'Un blog personal'
     settings.language = data.language || 'es'
     settings.timezone = data.timezone || 'America/Lima'
-    settings.template = data.template || 'default'
+    // Map legacy template values to new theme names
+    const legacyMap = { 'default': 'editorial', 'minimal': 'starter', 'professional': 'headline' }
+    const rawTemplate = data.template || 'editorial'
+    settings.template = legacyMap[rawTemplate] || rawTemplate
     settings.domain = data.domain || ''
     settings.googleAnalyticsId = data.googleAnalyticsId || ''
     settings.adsEnabled = data.adsEnabled !== undefined ? data.adsEnabled : true

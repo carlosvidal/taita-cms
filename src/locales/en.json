@@ -425,6 +425,8 @@
       "london": "London (Europe/London)"
     },
     "template": "Template",
+    "theme": "Blog Theme",
+    "themeHelp": "Choose a visual theme for your blog. Affects typography, colors, and style.",
     "domain": "Domain",
     "domainPlaceholder": "example.com",
     "domainHelp": "The main domain of your blog",
