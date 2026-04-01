@@ -504,9 +504,9 @@ const uploadProfilePicture = async (userId, userUuid) => {
 
     console.log('Actualizando usuario con imagen:', imageUpdateData)
 
-    // Actualizar usuario con la nueva imagen usando ID numérico
-    const updateResponse = await fetch(`${apiBaseUrl}/api/users/${userId}`, {
-      method: 'PATCH',
+    // Actualizar usuario con la nueva imagen usando UUID
+    const updateResponse = await fetch(`${apiBaseUrl}/api/users/uuid/${userUuid}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -547,8 +547,8 @@ const handleProfileSubmit = async () => {
         bio: user.value.bio
       }
 
-      // Actualizar usuario usando ID numérico
-      const response = await api.patch(`/api/users/${user.value.id}`, updateData)
+      // Actualizar usuario usando UUID
+      const response = await api.put(`/api/users/uuid/${user.value.uuid}`, updateData)
       userData = response.data
 
       // Si se ha seleccionado una nueva imagen, subirla
@@ -630,8 +630,8 @@ const handlePasswordSubmit = async () => {
       currentPassword: passwords.value.currentPassword
     }
 
-    // Actualizar contraseña usando ID numérico
-    await api.patch(`/api/users/${user.value.id}`, updateData)
+    // Actualizar contraseña usando UUID
+    await api.put(`/api/users/uuid/${user.value.uuid}`, updateData)
 
     // Resetear formulario de contraseña
     resetPasswordForm()
